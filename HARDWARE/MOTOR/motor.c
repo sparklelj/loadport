@@ -286,8 +286,7 @@ void EXTI15_10_IRQHandler(void)
 			gScan_pos[gScan_num] = COUNT_Get();
 			gScan_num++;
 			CPU_CRITICAL_EXIT();
-		}
-		
+		}	
 		EXTI_ClearITPendingBit(CONN(EXTI_Line, M_SCAN));
 	}
 }
