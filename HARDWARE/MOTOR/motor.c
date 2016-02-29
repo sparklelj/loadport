@@ -5,8 +5,10 @@
 #endif
 
 
-#define P_POS_A GPIO_Pin_6 //PB TIM4
-#define P_POS_B GPIO_Pin_7
+#define P_POS_A 6 //PB TIM4
+#define P_POS_B 7
+
+#define SCAN_PR 0x03
 
 #define PARK_PR 0x03
 #define ENCODER_PR 0x03
@@ -33,13 +35,16 @@ u16 gMax_vel = VEL_MAX;
 s8  gDir_vel = 1;
 
 
+s32 gScan_pos[SCAN_NUM_MAX];
+u8 gScan_num = 0;
+
 void CTRL_Init(void)
 {
 	GPIO_InitTypeDef  GPIO_InitStructure;
 
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOF, ENABLE);//使能GPIOE
  
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6; //输出引脚
+  GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_ENABLE) | CONN(GPIO_Pin_, M_DIR) | CONN(GPIO_Pin_, M_PULSE); //输出引脚
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//普通输出模式
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //推挽输出
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100M
@@ -59,17 +64,17 @@ void ENC_Init(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14 | GPIO_Pin_15;
+  GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_POS_Z) | CONN(GPIO_Pin_, M_POS_P);
   GPIO_Init(GPIOF, &GPIO_InitStructure);	
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 	
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource12);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource13);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource14);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource15);
+//	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource12);
+//	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource13);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_Z));
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_P));
 	
-	EXTI_InitStructure.EXTI_Line = EXTI_Line14 | EXTI_Line15;
+	EXTI_InitStructure.EXTI_Line = CONN(EXTI_Line, M_POS_Z) | CONN(EXTI_Line, M_POS_P);
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
   EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
   EXTI_InitStructure.EXTI_LineCmd = ENABLE;
@@ -91,11 +96,11 @@ void ENC_Init(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-  GPIO_InitStructure.GPIO_Pin = P_POS_A | P_POS_B;
+  GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, P_POS_A) | CONN(GPIO_Pin_, P_POS_B);
   GPIO_Init(GPIOB, &GPIO_InitStructure);
 	
-	GPIO_PinAFConfig(GPIOB,GPIO_PinSource6,GPIO_AF_TIM4);
-	GPIO_PinAFConfig(GPIOB,GPIO_PinSource7,GPIO_AF_TIM4);
+	GPIO_PinAFConfig(GPIOB,CONN(GPIO_PinSource, P_POS_A),GPIO_AF_TIM4);
+	GPIO_PinAFConfig(GPIOB,CONN(GPIO_PinSource, P_POS_B),GPIO_AF_TIM4);
 	
   /* Enable the TIM4 Update Interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;
@@ -152,6 +157,34 @@ void COUNT_Init(void)
 	NVIC_Init(&NVIC_InitStructure);	
 }
 
+void MOTION_Scan(void)
+{
+	GPIO_InitTypeDef  GPIO_InitStructure;
+	NVIC_InitTypeDef   NVIC_InitStructure;
+	EXTI_InitTypeDef   EXTI_InitStructure;
+	
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+  GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_SCAN);
+  GPIO_Init(GPIOF, &GPIO_InitStructure);	
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+	
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_SCAN));
+	
+	EXTI_InitStructure.EXTI_Line = CONN(EXTI_Line, M_SCAN);
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+  EXTI_Init(&EXTI_InitStructure);
+	
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = SCAN_PR;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);	
+}
 void MOTION_Init(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
@@ -189,19 +222,20 @@ s32 COUNT_Get(void)
 {	
 	s32 tmp;
 	CPU_SR_ALLOC();
-  CPU_CRITICAL_ENTER();
+	CPU_CRITICAL_ENTER();
 	tmp = TIM_GetCounter(TIM4);
 	tmp = tmp - CNT_VAL;
+	CPU_CRITICAL_EXIT();
 	return gPos_num + tmp;
 //	TIM_SetCounter(TIM4, CNT_VAL);
-	CPU_CRITICAL_EXIT();
+//	CPU_CRITICAL_EXIT();
 //	return tmp;
 }
 
 void POS_SET(s32 target)
 {
 	CPU_SR_ALLOC();
-  CPU_CRITICAL_ENTER();
+	CPU_CRITICAL_ENTER();
 //	gPos_num += COUNT_Get();
 	gPos_num = COUNT_Get();
 	gPos_num = gPos_num - target;
@@ -231,18 +265,30 @@ void TIM8_BRK_TIM12_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
 	CPU_SR_ALLOC();
-	if(EXTI_GetITStatus(EXTI_Line15) == SET)
+	if(EXTI_GetITStatus(CONN(EXTI_Line, M_POS_P)) == SET)
 	{
 		if(gMotor_state == MS_INITING)
 		{
 			CPU_CRITICAL_ENTER();
-			gPos_num += COUNT_Get();
-			gPark_num = gPos_num;
+			gPark_num = COUNT_Get();
 			gMotor_state = MS_PRKEND;
 			CPU_CRITICAL_EXIT();
 		}
 		
-		EXTI_ClearITPendingBit(EXTI_Line15);
+		EXTI_ClearITPendingBit(CONN(EXTI_Line, M_POS_P));
+	}
+	
+	if(EXTI_GetITStatus(CONN(EXTI_Line, M_SCAN)) == SET)
+	{
+		if(gMotor_state == MS_SCANNING)
+		{
+			CPU_CRITICAL_ENTER();
+			gScan_pos[gScan_num] = COUNT_Get();
+			gScan_num++;
+			CPU_CRITICAL_EXIT();
+		}
+		
+		EXTI_ClearITPendingBit(CONN(EXTI_Line, M_SCAN));
 	}
 }
 
