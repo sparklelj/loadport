@@ -3,4 +3,7 @@
 
 #include "sys.h"
 
+void STOP_Minit(void);
+void STOP_Motion(void);
+
 #endif

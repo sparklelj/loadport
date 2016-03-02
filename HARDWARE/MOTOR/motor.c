@@ -26,7 +26,7 @@
 
 s32 gPos_num = 0;
 s32 gPark_num = 0;
-u8 gMotor_state = MS_UNINIT;
+u8  gMotor_state = MS_UNINIT;
 
 s32 gMotion_num = 0;
 u32 gPulse_num = 0;
@@ -36,7 +36,7 @@ s8  gDir_vel = 1;
 
 
 s32 gScan_pos[SCAN_NUM_MAX];
-u8 gScan_num = 0;
+u8  gScan_num = 0;
 
 void CTRL_Init(void)
 {

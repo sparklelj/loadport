@@ -81,13 +81,19 @@ void tMotor_Motion(void *p_arg)
 	}
 }
 
+
+void STOP_Minit(void)
+{
+	gMotor_state = MS_UNINIT;
+	STOP_Motion();
+}
+
 void STOP_Motion(void)
 {
-	if((gMotor_state < MS_INITED) && (gMotor_state > MS_UNINIT))
-	{
-		gMotor_state = MS_UNINIT;
-		
-	}
+//	if((gMotor_state < MS_INITED) && (gMotor_state > MS_UNINIT))
+//	{
+//		gMotor_state = MS_UNINIT;
+//	}
 	if((gCur_vel != 0) || (gCur_vel < VEL_MIN))
 	{
 		gMotion_cmd = (gMotion_num + (((gCur_vel - VEL_MIN) >> VEL_ACCB) + 2) * gDir_vel) & 0xFFFFFFFE ;
