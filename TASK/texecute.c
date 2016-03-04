@@ -16,7 +16,7 @@
 #define INSLOT_HI  3
 #define INSLOT_LI  2
 #define INSLOT_LL  1
-#define INSLOT_ERR 0
+#define INSLOT_ERR 99
 u8 scan_mode = SCAN_UPP;
 
 
@@ -61,6 +61,7 @@ void Analyze_Scan(u8* result)
 	u8 slot = 0;
 	s32 pos1, pos2 = 0;
 	u8 p1,p2,p3,p4,p5;
+	memset(result, 0, WAFER_NUM);
 	while(cntp <= gScan_num)
 	{
 		p1 = is_inslot(gScan_pos[cntp], WAFER_NUM - cnts);
@@ -71,24 +72,65 @@ void Analyze_Scan(u8* result)
 			p3 = is_inslot(gScan_pos[cntp+2], WAFER_NUM - cnts - 1);
 			p4 = is_inslot(gScan_pos[cntp+3], WAFER_NUM - cnts - 1);
 		}
-		if((p1 == INSLOT_HI) && (p2 == INSLOT_LI))
+		if((p1 >= INSLOT_HI) && (p2 == INSLOT_LI))
 		{
 			if(p5 == INSLOT_HI)
 			{
-				*result[cnts] = 1;
+				if(*result[cnts] == 0)
+				{
+					*result[cnts] = 1;
+				}
+				esle
+				{
+					*result[cnts] = 5;
+				}
 				cntp += 2;
 				cnts += 1;
 				continue;
 			}
 			if(p5 == INSLOT_HH)
 			{
-				*result[cnts] = 2;
+				if(*result[cnts] == 0)
+				{
+					*result[cnts] = 2;
+				}
+				esle
+				{
+					*result[cnts] = 5;
+				}
 				cntp += 2;
 				cnts += 1;
 			}
 			if(p5 == INSLOT_LL)
 			{
 				*result[cnts] = 5;
+				cntp += 2;
+				cnts += 1;
+			}
+		}
+		if((p1 == INSLOT_LL) && (p2 == INSLOT_LL))
+		{
+			if(cnts < WAFER_NUM - 1)
+			{
+				p3 = is_inslot(gScan_pos[cntp+2], WAFER_NUM - cnts - 1);
+				p4 = is_inslot(gScan_pos[cntp+3], WAFER_NUM - cnts - 1);
+				if(p4 <= INSLOT_LI)
+				{
+					*result[cnts] = 0;
+					cntp += 2;
+					cnts += 1;
+				}
+				else
+				{
+					*result[cnts] = 3;
+					*result[cnts+1] = 3;
+					cntp += 2;
+					cnts += 1;
+				}
+			}
+			else
+			{
+				*result[cnts] = 3;
 				cntp += 2;
 				cnts += 1;
 			}
