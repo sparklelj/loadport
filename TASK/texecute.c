@@ -10,7 +10,7 @@
 #define WPOS_START    20000
 #define WPOS_INTERVAL 10000
 
-#define WAFER_NUM (25<<1)
+#define WAFER_NUM 25
 
 #define INSLOT_HH  4
 #define INSLOT_HI  3
@@ -42,25 +42,62 @@ u8 is_inslot(s32 cpos, u8 slot)
 	}
 	return INSLOT_ERR;
 }
-
-void Analyze_Scan(s32* result)
+u8 is_inthick(S32 height)
 {
-	s32 wafer_pos[WAFER_NUM];
-	u8 cnt = 0;
+	if(height > WAFER_THICK + WTHICK_MARG)
+	{
+		return INSLOT_HH;
+	}
+	if(height < WAFER_THICK - WTHICK_MARG)
+	{
+		return INSLOT_LL;
+	}
+	return INSLOT_HI;
+}
+void Analyze_Scan(u8* result)
+{
+	u8 cntp = 0;
+	u8 cnts = 0;
 	u8 slot = 0;
 	s32 pos1, pos2 = 0;
-	u8 i;
-	for(i = 0; i < WAFER_NUM; )
+	u8 p1,p2,p3,p4,p5;
+	while(cntp <= gScan_num)
 	{
-		wafer_pos[i] = WPOS_START + ((WAFER_NUM - i - 2) >> 1) * WPOS_INTERVAL + WAFER_THICK;
-		wafer_pos[i] = WPOS_START + ((WAFER_NUM - i - 2) >> 1) * WPOS_INTERVAL;
-		i += 2;
+		p1 = is_inslot(gScan_pos[cntp], WAFER_NUM - cnts);
+		p2 = is_inslot(gScan_pos[cntp+1], WAFER_NUM - cnts);
+		p5 = is_inthick(gScan_pos[cntp] - gScan_pos[cntp+1]);
+		if(cnts < WAFER_NUM)
+		{
+			p3 = is_inslot(gScan_pos[cntp+2], WAFER_NUM - cnts - 1);
+			p4 = is_inslot(gScan_pos[cntp+3], WAFER_NUM - cnts - 1);
+		}
+		if((p1 == INSLOT_HI) && (p2 == INSLOT_LI))
+		{
+			if(p5 == INSLOT_HI)
+			{
+				*result[cnts] = 1;
+				cntp += 2;
+				cnts += 1;
+				continue;
+			}
+			if(p5 == INSLOT_HH)
+			{
+				*result[cnts] = 2;
+				cntp += 2;
+				cnts += 1;
+			}
+			if(p5 == INSLOT_LL)
+			{
+				*result[cnts] = 5;
+				cntp += 2;
+				cnts += 1;
+			}
+		}
+
 	}
-	while(cnt <= gScan_num)
+	if(cnts < WAFER_NUM - 1)
 	{
-		pos1 = (gScan_pos[cnt++] - WPOS_START) % WPOS_INTERVAL;
-		pos2 = (gScan_pos[cnt] - WPOS_START) % WPOS_INTERVAL;
-		slot = (gScan_pos[cnt++] - WPOS_START) / WPOS_INTERVAL;
+		memset(result+cnts, 0, WAFER_NUM - cnts - 1);
 	}
 }
 
