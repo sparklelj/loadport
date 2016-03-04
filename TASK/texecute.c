@@ -17,6 +17,7 @@
 #define INSLOT_LI  2
 #define INSLOT_LL  1
 #define INSLOT_ERR 99
+
 u8 scan_mode = SCAN_UPP;
 
 
