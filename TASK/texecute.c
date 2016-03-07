@@ -144,3 +144,7 @@ void Analyze_Scan(u8* result)
 	}
 }
 
+void start_init(void)
+{
+
+}
