@@ -143,6 +143,22 @@ __inline u8 ONLINE_TxLen(void)
 	return uOnlineTxTail - uOnlineTxHead ;
 }
 
+u8 ONLINE_Peer(u8 *buff, u8 len)
+{
+	u8 tmp = 0;
+	u8 tmpcnt = uOnlineRxHead;
+	while(uCmdRxTail != tmpcnt)
+	{
+		if(tmp >= len)
+		{
+			break;
+		}
+		*(buff + (tmp++)) = CmdRxBuffer[tmpcnt++];
+	}
+	return tmp;
+	
+}
+
 u8 ONLINE_Read(u8 *buff, u8 len)
 {
 	u8 tmp = 0;
@@ -184,6 +200,22 @@ __inline u8 CMD_RxLen(void)
 __inline u8 CMD_TxLen(void)
 {
 	return uCmdTxTail - uCmdTxHead ;
+}
+
+u8 CMD_Peer(u8 *buff, u8 len)
+{
+	u8 tmp = 0;
+	u8 tmpcnt = uCmdRxHead;
+	while(uCmdRxTail != tmpcnt)
+	{
+		if(tmp >= len)
+		{
+			break;
+		}
+		*(buff + (tmp++)) = CmdRxBuffer[tmpcnt++];
+	}
+	return tmp;
+	
 }
 
 u8 CMD_Read(u8 *buff, u8 len)
