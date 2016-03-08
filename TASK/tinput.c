@@ -6,7 +6,10 @@
 
 u8 gStatus_scan[INPUT_NUM];
 
-u8 status_ready[STATUS_NUM][INPUT_NUM<<1];
+u8 status_ready[STATUS_NUM][INPUT_NUM<<1] = {{},\	
+					     {},\
+					     {},\
+					     {}};
 
 void tInput_Scan(void *p_arg)
 {
