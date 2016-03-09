@@ -6,7 +6,7 @@
 
 u8 gStatus_scan[INPUT_NUM];
 
-u8 status_ready[STATUS_NUM][INPUT_NUM<<1] = {{0x00,0x03},\
+u8 status_ready[STATUS_NUM][INPUT_NUM<<1] = {{0x00,0x03,0x00,0x01,},\
 {},\
 {}};
 
