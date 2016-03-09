@@ -1,3 +1,3 @@
 #!sh
 git commit  -am "add"
-git push
+git push origin master
