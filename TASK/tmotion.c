@@ -17,7 +17,7 @@
 s32 gMotion_cmd = 0;
 u16 gVel_cmd = 0;
 
-
+u8 gMotion_status;
 
 void tMotor_Motion(void *p_arg)
 {
@@ -81,6 +81,17 @@ void tMotor_Motion(void *p_arg)
 	}
 }
 
+bool is_mstop(void)
+{
+	if((gMotion_cmd == gMotion_num) && (gCur_vel == 0))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 void STOP_Minit(void)
 {
@@ -105,7 +116,6 @@ void START_Motion(s32 target_pos, u16 target_vel)
 	gMotion_cmd = target_pos << 1;
 	gVel_cmd = target_vel;
 }
-
 
 
 void tMotor_Init(void *p_arg)
@@ -191,5 +201,52 @@ void tMotor_Init(void *p_arg)
 	
 	OSTaskDel(NULL,&err);
 	goto BEGIN;	
-	
+}
+
+u8 Get_MStatus(void)
+{
+	if(gMotion_cmd == M_UPLMT)
+	{
+		if(is_mstop)
+		{
+			gMotion_status = 0x01;
+		}
+		else
+		{
+			gMotion_status = 0x08;
+		}
+	}
+	if(gMotion_cmd == M_STRMP)
+	{
+		if(is_mstop)
+		{
+			gMotion_status = 0x03;
+		}
+		else
+		{
+			gMotion_status = 0x02;
+		}
+	}
+	if(gMotion_cmd == M_STPMP)
+	{
+		if(is_mstop)
+		{
+			gMotion_status = 0x05;
+		}
+		else
+		{
+			gMotion_status = 0x04;
+		}
+	}
+	if(gMotion_cmd == M_DNLMT)
+	{
+		if(is_mstop)
+		{
+			gMotion_status = 0x07;
+		}
+		else
+		{
+			gMotion_status = 0x06;
+		}
+	}
 }

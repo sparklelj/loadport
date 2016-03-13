@@ -2,6 +2,8 @@
 #include "motor.h"
 #include "texecute.h"
 #include "includes.h"
+#include "tinput.h"
+#include "output.h"
 
 #define WAFER_THICK 100
 #define WTHICK_MARG 10
@@ -18,9 +20,30 @@
 #define INSLOT_LL  1
 #define INSLOT_ERR 99
 
+#define PROC_ERR 0
+#define PROC_ING 1
+#define PROC_END 2
+#define PROC_UNS 4
+
 u8 scan_mode = SCAN_UPP;
 
-
+u8 exe_clamup(void)
+{
+	if(!is_sf_ready)
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_1,SOL01B_1);
+	OUTPUT_SetOne(CS_O_1,SOL01A_1);
+	if(is_sf_setfoupd)
+	{
+		return PROC_END;
+	}
+	if(is_sf_setfoupi)
+	{
+		return PROC_ING;
+	}	
+}
 
 u8 is_inslot(s32 cpos, u8 slot)
 {
