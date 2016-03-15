@@ -8,6 +8,7 @@
 #define M_STPMP 600000
 #define M_DNLMT 200000
 
+#define M_VEL VEL_MAX
 
 void STOP_Minit(void);
 void START_Motion(s32 target_pos, u16 target_vel);

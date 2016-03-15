@@ -95,6 +95,7 @@ bool is_sf_drclsi(void);
 bool is_sf_drclsd(void);
 bool is_sf_drlti(void);
 bool is_sf_drltd(void);
+bool is_sf_dradsri(void);
 bool is_sf_dradsrd(void);
 bool is_sf_fpundki(void);
 bool is_sf_fpundkd(void);

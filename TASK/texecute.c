@@ -27,22 +27,418 @@
 
 u8 scan_mode = SCAN_UPP;
 
-u8 exe_clamup(void)
+u8 exe_clamup(bool bforce)
 {
-	if(!is_sf_ready)
+	if((!is_sf_setfoupd()) && (!bforce))
 	{
 		return PROC_UNS;
 	}
 	OUTPUT_ResetOne(CS_O_1,SOL01B_1);
 	OUTPUT_SetOne(CS_O_1,SOL01A_1);
-	if(is_sf_setfoupd)
+	if(is_sf_clamupd())
 	{
 		return PROC_END;
 	}
-	if(is_sf_setfoupi)
+	if(is_sf_clamupi())
 	{
 		return PROC_ING;
 	}	
+	return PROC_ERR;
+}
+
+u8 exe_clamfwd(bool bforce)
+{
+	if((!is_sf_clamupd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_1,SOL02B_1);
+	OUTPUT_SetOne(CS_O_1,SOL02A_1);
+	if(is_sf_clanfwdd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_clanfwdi())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_clamlck(bool bforce)
+{
+	if((!is_sf_clanfwdd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_1,SOL01A_1);
+	OUTPUT_SetOne(CS_O_1,SOL01B_1);
+	if(is_sf_clamlckd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_clamlcki())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_fpdck(bool bforce)
+{
+	if((!is_sf_clamlckd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_1,SOL03B_1);
+	OUTPUT_SetOne(CS_O_1,SOL03A_1);
+	if(is_sf_fpdckd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_fpdcki())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_dradsp(bool bforce)
+{
+	if((!is_sf_fpdckd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_2,SOL09B_2);
+	OUTPUT_SetOne(CS_O_2,SOL09A_2);
+	if(is_sf_dradspd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_dradspi())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_drunlt(bool bforce)
+{
+	if((!is_sf_dradspd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_1,SOL04B_1);
+	OUTPUT_SetOne(CS_O_1,SOL04A_1);
+	if(is_sf_drunltd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_drunlti())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_drop(bool bforce)
+{
+	if((!is_sf_drunltd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_2,SOL05B_2);
+	OUTPUT_SetOne(CS_O_2,SOL05A_2);
+	if(is_sf_dropd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_dropi())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_drdwns(bool bforce)
+{
+	if((!is_sf_dropd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	START_Motion(M_STRMP, M_VEL);
+	if(is_sf_drdwnsd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_drdwnsi())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_mpaop(bool bforce)
+{
+	if((!is_sf_drdwnsd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_0,SOL08B_0);
+	OUTPUT_SetOne(CS_O_0,SOL08A_0);
+	if(is_sf_mpaopd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_mpaopi())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_stpon(bool bforce)
+{
+	if((!is_sf_mpaopd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_0,SOL07B_0);
+	OUTPUT_SetOne(CS_O_0,SOL07A_0);
+	if(is_sf_stpond())
+	{
+		return PROC_END;
+	}
+	if(is_sf_stponi())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_drdwne(bool bforce)
+{
+	if((!is_sf_stpond()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	START_Motion(M_STPMP, M_VEL);
+	if(is_sf_drdwned())
+	{
+		return PROC_END;
+	}
+	if(is_sf_drdwnei())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_mpac(bool bforce)
+{
+	if((!is_sf_drdwned()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_0,SOL08A_0);
+	OUTPUT_SetOne(CS_O_0,SOL08B_0);
+	if(is_sf_mpacd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_mpaci())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_stpoff(bool bforce)
+{
+	if((!is_sf_mpacd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_0,SOL07A_0);
+	OUTPUT_SetOne(CS_O_0,SOL07B_0);
+	if(is_sf_stpoffd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_stpoffi())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_drdwnl(bool bforce)
+{
+	if((!is_sf_stpoffd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	START_Motion(M_DNLMT, M_VEL);
+	if(is_sf_drdwnld())
+	{
+		return PROC_END;
+	}
+	if(is_sf_drdwnli())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_drupl(bool bforce)
+{
+	if((!is_sf_drdwnld()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	START_Motion(M_UPLMT, M_VEL);
+	if(is_sf_drupld())
+	{
+		return PROC_END;
+	}
+	if(is_sf_drupli())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_drcls(bool bforce)
+{
+	if((!is_sf_drupld()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_2,SOL05A_2);
+	OUTPUT_SetOne(CS_O_2,SOL05B_2);
+	if(is_sf_drclsd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_drclsi())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_drlt(bool bforce)
+{
+	if((!is_sf_drclsd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_1,SOL04A_1);
+	OUTPUT_SetOne(CS_O_1,SOL04B_1);
+	if(is_sf_drltd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_drlti())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_dradsr(bool bforce)
+{
+	if((!is_sf_drltd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_2,SOL09B_2);
+	OUTPUT_SetOne(CS_O_2,SOL09A_2);
+	if(is_sf_dradsrd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_drclsi())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_fpundk(bool bforce)
+{
+	if((!is_sf_dradsrd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_1,SOL03A_1);
+	OUTPUT_SetOne(CS_O_1,SOL03B_1);
+	if(is_sf_fpundkd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_fpundki())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_clamulk(bool bforce)
+{
+	if((!is_sf_fpundkd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_1,SOL01B_1);
+	OUTPUT_SetOne(CS_O_1,SOL01A_1);
+	if(is_sf_clamulkd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_clamulki())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_clambwd(bool bforce)
+{
+	if((!is_sf_clamulkd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_1,SOL02A_1);
+	OUTPUT_SetOne(CS_O_1,SOL02B_1);
+	if(is_sf_clambwdd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_clambwdi())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
+}
+
+u8 exe_clamdwn(bool bforce)
+{
+	if((!is_sf_clambwdd()) && (!bforce))
+	{
+		return PROC_UNS;
+	}
+	OUTPUT_ResetOne(CS_O_1,SOL01A_1);
+	OUTPUT_SetOne(CS_O_1,SOL01B_1);
+	if(is_sf_clamdwnd())
+	{
+		return PROC_END;
+	}
+	if(is_sf_clamdwni())
+	{
+		return PROC_ING;
+	}	
+	return PROC_ERR;
 }
 
 u8 is_inslot(s32 cpos, u8 slot)

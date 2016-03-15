@@ -207,7 +207,7 @@ u8 Get_MStatus(void)
 {
 	if(gMotion_cmd == M_UPLMT)
 	{
-		if(is_mstop)
+		if(is_mstop())
 		{
 			gMotion_status = 0x01;
 		}
@@ -218,7 +218,7 @@ u8 Get_MStatus(void)
 	}
 	if(gMotion_cmd == M_STRMP)
 	{
-		if(is_mstop)
+		if(is_mstop())
 		{
 			gMotion_status = 0x03;
 		}
@@ -229,7 +229,7 @@ u8 Get_MStatus(void)
 	}
 	if(gMotion_cmd == M_STPMP)
 	{
-		if(is_mstop)
+		if(is_mstop())
 		{
 			gMotion_status = 0x05;
 		}
@@ -240,7 +240,7 @@ u8 Get_MStatus(void)
 	}
 	if(gMotion_cmd == M_DNLMT)
 	{
-		if(is_mstop)
+		if(is_mstop())
 		{
 			gMotion_status = 0x07;
 		}
@@ -249,4 +249,5 @@ u8 Get_MStatus(void)
 			gMotion_status = 0x06;
 		}
 	}
+	return gMotion_status;
 }

@@ -25,8 +25,8 @@
 #define SOL05B_2      1
 #define SOL06A_2      2
 #define SOL06B_2      3
-#define SOL09B_2      4
-#define SOL09N_2      5
+#define SOL09A_2      4
+#define SOL09B_2      5
 #define SW01OUT_2     6
 #define SWLED01OUT_2  7
 
@@ -68,8 +68,8 @@
 #define SOL05B_2      PFout(1)
 #define SOL06A_2      PFout(2)
 #define SOL06B_2      PFout(3)
-#define SOL09B_2      PFout(4)
-#define SOL09N_2      PFout(5)
+#define SOL09A_2      PFout(4)
+#define SOL09B_2      PFout(5)
 #define SW01OUT_2     PFout(6)
 #define SWLED01OUT_2  PFout(7)
 

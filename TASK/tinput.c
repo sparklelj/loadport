@@ -712,7 +712,4 @@ bool is_low(void)
 		return true;
 	}
 }
-u8 Get_Status(void)
-{
-	
-}	
+
