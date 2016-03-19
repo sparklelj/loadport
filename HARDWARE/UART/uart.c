@@ -147,13 +147,13 @@ u8 ONLINE_Peer(u8 *buff, u8 len)
 {
 	u8 tmp = 0;
 	u8 tmpcnt = uOnlineRxHead;
-	while(uCmdRxTail != tmpcnt)
+	while(uOnlineRxTail != tmpcnt)
 	{
 		if(tmp >= len)
 		{
 			break;
 		}
-		*(buff + (tmp++)) = CmdRxBuffer[tmpcnt++];
+		*(buff + (tmp++)) = OnlineRxBuffer[tmpcnt++];
 	}
 	return tmp;
 	
