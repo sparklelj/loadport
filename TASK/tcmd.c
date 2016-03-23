@@ -3,6 +3,8 @@
 #include "uart.h"
 #include "stdio.h"
 
+u8 gAddr[2] = {'0','0'};
+
 bool check_sum(u8* msg)
 {
 	u8 i;
@@ -25,6 +27,21 @@ bool check_sum(u8* msg)
 
 bool proc_cmd(u8* msg)
 {
+	u8 addr[2];
+	u8 cmd_t[3];
+	u8 cmd_n[5];
+	memcpy(addr, msg+3, 2);
+	if(memcmp(addr, gAddr, 2) != 0)
+	{
+		return false;
+	}
+	memcpy(cmd_t, msg+5, 3);
+	memcpy(cmd_n, msg+9, 5);
+	
+	if(memcmp(cmd_t, "MOV", 3) == 0)
+	{
+		
+	}
 	
 }
 
