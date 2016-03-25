@@ -133,12 +133,12 @@ void UART_init(void)
 	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
 }
 
-__inline u8 ONLINE_RxLen(void)
+u8 ONLINE_RxLen(void)
 {
 	return uOnlineRxTail - uOnlineRxHead ;
 }
 
-__inline u8 ONLINE_TxLen(void)
+u8 ONLINE_TxLen(void)
 {
 	return uOnlineTxTail - uOnlineTxHead ;
 }
@@ -192,12 +192,12 @@ u8 ONLINE_Write(u8 *buff, u8 len)
 	return tmp;
 }
 
-__inline u8 CMD_RxLen(void)
+u8 CMD_RxLen(void)
 {
 	return uCmdRxTail - uCmdRxHead ;
 }
 
-__inline u8 CMD_TxLen(void)
+u8 CMD_TxLen(void)
 {
 	return uCmdTxTail - uCmdTxHead ;
 }
