@@ -798,6 +798,11 @@
               <FileType>1</FileType>
               <FilePath>..\TASK\tmotion.c</FilePath>
             </File>
+            <File>
+              <FileName>tled.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TASK\tled.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

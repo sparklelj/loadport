@@ -4,5 +4,7 @@
 #include "includes.h"
 
 extern u8 gAddr[2];
+extern u8 gLED_status[8];
+
 
 #endif

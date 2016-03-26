@@ -58,10 +58,10 @@ void tMotor_Motion(void *p_arg)
 				gPulse_num = gMotion_cmd - gMotion_num;
 				if(gDir_vel == DIE_NEG)
 				{					
-					OSTimeDlyHMSM(0,0,0,1,OS_OPT_TIME_HMSM_STRICT,&err);
+					OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
 					PEout(M_DIR) = 1;
 					gDir_vel = DIR_POS;
-					OSTimeDlyHMSM(0,0,0,1,OS_OPT_TIME_HMSM_STRICT,&err);
+					OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
 				}
 			}
 			else
@@ -69,10 +69,10 @@ void tMotor_Motion(void *p_arg)
 				gPulse_num = gMotion_num - gMotion_cmd;
 				if(gDir_vel == DIR_POS)
 				{				
-					OSTimeDlyHMSM(0,0,0,1,OS_OPT_TIME_HMSM_STRICT,&err);
+					OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
 					PEout(M_DIR) = 0;
 					gDir_vel = DIE_NEG;
-					OSTimeDlyHMSM(0,0,0,1,OS_OPT_TIME_HMSM_STRICT,&err);
+					OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
 				}
 			}
 		}

@@ -92,4 +92,5 @@ void OUTPUT_Init(void);
 void OUTPUT_Write(u8 cs_num, u8 val);
 void OUTPUT_SetOne(u8 cs_num, u8 pin);
 void OUTPUT_ResetOne(u8 cs_num, u8 pin);
+void OUTPUT_TogOne(u8 cs_num, u8 pin);
 #endif

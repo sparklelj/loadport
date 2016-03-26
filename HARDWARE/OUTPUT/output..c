@@ -66,3 +66,11 @@ void OUTPUT_ResetOne(u8 cs_num, u8 pin)
 	PDout(cs_num) = 0; //相应片选，低有效
 	PFout(pin) = 0;
 }
+
+void OUTPUT_TogOne(u8 cs_num, u8 pin)
+{
+	assert_param(IS_OUTPUT_CS(cs_num));
+	assert_param(IS_OUTPUT_PIN(pin));
+	PDout(cs_num) = 0; //相应片选，低有效
+	PFout(pin) = ~PFout(pin);
+}
