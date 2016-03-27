@@ -1,7 +1,9 @@
 #include "tcmd.h"
 #include "includes.h"
 #include "uart.h"
+#include "texecute.h"
 #include "stdio.h"
+#include "tinput.h"
 
 u8 gAddr[2] = {'0','0'};
 u8 gCom_mod = 0;
@@ -105,22 +107,173 @@ bool check_sum(u8* msg)
 
 bool format_state(u8* param)
 {
+	param[0] = '/';
+	param[1] = gEqu_sta + 0x30;
+	param[2] = '0';
+	param[3] = gInit_pos + 0x30;
+	param[4] = gOpe_sta + 0x30;
+	param[5] = (gErr_code >> 4) + 0x30;
+	param[6] = (gErr_code & 0x0F) + 0x30;
+	param[7] = '0';
+	param[8] = clam_sta();
+	param[9] = latch_sta();
+	param[10] = vac_sta();
+	param[11] = is_obstacle();
+	param[12] = ;
+	param[13] = ;
+	param[14] = ;
+	param[15] = ;
+	param[16] = ;
+	param[17] = ;
+	param[18] = ;
+	param[19] = ;
+	param[20] = ;
+	return true;
 }
 
 bool format_ledst(u8* param)
 {
+	u8 cnt;
+	param[0] = '/';
+	for(cnt=0;cnt<9;cnt++)
+	{
+		if((gLED_status[cnt] & 0xF0) == 0x10)
+		{
+			switch (gLED_status[7] & 0x03)
+			{
+				case 1:
+					param[cnt+1] = '0';
+					break;
+				case 2:
+					param[cnt+1] = '2';
+					break;
+				case 3:
+					param[cnt+1] = '1';
+					break;
+			}
+		}
+		else
+		{
+			switch (gLED_status[7] & 0x0C)
+			{
+				case 1:
+					param[cnt+1] = '0';
+					break;
+				case 2:
+					param[cnt+1] = '2';
+					break;
+				case 3:
+					param[cnt+1] = '1';
+					break;
+			}			
+		}
+	}
+	return true;
 }
 
 bool format_mapdt(u8* param)
 {
+	u8 result[25];
+	u8 i;
+	param[0] = '/';
+	if(Analyze_Scan(result) == true)
+	{
+		for(i=0;i<25;i++)
+		{
+			switch (result[i])
+			{
+				case 0:
+					param[i+1] = '0';
+					break;
+				case 1:
+					param[i+1] = '1';
+					break;
+				case 2:
+					param[i+1] = 'W';
+					break;
+				case 3:
+					param[i+1] = '2';
+					break;
+			}
+		}
+		return true;
+	}
+	else
+	{
+		memset(param+1,'0',25);
+		return false;
+	}
 }
 
 bool format_maprd(u8* param)
 {
+	u8 result[25];
+	u8 i;
+	param[0] = '/';
+	if(Analyze_Scan(result) == true)
+	{
+		for(i=0;i<25;i++)
+		{
+			switch (result[i])
+			{
+				case 0:
+					param[26-i] = '0';
+					break;
+				case 1:
+					param[26-i] = '1';
+					break;
+				case 2:
+					param[26-i] = 'W';
+					break;
+				case 3:
+					param[26-i] = '2';
+					break;
+			}
+		}
+		return true;
+	}
+	else
+	{
+		memset(param+1,'0',25);
+		return false;
+	}
 }
 
 bool format_wfcnt(u8* param)
 {
+	u8 result[25];
+	u8 i;
+	u8 cnt = 0;
+	param[0] = '/';
+	if(Analyze_Scan(result) == true)
+	{
+		for(i=0;i<25;i++)
+		{
+			switch (result[i])
+			{
+				case 0:
+					break;
+				case 1:
+					cnt += 2;
+					break;
+				case 2:
+					cnt += 4; 
+					break;
+				case 3:
+					cnt += 1;
+					break;
+			}
+		}
+		cnt = cnt >> 1;
+		sprintf((char*)param+1, "%2d", cnt);
+		return true;
+	}
+	else
+	{
+		param[1] = '?';
+		param[2] = '?';
+		return true;
+	}	
 }
 
 bool proc_set(u8* cmd_name)

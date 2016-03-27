@@ -106,7 +106,13 @@ bool is_sf_clambwdd(void);
 bool is_sf_clamdwni(void);
 bool is_sf_clamdwnd(void);
 
-bool is_obstacle(void);
+u8 clam_sta(void);
+u8 latch_sta(void);
+u8 vac_sta(void);
+u8 dr_pos(void);
+u8 is_obstacle(void);
+u8 Z_pos(void);
+u8 Y_pos(void);
 
 bool is_low(void);
 

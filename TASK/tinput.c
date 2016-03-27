@@ -689,16 +689,93 @@ bool is_sf_clamdwnd(void)
     }
 }
 
-bool is_obstacle(void)
+u8 clam_sta(void)
+{
+	if((INPUT_ReadOne(CS_I_9, CLS01C_9) == 1) && (INPUT_ReadOne(CS_I_9, CLS02A_9) == 1))
+	{
+		return '1';
+	}
+	if((INPUT_ReadOne(CS_I_9, CLS01B_9) == 1) && (INPUT_ReadOne(CS_I_9, CLS02B_9) == 1))
+	{
+		return '0';
+	}
+	return '?';
+}
+
+u8 latch_sta(void)
+{
+	if(INPUT_ReadOne(CS_I_10, CLS04B_10) == 1)
+	{
+		return '1';
+	}
+	if(INPUT_ReadOne(CS_I_10, CLS04A_10) == 1)
+	{
+		return '0';
+	}	
+	return '?';
+}
+
+u8 vac_sta(void)
+{
+	if(INPUT_ReadOne(CS_I_10, VS01_10) == 1)
+	{
+		return '1';
+	}
+	else
+	{
+		return '0';
+	}	
+}
+
+u8 dr_pos(void)
+{
+	if(INPUT_ReadOne(CS_I_10, CLS05B_10) == 1)
+	{
+		return '1';
+	}
+	if(INPUT_ReadOne(CS_I_10, CLS05A_10) == 1)
+	{
+		return '0';
+	}
+	return '?';
+}
+
+u8 is_obstacle(void)
 {
     if((gStatus_scan[6]&0x70) == 0x70)
     {
-        return false;
+        return '1';
     }
     else
     {
-        return true;
+        return '0';
     }
+}
+
+u8 Z_pos(void)
+{
+	if(Get_MStatus() == 0x01)
+	{
+		return '0';
+	}
+	if(Get_MStatus() == 0x07)
+	{
+		return '1';
+	}
+	return '?';
+}
+
+u8 Y_pos(void)
+{
+	if(INPUT_ReadOne(CS_I_9, CLS03A_9) == 1)
+	{
+		return '1';
+	}
+	if(INPUT_ReadOne(CS_I_9, CLS03B_9) == 1)
+	{
+		return '0';
+	}	
+	return '?';	
 }
 
 bool is_low(void)

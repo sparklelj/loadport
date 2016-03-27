@@ -7,5 +7,6 @@
 #define SCAN_LOW 1
 
 extern u8 scan_mode;
+bool Analyze_Scan(u8* result);
 
 #endif

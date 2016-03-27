@@ -26,6 +26,7 @@
 #define PROC_UNS 4
 
 u8 scan_mode = SCAN_UPP;
+bool gis_scan = false;
 
 u8 exe_clamup(bool bforce)
 {
@@ -475,13 +476,17 @@ u8 is_inthick(s32 height)
 	}
 	return INSLOT_HI;
 }
-void Analyze_Scan(u8* result)
+bool Analyze_Scan(u8* result)
 {
 	u8 cntp = 0;
 	u8 cnts = 0;
 //	u8 p1,p2,p3,p4,p5;
 	u8 p1,p2,p4,p5;
 	memset(result, 0, WAFER_NUM);
+	if(gis_scan == false)
+	{
+		return false;
+	}
 	while(cntp <= gScan_num)
 	{
 		p1 = is_inslot(gScan_pos[cntp], WAFER_NUM - cnts);
@@ -498,7 +503,7 @@ void Analyze_Scan(u8* result)
 			{
 				if(*(result+cnts) == 0)
 				{
-					*(result+cnts) = 1;
+					*(result+cnts) = 1;// one wafer
 				}
 				else
 				{
@@ -512,7 +517,7 @@ void Analyze_Scan(u8* result)
 			{
 				if(*(result+cnts) == 0)
 				{
-					*(result+cnts) = 2;
+					*(result+cnts) = 2;// two wafers
 				}
 				else
 				{
@@ -536,31 +541,31 @@ void Analyze_Scan(u8* result)
 				p4 = is_inslot(gScan_pos[cntp+3], WAFER_NUM - cnts - 1);
 				if(p4 <= INSLOT_LI)
 				{
-					*(result+cnts) = 0;
+					*(result+cnts) = 0; //no wafer
 					cntp += 2;
 					cnts += 1;
 				}
 				else
 				{
-					*(result+cnts) = 3;
+					*(result+cnts) = 3; //cross
 					*(result+cnts+1) = 3;
-					cntp += 2;
-					cnts += 1;
+					cntp += 4;
+					cnts += 2;
 				}
 			}
 			else
 			{
-				*(result+cnts) = 3;
+				*(result+cnts) = 3; //cross
 				cntp += 2;
 				cnts += 1;
 			}
 		}
-
 	}
 	if(cnts < WAFER_NUM - 1)
 	{
 		memset(result+cnts, 0, WAFER_NUM - cnts - 1);
 	}
+	return true;
 }
 
 void start_init(void)
