@@ -778,6 +778,32 @@ u8 Y_pos(void)
 	return '?';	
 }
 
+u8 map_apos(void)
+{
+	if(INPUT_ReadOne(CS_I_11, CLS08B_11) == 1)
+	{
+		return '1';
+	}
+	if(INPUT_ReadOne(CS_I_11, CLS08A_11) == 1)
+	{
+		return '0';
+	}
+	return '?';
+}
+
+u8 map_stp(void)
+{
+	if(INPUT_ReadOne(CS_I_11, CLS07B_11) == 1)
+	{
+		return '1';                     
+	}
+	if(INPUT_ReadOne(CS_I_11, CLS07A_11) == 1)
+	{
+		return '0';                             
+	}
+	return '?';
+}
+
 bool is_low(void)
 {
     if(((gStatus_scan[1]&0x02) == 0x02) && ((gStatus_scan[3]&0x01) == 0x01))

@@ -9,6 +9,7 @@ u8 gAddr[2] = {'0','0'};
 u8 gCom_mod = 0;
 u8 gLED_status[8];
 u8 gVersion[13] = {'/','V','E','R',' ','1','.','0','1',' ',' ',' ',' '};
+u8 gCUr_status = 0; //uninit
 
 bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
 {
@@ -105,6 +106,19 @@ bool check_sum(u8* msg)
     return false;
 }
 
+
+bool check_fornat(u8* msg)
+{
+	u16 len;
+	len = *(msg + 1);
+	len = (len << 8) + *(msg + 2);
+	if((msg[0] == 0x01) && (msg[len+3] == 0x03) && (msg[3] == gAddr[0]) && (msg[4] == gAddr[1]))
+	{
+		return true;
+	}
+	return false;
+}
+
 bool format_state(u8* param)
 {
 	param[0] = '/';
@@ -118,13 +132,13 @@ bool format_state(u8* param)
 	param[8] = clam_sta();
 	param[9] = latch_sta();
 	param[10] = vac_sta();
-	param[11] = is_obstacle();
-	param[12] = ;
-	param[13] = ;
-	param[14] = ;
-	param[15] = ;
+	param[11] = dr_pos();
+	param[12] = is_obstacle();
+	param[13] = Z_pos();
+	param[14] = Y_pos();
+	param[15] = map_apos();
 	param[16] = ;
-	param[17] = ;
+	param[17] = map_stp();
 	param[18] = ;
 	param[19] = ;
 	param[20] = ;
@@ -596,8 +610,15 @@ bool proc_cmd(u8* msg)
     {
         return false;
     }
+
     memcpy(cmd_t, msg+5, 3);
     memcpy(cmd_n, msg+9, 5);
+
+    if(!check_sum(msg))
+    {	    
+	    send_msg(0x01, cmd_n, "/CKSUM", 6);
+	    return false;
+    }
 
     if(memcmp(cmd_t, "SET", 3) == 0)
     {
@@ -643,6 +664,9 @@ bool proc_cmd(u8* msg)
     {
         res = proc_rmv(cmd_n);
     }
+
+    send_msg(0x01, cmd_n, "/CMDER", 6);
+    return false;
 }
 
 void tCMD_Proc(void *p_arg)
@@ -678,7 +702,12 @@ void tCMD_Proc(void *p_arg)
             ONLINE_Read(msg, 1);
             continue;
         }
-        lencmd += 4;
+	lencmd += 4;
+	if(lencmd > 100)
+	{
+		ONLINE_Read(msg, 1);
+		continue;
+	}
         len = ONLINE_RxLen();
         if(lencmd > len)
         {
@@ -689,7 +718,7 @@ void tCMD_Proc(void *p_arg)
         {
             continue;
         }
-        if(check_sum(msg))
+        if(check_fornat(msg))
         {
             len = ONLINE_Read(msg, lencmd);
             proc_cmd(msg);
