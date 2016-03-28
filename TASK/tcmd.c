@@ -11,6 +11,10 @@ u8 gLED_status[8];
 u8 gVersion[13] = {'/','V','E','R',' ','1','.','0','1',' ',' ',' ',' '};
 u8 gCUr_status = 0; //uninit
 
+u8 gAction_seq[32];
+u8 gAction_num = 0;
+u8 gAction_sta = 0;
+
 bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
 {
 	u8 msg[100];
@@ -84,6 +88,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
 			OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
 		}
 	}
+	return true;
 }
 
 bool check_sum(u8* msg)
@@ -288,6 +293,200 @@ bool format_wfcnt(u8* param)
 		param[2] = '?';
 		return true;
 	}	
+}
+// type 0 normal 0x80 force
+u8 format_podop(u8 type)
+{
+	gAction_seq[gAction_num++] = 20 + type;
+	gAction_seq[gAction_num++] = 21 + type;
+	gAction_seq[gAction_num++] = 22 + type;
+}
+
+u8 format_podcl(u8 type)
+{
+	gAction_seq[gAction_num++] = 1 + type;
+	gAction_seq[gAction_num++] = 2 + type;
+	gAction_seq[gAction_num++] = 3 + type;	
+}
+
+u8 format_vacon(u8 type)
+{
+	gAction_seq[gAction_num++] = 5 + type;
+}
+
+u8 format_vacof(u8 type)
+{
+	gAction_seq[gAction_num++] = 18 + type;
+}
+
+u8 format_dorop(u8 type)
+{
+	gAction_seq[gAction_num++] = 6 + type;
+}
+
+u8 format_dorcl(u8 type)
+{
+	gAction_seq[gAction_num++] = 17 + type;
+}
+
+u8 format_mapop(u8 type)
+{
+	gAction_seq[gAction_num++] = 9 + type;
+}
+
+u8 format_mapcl(u8 type)
+{
+	gAction_seq[gAction_num++] = 12 + type;
+}
+
+u8 format_zdrup(u8 type)
+{
+	gAction_seq[gAction_num++] = 15 + type;
+}
+
+u8 format_zdrdw(u8 type)
+{
+	gAction_seq[gAction_num++] = 14 + type;
+}
+
+u8 format_zdrmp(u8 type)
+{
+	gAction_seq[gAction_num++] = 11 + type;
+}
+
+u8 format_zmpst(u8 type)
+{
+	gAction_seq[gAction_num++] = 8 + type;
+}
+
+u8 format_zmped(u8 type)
+{
+	
+}
+
+u8 format_mston(u8 type)
+{
+	gAction_seq[gAction_num++] = 10 + type;
+}
+
+u8 format_mstof(u8 type)
+{
+	gAction_seq[gAction_num++] = 13 + type;
+}
+
+u8 format_ywait(u8 type)
+{
+	gAction_seq[gAction_num++] = 19 + type;	
+}
+
+u8 format_ydoor(u8 type)
+{
+	gAction_seq[gAction_num++] = 4 + type;
+}
+
+u8 format_dorbk(u8 type)
+{
+	gAction_seq[gAction_num++] = 7 + type;
+}
+
+u8 format_dorfw(u8 type)
+{
+	gAction_seq[gAction_num++] = 16 + type;
+}
+
+u8 format_orgsh(u8 type)
+{
+	
+}
+
+u8 format_aborg(u8 type)
+{
+	
+}
+
+u8 format_cload(u8 type)
+{
+	
+}
+
+u8 format_clddk(u8 type)
+{
+	
+}
+
+u8 format_cldyd(u8 type)
+{
+	
+}
+
+u8 format_cldop(u8 type)
+{
+	
+}
+
+u8 format_cldmp(u8 type)
+{
+	
+}
+
+u8 format_clmop(u8 type)
+{
+	
+}
+
+u8 format_culod(u8 type)
+{
+	
+}
+
+u8 format_culdk(u8 type)
+{
+	
+}
+
+u8 format_cudcl(u8 type)
+{
+	
+}
+
+u8 format_cudnc(u8 type)
+{
+	
+}
+
+u8 format_culyd(u8 type)
+{
+	
+}
+
+u8 format_cuflc(u8 type)
+{
+	
+}
+
+u8 format_cudmp(u8 type)
+{
+	
+}
+
+u8 format_cumdk(u8 type)
+{
+	
+}
+
+u8 format_cumfc(u8 type)
+{
+	
+}
+
+u8 format_mapdo(u8 type)
+{
+	
+}
+
+u8 format_remap(u8 type)
+{
+	
 }
 
 bool proc_set(u8* cmd_name)
@@ -616,7 +815,7 @@ bool proc_cmd(u8* msg)
 
     if(!check_sum(msg))
     {	    
-	    send_msg(0x01, cmd_n, "/CKSUM", 6);
+	    send_msg(0x01, (char*)cmd_n, (u8*)"/CKSUM", 6);
 	    return false;
     }
 
@@ -665,7 +864,7 @@ bool proc_cmd(u8* msg)
         res = proc_rmv(cmd_n);
     }
 
-    send_msg(0x01, cmd_n, "/CMDER", 6);
+    send_msg(0x01, (char*)cmd_n, (u8*)"/CMDER", 6);
     return false;
 }
 
