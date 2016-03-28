@@ -295,196 +295,196 @@ bool format_wfcnt(u8* param)
 	}	
 }
 // type 0 normal 0x80 force
-u8 format_podop(u8 type)
+void format_podop(u8 type)
 {
 	gAction_seq[gAction_num++] = 20 + type;
 	gAction_seq[gAction_num++] = 21 + type;
 	gAction_seq[gAction_num++] = 22 + type;
 }
 
-u8 format_podcl(u8 type)
+void format_podcl(u8 type)
 {
 	gAction_seq[gAction_num++] = 1 + type;
 	gAction_seq[gAction_num++] = 2 + type;
 	gAction_seq[gAction_num++] = 3 + type;	
 }
 
-u8 format_vacon(u8 type)
+void format_vacon(u8 type)
 {
 	gAction_seq[gAction_num++] = 5 + type;
 }
 
-u8 format_vacof(u8 type)
+void format_vacof(u8 type)
 {
 	gAction_seq[gAction_num++] = 18 + type;
 }
 
-u8 format_dorop(u8 type)
+void format_dorop(u8 type)
 {
 	gAction_seq[gAction_num++] = 6 + type;
 }
 
-u8 format_dorcl(u8 type)
+void format_dorcl(u8 type)
 {
 	gAction_seq[gAction_num++] = 17 + type;
 }
 
-u8 format_mapop(u8 type)
+void format_mapop(u8 type)
 {
 	gAction_seq[gAction_num++] = 9 + type;
 }
 
-u8 format_mapcl(u8 type)
+void format_mapcl(u8 type)
 {
 	gAction_seq[gAction_num++] = 12 + type;
 }
 
-u8 format_zdrup(u8 type)
+void format_zdrup(u8 type)
 {
 	gAction_seq[gAction_num++] = 15 + type;
 }
 
-u8 format_zdrdw(u8 type)
+void format_zdrdw(u8 type)
 {
 	gAction_seq[gAction_num++] = 14 + type;
 }
 
-u8 format_zdrmp(u8 type)
+void format_zdrmp(u8 type)
 {
 	gAction_seq[gAction_num++] = 11 + type;
 }
 
-u8 format_zmpst(u8 type)
+void format_zmpst(u8 type)
 {
 	gAction_seq[gAction_num++] = 8 + type;
 }
 
-u8 format_zmped(u8 type)
+void format_zmped(u8 type)
 {
 	
 }
 
-u8 format_mston(u8 type)
+void format_mston(u8 type)
 {
 	gAction_seq[gAction_num++] = 10 + type;
 }
 
-u8 format_mstof(u8 type)
+void format_mstof(u8 type)
 {
 	gAction_seq[gAction_num++] = 13 + type;
 }
 
-u8 format_ywait(u8 type)
+void format_ywait(u8 type)
 {
 	gAction_seq[gAction_num++] = 19 + type;	
 }
 
-u8 format_ydoor(u8 type)
+void format_ydoor(u8 type)
 {
 	gAction_seq[gAction_num++] = 4 + type;
 }
 
-u8 format_dorbk(u8 type)
+void format_dorbk(u8 type)
 {
 	gAction_seq[gAction_num++] = 7 + type;
 }
 
-u8 format_dorfw(u8 type)
+void format_dorfw(u8 type)
 {
 	gAction_seq[gAction_num++] = 16 + type;
 }
 
-u8 format_orgsh(u8 type)
+void format_orgsh(u8 type)
 {
 	
 }
 
-u8 format_aborg(u8 type)
+void format_aborg(u8 type)
 {
 	
 }
 
-u8 format_cload(u8 type)
+void format_cload(u8 type)
 {
 	
 }
 
-u8 format_clddk(u8 type)
+void format_clddk(u8 type)
 {
 	
 }
 
-u8 format_cldyd(u8 type)
+void format_cldyd(u8 type)
 {
 	
 }
 
-u8 format_cldop(u8 type)
+void format_cldop(u8 type)
 {
 	
 }
 
-u8 format_cldmp(u8 type)
+void format_cldmp(u8 type)
 {
 	
 }
 
-u8 format_clmop(u8 type)
+void format_clmop(u8 type)
 {
 	
 }
 
-u8 format_culod(u8 type)
+void format_culod(u8 type)
 {
 	
 }
 
-u8 format_culdk(u8 type)
+void format_culdk(u8 type)
 {
 	
 }
 
-u8 format_cudcl(u8 type)
+void format_cudcl(u8 type)
 {
 	
 }
 
-u8 format_cudnc(u8 type)
+void format_cudnc(u8 type)
 {
 	
 }
 
-u8 format_culyd(u8 type)
+void format_culyd(u8 type)
 {
 	
 }
 
-u8 format_cuflc(u8 type)
+void format_cuflc(u8 type)
 {
 	
 }
 
-u8 format_cudmp(u8 type)
+void format_cudmp(u8 type)
 {
 	
 }
 
-u8 format_cumdk(u8 type)
+void format_cumdk(u8 type)
 {
 	
 }
 
-u8 format_cumfc(u8 type)
+void format_cumfc(u8 type)
 {
 	
 }
 
-u8 format_mapdo(u8 type)
+void format_mapdo(u8 type)
 {
 	
 }
 
-u8 format_remap(u8 type)
+void format_remap(u8 type)
 {
 	
 }
