@@ -30,7 +30,7 @@ bool gis_scan = false;
 
 u8 exe_clamup(bool bforce)
 {
-	if((!is_sf_setfoupd()) && (!bforce))
+	if((!is_sf_setfoupd()) && (!bforce) && (!is_sf_clamupd()) && (!is_sf_clamupi()))
 	{
 		return PROC_UNS;
 	}
@@ -49,7 +49,7 @@ u8 exe_clamup(bool bforce)
 
 u8 exe_clamfwd(bool bforce)
 {
-	if((!is_sf_clamupd()) && (!bforce))
+	if((!is_sf_clamupd()) && (!bforce) && (!is_sf_clanfwdd()) && (!is_sf_clanfwdi()))
 	{
 		return PROC_UNS;
 	}
@@ -68,7 +68,7 @@ u8 exe_clamfwd(bool bforce)
 
 u8 exe_clamlck(bool bforce)
 {
-	if((!is_sf_clanfwdd()) && (!bforce))
+	if((!is_sf_clanfwdd()) && (!bforce) && (!is_sf_clamlckd()) && (!is_sf_clamlcki()))
 	{
 		return PROC_UNS;
 	}
@@ -87,7 +87,7 @@ u8 exe_clamlck(bool bforce)
 
 u8 exe_fpdck(bool bforce)
 {
-	if((!is_sf_clamlckd()) && (!bforce))
+	if((!is_sf_clamlckd()) && (!bforce) && (!is_sf_fpdckd()) && (!is_sf_fpdcki()))
 	{
 		return PROC_UNS;
 	}
@@ -106,7 +106,7 @@ u8 exe_fpdck(bool bforce)
 
 u8 exe_dradsp(bool bforce)
 {
-	if((!is_sf_fpdckd()) && (!bforce))
+	if((!is_sf_fpdckd()) && (!bforce) && (!is_sf_dradspd()) && (!is_sf_dradspi()))
 	{
 		return PROC_UNS;
 	}
@@ -125,7 +125,7 @@ u8 exe_dradsp(bool bforce)
 
 u8 exe_drunlt(bool bforce)
 {
-	if((!is_sf_dradspd()) && (!bforce))
+	if((!is_sf_dradspd()) && (!bforce) && (!is_sf_drunltd()) && (!is_sf_drunlti()))
 	{
 		return PROC_UNS;
 	}
@@ -144,7 +144,7 @@ u8 exe_drunlt(bool bforce)
 
 u8 exe_drop(bool bforce)
 {
-	if((!is_sf_drunltd()) && (!bforce))
+	if((!is_sf_drunltd()) && (!bforce) && (!is_sf_dropd()) && (!is_sf_dropi()))
 	{
 		return PROC_UNS;
 	}
@@ -163,7 +163,7 @@ u8 exe_drop(bool bforce)
 
 u8 exe_drdwns(bool bforce)
 {
-	if((!is_sf_dropd()) && (!bforce))
+	if((!is_sf_dropd()) && (!bforce) && (!is_sf_drdwnsd()) && (!is_sf_drdwnsi()))
 	{
 		return PROC_UNS;
 	}
@@ -181,7 +181,7 @@ u8 exe_drdwns(bool bforce)
 
 u8 exe_mpaop(bool bforce)
 {
-	if((!is_sf_drdwnsd()) && (!bforce))
+	if((!is_sf_drdwnsd()) && (!bforce) && (!is_sf_mpaopd()) && (!is_sf_mpaopi()))
 	{
 		return PROC_UNS;
 	}
@@ -200,7 +200,7 @@ u8 exe_mpaop(bool bforce)
 
 u8 exe_stpon(bool bforce)
 {
-	if((!is_sf_mpaopd()) && (!bforce))
+	if((!is_sf_mpaopd()) && (!bforce) && (!is_sf_stpond()) && (!is_sf_stponi()))
 	{
 		return PROC_UNS;
 	}
@@ -219,7 +219,7 @@ u8 exe_stpon(bool bforce)
 
 u8 exe_drdwne(bool bforce)
 {
-	if((!is_sf_stpond()) && (!bforce))
+	if((!is_sf_stpond()) && (!bforce) && (!is_sf_drdwned()) && (!is_sf_drdwnei()))
 	{
 		return PROC_UNS;
 	}
@@ -237,7 +237,7 @@ u8 exe_drdwne(bool bforce)
 
 u8 exe_mpac(bool bforce)
 {
-	if((!is_sf_drdwned()) && (!bforce))
+	if((!is_sf_drdwned()) && (!bforce) && (!is_sf_mpacd()) && (!is_sf_mpaci()))
 	{
 		return PROC_UNS;
 	}
@@ -256,7 +256,7 @@ u8 exe_mpac(bool bforce)
 
 u8 exe_stpoff(bool bforce)
 {
-	if((!is_sf_mpacd()) && (!bforce))
+	if((!is_sf_mpacd()) && (!bforce) && (!is_sf_stpoffd()) && (!is_sf_stpoffi()))
 	{
 		return PROC_UNS;
 	}
@@ -275,7 +275,7 @@ u8 exe_stpoff(bool bforce)
 
 u8 exe_drdwnl(bool bforce)
 {
-	if((!is_sf_stpoffd()) && (!bforce))
+	if((!is_sf_stpoffd()) && (!bforce) && (!is_sf_drdwnld()) && (!is_sf_drdwnli()))
 	{
 		return PROC_UNS;
 	}
@@ -293,7 +293,7 @@ u8 exe_drdwnl(bool bforce)
 
 u8 exe_drupl(bool bforce)
 {
-	if((!is_sf_drdwnld()) && (!bforce))
+	if((!is_sf_drdwnld()) && (!bforce) && (!is_sf_drupld()) && (!is_sf_drupli()))
 	{
 		return PROC_UNS;
 	}
@@ -311,7 +311,7 @@ u8 exe_drupl(bool bforce)
 
 u8 exe_drcls(bool bforce)
 {
-	if((!is_sf_drupld()) && (!bforce))
+	if((!is_sf_drupld()) && (!bforce) && (!is_sf_drclsd()) && (!is_sf_drclsi()))
 	{
 		return PROC_UNS;
 	}
@@ -330,7 +330,7 @@ u8 exe_drcls(bool bforce)
 
 u8 exe_drlt(bool bforce)
 {
-	if((!is_sf_drclsd()) && (!bforce))
+	if((!is_sf_drclsd()) && (!bforce) && (!is_sf_drltd()) && (!is_sf_drlti()))
 	{
 		return PROC_UNS;
 	}
@@ -349,7 +349,7 @@ u8 exe_drlt(bool bforce)
 
 u8 exe_dradsr(bool bforce)
 {
-	if((!is_sf_drltd()) && (!bforce))
+	if((!is_sf_drltd()) && (!bforce) && (!is_sf_drclsd()) && (!is_sf_drclsi()))
 	{
 		return PROC_UNS;
 	}
@@ -368,7 +368,7 @@ u8 exe_dradsr(bool bforce)
 
 u8 exe_fpundk(bool bforce)
 {
-	if((!is_sf_dradsrd()) && (!bforce))
+	if((!is_sf_dradsrd()) && (!bforce) && (!is_sf_fpundkd()) && (!is_sf_fpundki()))
 	{
 		return PROC_UNS;
 	}
@@ -387,7 +387,7 @@ u8 exe_fpundk(bool bforce)
 
 u8 exe_clamulk(bool bforce)
 {
-	if((!is_sf_fpundkd()) && (!bforce))
+	if((!is_sf_fpundkd()) && (!bforce) && (!is_sf_clamulkd()) && (!is_sf_clamulki()))
 	{
 		return PROC_UNS;
 	}
@@ -406,7 +406,7 @@ u8 exe_clamulk(bool bforce)
 
 u8 exe_clambwd(bool bforce)
 {
-	if((!is_sf_clamulkd()) && (!bforce))
+	if((!is_sf_clamulkd()) && (!bforce) && (!is_sf_clambwdd()) && (!is_sf_clambwdi()))
 	{
 		return PROC_UNS;
 	}
@@ -425,7 +425,7 @@ u8 exe_clambwd(bool bforce)
 
 u8 exe_clamdwn(bool bforce)
 {
-	if((!is_sf_clambwdd()) && (!bforce))
+	if((!is_sf_clambwdd()) && (!bforce) && (!is_sf_clamdwnd()) && (!is_sf_clamdwni()))
 	{
 		return PROC_UNS;
 	}

@@ -17,78 +17,78 @@ u8 gAction_sta = 0;
 
 bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
 {
-	u8 msg[100];
-	u8 mlen = 0;
-	u8 sum = 0;
-	u8 i;
-	u8 s_len;
-	OS_ERR err;
-	
-	msg[mlen] = 0x01;
-	mlen++;
-	msg[mlen] = pLen + 14;
-	mlen++;
-	msg[mlen] = 0x00;
-	mlen++;
-	msg[mlen] = gAddr[0];
-	mlen++;
-	msg[mlen] = gAddr[1];
-	mlen++;
-	if((type & 0x0F) == 0x0)
-	{
-		msg[mlen] = 'A';
-		mlen++;
-		msg[mlen] = 'C';
-		mlen++;
-		msg[mlen] = 'K';
-		mlen++;
-	}
-	if((type & 0x0F) == 0x1)
-	{
-		msg[mlen] = 'N';
-		mlen++;
-		msg[mlen] = 'A';
-		mlen++;
-		msg[mlen] = 'K';
-		mlen++;
-	}
-	msg[mlen] = ':';
-	mlen++;
-	memcpy(msg+mlen, cmd_n, 5);
-	mlen += 5;
-	memcpy(msg+mlen, param, pLen);
-	mlen += pLen;
-	msg[mlen] = ';';
-	mlen++;
-	for(i=0;i<mlen;i++)
-	{
-		sum += msg[i];
-	}
-	sprintf((char*)(msg + mlen), "%2X", sum);
-	mlen += 2;
-	msg[mlen] = 0x03;
-	mlen++;
-	if((type & 0xF0) == 0x00)
-	{
-		s_len = ONLINE_Write(msg, mlen);
-		while(s_len !=  mlen)
-		{
-			mlen = mlen - s_len;
-			s_len = ONLINE_Write(msg, mlen);
-			OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
-		}
-	}
-	if((type & 0xF0) == 0x10)
-	{
-		s_len = CMD_Write(msg, mlen);
-		while(s_len !=  mlen)
-		{
-			mlen = mlen - s_len;
-			s_len = CMD_Write(msg, mlen);
-			OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
-		}
-	}
-	return true;
+    u8 msg[100];
+    u8 mlen = 0;
+    u8 sum = 0;
+    u8 i;
+    u8 s_len;
+    OS_ERR err;
+
+    msg[mlen] = 0x01;
+    mlen++;
+    msg[mlen] = pLen + 14;
+    mlen++;
+    msg[mlen] = 0x00;
+    mlen++;
+    msg[mlen] = gAddr[0];
+    mlen++;
+    msg[mlen] = gAddr[1];
+    mlen++;
+    if((type & 0x0F) == 0x0)
+    {
+        msg[mlen] = 'A';
+        mlen++;
+        msg[mlen] = 'C';
+        mlen++;
+        msg[mlen] = 'K';
+        mlen++;
+    }
+    if((type & 0x0F) == 0x1)
+    {
+        msg[mlen] = 'N';
+        mlen++;
+        msg[mlen] = 'A';
+        mlen++;
+        msg[mlen] = 'K';
+        mlen++;
+    }
+    msg[mlen] = ':';
+    mlen++;
+    memcpy(msg+mlen, cmd_n, 5);
+    mlen += 5;
+    memcpy(msg+mlen, param, pLen);
+    mlen += pLen;
+    msg[mlen] = ';';
+    mlen++;
+    for(i=0; i<mlen; i++)
+    {
+        sum += msg[i];
+    }
+    sprintf((char*)(msg + mlen), "%2X", sum);
+    mlen += 2;
+    msg[mlen] = 0x03;
+    mlen++;
+    if((type & 0xF0) == 0x00)
+    {
+        s_len = ONLINE_Write(msg, mlen);
+        while(s_len !=  mlen)
+        {
+            mlen = mlen - s_len;
+            s_len = ONLINE_Write(msg, mlen);
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+    }
+    if((type & 0xF0) == 0x10)
+    {
+        s_len = CMD_Write(msg, mlen);
+        while(s_len !=  mlen)
+        {
+            mlen = mlen - s_len;
+            s_len = CMD_Write(msg, mlen);
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+    }
+    return true;
 }
 
 bool check_sum(u8* msg)
@@ -114,506 +114,506 @@ bool check_sum(u8* msg)
 
 bool check_fornat(u8* msg)
 {
-	u16 len;
-	len = *(msg + 1);
-	len = (len << 8) + *(msg + 2);
-	if((msg[0] == 0x01) && (msg[len+3] == 0x03) && (msg[3] == gAddr[0]) && (msg[4] == gAddr[1]))
-	{
-		return true;
-	}
-	return false;
+    u16 len;
+    len = *(msg + 1);
+    len = (len << 8) + *(msg + 2);
+    if((msg[0] == 0x01) && (msg[len+3] == 0x03) && (msg[3] == gAddr[0]) && (msg[4] == gAddr[1]))
+    {
+        return true;
+    }
+    return false;
 }
 
 bool format_state(u8* param)
 {
-	param[0] = '/';
-	param[1] = gEqu_sta + 0x30;
-	param[2] = '0';
-	param[3] = gInit_pos + 0x30;
-	param[4] = gOpe_sta + 0x30;
-	param[5] = (gErr_code >> 4) + 0x30;
-	param[6] = (gErr_code & 0x0F) + 0x30;
-	param[7] = '0';
-	param[8] = clam_sta();
-	param[9] = latch_sta();
-	param[10] = vac_sta();
-	param[11] = dr_pos();
-	param[12] = is_obstacle();
-	param[13] = Z_pos();
-	param[14] = Y_pos();
-	param[15] = map_apos();
-	param[16] = ;
-	param[17] = map_stp();
-	param[18] = ;
-	param[19] = ;
-	param[20] = ;
-	return true;
+    param[0] = '/';
+    param[1] = gEqu_sta + 0x30;
+    param[2] = '0';
+    param[3] = gInit_pos + 0x30;
+    param[4] = gOpe_sta + 0x30;
+    param[5] = (gErr_code >> 4) + 0x30;
+    param[6] = (gErr_code & 0x0F) + 0x30;
+    param[7] = '0';
+    param[8] = clam_sta();
+    param[9] = latch_sta();
+    param[10] = vac_sta();
+    param[11] = dr_pos();
+    param[12] = is_obstacle();
+    param[13] = Z_pos();
+    param[14] = Y_pos();
+    param[15] = map_apos();
+    param[16] = ;
+    param[17] = map_stp();
+    param[18] = ;
+    param[19] = ;
+    param[20] = ;
+    return true;
 }
 
 bool format_ledst(u8* param)
 {
-	u8 cnt;
-	param[0] = '/';
-	for(cnt=0;cnt<9;cnt++)
-	{
-		if((gLED_status[cnt] & 0xF0) == 0x10)
-		{
-			switch (gLED_status[7] & 0x03)
-			{
-				case 1:
-					param[cnt+1] = '0';
-					break;
-				case 2:
-					param[cnt+1] = '2';
-					break;
-				case 3:
-					param[cnt+1] = '1';
-					break;
-			}
-		}
-		else
-		{
-			switch (gLED_status[7] & 0x0C)
-			{
-				case 1:
-					param[cnt+1] = '0';
-					break;
-				case 2:
-					param[cnt+1] = '2';
-					break;
-				case 3:
-					param[cnt+1] = '1';
-					break;
-			}			
-		}
-	}
-	return true;
+    u8 cnt;
+    param[0] = '/';
+    for(cnt=0; cnt<9; cnt++)
+    {
+        if((gLED_status[cnt] & 0xF0) == 0x10)
+        {
+            switch (gLED_status[7] & 0x03)
+            {
+            case 1:
+                param[cnt+1] = '0';
+                break;
+            case 2:
+                param[cnt+1] = '2';
+                break;
+            case 3:
+                param[cnt+1] = '1';
+                break;
+            }
+        }
+        else
+        {
+            switch (gLED_status[7] & 0x0C)
+            {
+            case 1:
+                param[cnt+1] = '0';
+                break;
+            case 2:
+                param[cnt+1] = '2';
+                break;
+            case 3:
+                param[cnt+1] = '1';
+                break;
+            }
+        }
+    }
+    return true;
 }
 
 bool format_mapdt(u8* param)
 {
-	u8 result[25];
-	u8 i;
-	param[0] = '/';
-	if(Analyze_Scan(result) == true)
-	{
-		for(i=0;i<25;i++)
-		{
-			switch (result[i])
-			{
-				case 0:
-					param[i+1] = '0';
-					break;
-				case 1:
-					param[i+1] = '1';
-					break;
-				case 2:
-					param[i+1] = 'W';
-					break;
-				case 3:
-					param[i+1] = '2';
-					break;
-			}
-		}
-		return true;
-	}
-	else
-	{
-		memset(param+1,'0',25);
-		return false;
-	}
+    u8 result[25];
+    u8 i;
+    param[0] = '/';
+    if(Analyze_Scan(result) == true)
+    {
+        for(i=0; i<25; i++)
+        {
+            switch (result[i])
+            {
+            case 0:
+                param[i+1] = '0';
+                break;
+            case 1:
+                param[i+1] = '1';
+                break;
+            case 2:
+                param[i+1] = 'W';
+                break;
+            case 3:
+                param[i+1] = '2';
+                break;
+            }
+        }
+        return true;
+    }
+    else
+    {
+        memset(param+1,'0',25);
+        return false;
+    }
 }
 
 bool format_maprd(u8* param)
 {
-	u8 result[25];
-	u8 i;
-	param[0] = '/';
-	if(Analyze_Scan(result) == true)
-	{
-		for(i=0;i<25;i++)
-		{
-			switch (result[i])
-			{
-				case 0:
-					param[26-i] = '0';
-					break;
-				case 1:
-					param[26-i] = '1';
-					break;
-				case 2:
-					param[26-i] = 'W';
-					break;
-				case 3:
-					param[26-i] = '2';
-					break;
-			}
-		}
-		return true;
-	}
-	else
-	{
-		memset(param+1,'0',25);
-		return false;
-	}
+    u8 result[25];
+    u8 i;
+    param[0] = '/';
+    if(Analyze_Scan(result) == true)
+    {
+        for(i=0; i<25; i++)
+        {
+            switch (result[i])
+            {
+            case 0:
+                param[26-i] = '0';
+                break;
+            case 1:
+                param[26-i] = '1';
+                break;
+            case 2:
+                param[26-i] = 'W';
+                break;
+            case 3:
+                param[26-i] = '2';
+                break;
+            }
+        }
+        return true;
+    }
+    else
+    {
+        memset(param+1,'0',25);
+        return false;
+    }
 }
 
 bool format_wfcnt(u8* param)
 {
-	u8 result[25];
-	u8 i;
-	u8 cnt = 0;
-	param[0] = '/';
-	if(Analyze_Scan(result) == true)
-	{
-		for(i=0;i<25;i++)
-		{
-			switch (result[i])
-			{
-				case 0:
-					break;
-				case 1:
-					cnt += 2;
-					break;
-				case 2:
-					cnt += 4; 
-					break;
-				case 3:
-					cnt += 1;
-					break;
-			}
-		}
-		cnt = cnt >> 1;
-		sprintf((char*)param+1, "%2d", cnt);
-		return true;
-	}
-	else
-	{
-		param[1] = '?';
-		param[2] = '?';
-		return true;
-	}	
+    u8 result[25];
+    u8 i;
+    u8 cnt = 0;
+    param[0] = '/';
+    if(Analyze_Scan(result) == true)
+    {
+        for(i=0; i<25; i++)
+        {
+            switch (result[i])
+            {
+            case 0:
+                break;
+            case 1:
+                cnt += 2;
+                break;
+            case 2:
+                cnt += 4;
+                break;
+            case 3:
+                cnt += 1;
+                break;
+            }
+        }
+        cnt = cnt >> 1;
+        sprintf((char*)param+1, "%2d", cnt);
+        return true;
+    }
+    else
+    {
+        param[1] = '?';
+        param[2] = '?';
+        return true;
+    }
 }
 // type 0 normal 0x80 force
 void format_podop(u8 type)
 {
-	gAction_seq[gAction_num++] = 20 + type;
-	gAction_seq[gAction_num++] = 21 + type;
-	gAction_seq[gAction_num++] = 22 + type;
+    gAction_seq[gAction_num++] = 20 + type;
+    gAction_seq[gAction_num++] = 21 + type;
+    gAction_seq[gAction_num++] = 22 + type;
 }
 
 void format_podcl(u8 type)
 {
-	gAction_seq[gAction_num++] = 1 + type;
-	gAction_seq[gAction_num++] = 2 + type;
-	gAction_seq[gAction_num++] = 3 + type;	
+    gAction_seq[gAction_num++] = 1 + type;
+    gAction_seq[gAction_num++] = 2 + type;
+    gAction_seq[gAction_num++] = 3 + type;
 }
 
 void format_vacon(u8 type)
 {
-	gAction_seq[gAction_num++] = 5 + type;
+    gAction_seq[gAction_num++] = 5 + type;
 }
 
 void format_vacof(u8 type)
 {
-	gAction_seq[gAction_num++] = 18 + type;
+    gAction_seq[gAction_num++] = 18 + type;
 }
 
 void format_dorop(u8 type)
 {
-	gAction_seq[gAction_num++] = 6 + type;
+    gAction_seq[gAction_num++] = 6 + type;
 }
 
 void format_dorcl(u8 type)
 {
-	gAction_seq[gAction_num++] = 17 + type;
+    gAction_seq[gAction_num++] = 17 + type;
 }
 
 void format_mapop(u8 type)
 {
-	gAction_seq[gAction_num++] = 9 + type;
+    gAction_seq[gAction_num++] = 9 + type;
 }
 
 void format_mapcl(u8 type)
 {
-	gAction_seq[gAction_num++] = 12 + type;
+    gAction_seq[gAction_num++] = 12 + type;
 }
 
 void format_zdrup(u8 type)
 {
-	gAction_seq[gAction_num++] = 15 + type;
+    gAction_seq[gAction_num++] = 15 + type;
 }
 
 void format_zdrdw(u8 type)
 {
-	gAction_seq[gAction_num++] = 14 + type;
+    gAction_seq[gAction_num++] = 14 + type;
 }
 
 void format_zdrmp(u8 type)
 {
-	gAction_seq[gAction_num++] = 11 + type;
+    gAction_seq[gAction_num++] = 11 + type;
 }
 
 void format_zmpst(u8 type)
 {
-	gAction_seq[gAction_num++] = 8 + type;
+    gAction_seq[gAction_num++] = 8 + type;
 }
 
 void format_zmped(u8 type)
 {
-	gAction_seq[gAction_num++] = 15 + type;	
+    gAction_seq[gAction_num++] = 15 + type;
 }
 
 void format_mston(u8 type)
 {
-	gAction_seq[gAction_num++] = 10 + type;
+    gAction_seq[gAction_num++] = 10 + type;
 }
 
 void format_mstof(u8 type)
 {
-	gAction_seq[gAction_num++] = 13 + type;
+    gAction_seq[gAction_num++] = 13 + type;
 }
 
 void format_ywait(u8 type)
 {
-	gAction_seq[gAction_num++] = 19 + type;	
+    gAction_seq[gAction_num++] = 19 + type;
 }
 
 void format_ydoor(u8 type)
 {
-	gAction_seq[gAction_num++] = 4 + type;
+    gAction_seq[gAction_num++] = 4 + type;
 }
 
 void format_dorbk(u8 type)
 {
-	gAction_seq[gAction_num++] = 7 + type;
+    gAction_seq[gAction_num++] = 7 + type;
 }
 
 void format_dorfw(u8 type)
 {
-	gAction_seq[gAction_num++] = 16 + type;
+    gAction_seq[gAction_num++] = 16 + type;
 }
 
 void format_orgsh(u8 type)
 {
-	format_mapcl();
-	format_zmped();
-	format_mstof();
-	format_dorbk();
-	format_zdrup();
-	format_dorfw();
-	format_dorcl();
-	format_vacof();
-	format_ywait();
-	format_podop();
+    format_mapcl(type);
+    format_zmped(type);
+    format_mstof(type);
+    format_dorbk(type);
+    format_zdrup(type);
+    format_dorfw(type);
+    format_dorcl(type);
+    format_vacof(type);
+    format_ywait(type);
+    format_podop(type);
 }
 
 void format_aborg(u8 type)
 {
-        format_mapcl();
-        format_zmped();
-        format_mstof();
-        format_dorbk();
-        format_zdrup();
-        format_dorfw();
-        format_dorcl();
-        format_vacof();
-        format_ywait();
-        format_podop();	
+    format_mapcl(type);
+    format_zmped(type);
+    format_mstof(type);
+    format_dorbk(type);
+    format_zdrup(type);
+    format_dorfw(type);
+    format_dorcl(type);
+    format_vacof(type);
+    format_ywait(type);
+    format_podop(type);
 }
 
 void format_cload(u8 type)
 {
-	format_podcl();
-	format_ydoor();
-	format_vacon();
-	format_dorop();
-	format_dorbk();
-	format_zdrmp();
-	format_zdrdw();
+    format_podcl(type);
+    format_ydoor(type);
+    format_vacon(type);
+    format_dorop(type);
+    format_dorbk(type);
+    format_zdrmp(type);
+    format_zdrdw(type);
 }
 
 void format_clddk(u8 type)
 {
-	format_podcl();
-	format_ydoor();
-	format_vacon();
-	format_dorop();
+    format_podcl(type);
+    format_ydoor(type);
+    format_vacon(type);
+    format_dorop(type);
 }
 
 void format_cldyd(u8 type)
 {
-	format_podcl();
-	format_ydoor();
+    format_podcl(type);
+    format_ydoor(type);
 }
 
 void format_cldop(u8 type)
 {
-	format_dorbk();
-	format_zdrdw();
+    format_dorbk(type);
+    format_zdrdw(type);
 }
 
 void format_cldmp(u8 type)
 {
-	format_podcl();
-	format_ydoor();
-	format_vacon();
-	format_dorop();
-	format_dorbk();
-	format_zmpst();
-	format_mapop();
-	format_mston();
-	format_zdrmp();
-	format_mapcl();
-	format_mstof();
-	format_zdrdw();	
+    format_podcl(type);
+    format_ydoor(type);
+    format_vacon(type);
+    format_dorop(type);
+    format_dorbk(type);
+    format_zmpst(type);
+    format_mapop(type);
+    format_mston(type);
+    format_zdrmp(type);
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrdw(type);
 }
 
 void format_clmpo(u8 type)
 {
-	format_dorbk();
-	format_zmpst();
-	format_mapop();
-	format_mston();
-	format_zdrmp();
-	format_mapcl();
-	format_mstof();
-	format_zdrdw();	
+    format_dorbk(type);
+    format_zmpst(type);
+    format_mapop(type);
+    format_mston(type);
+    format_zdrmp(type);
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrdw(type);
 }
 
 void format_culod(u8 type)
 {
-        format_mapcl();
-        format_mstof();
-        format_zdrup();
-        format_zmped();
-        format_dorfw();
-        format_dorcl();
-        format_vacof();
-        format_ywait();
-        format_podop();	
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrup(type);
+    format_zmped(type);
+    format_dorfw(type);
+    format_dorcl(type);
+    format_vacof(type);
+    format_ywait(type);
+    format_podop(type);
 }
 
 void format_culdk(u8 type)
 {
-        format_mapcl();
-        format_mstof();
-        format_zdrup();
-        format_zmped();
-        format_dorfw();
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrup(type);
+    format_zmped(type);
+    format_dorfw(type);
 }
 
 void format_cudcl(u8 type)
 {
-        format_dorcl();
-        format_vacof();
-        format_ywait();
+    format_dorcl(type);
+    format_vacof(type);
+    format_ywait(type);
 }
 
 void format_cudnc(u8 type)
 {
-        format_dorcl();
-        format_vacof();
-        format_ywait();
-        format_podop();	
+    format_dorcl(type);
+    format_vacof(type);
+    format_ywait(type);
+    format_podop(type);
 }
 
 void format_culyd(u8 type)
 {
-        format_mapcl();
-        format_mstof();
-        format_zdrup();
-        format_zmped();
-        format_dorfw();
-        format_dorcl();
-        format_vacof();
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrup(type);
+    format_zmped(type);
+    format_dorfw(type);
+    format_dorcl(type);
+    format_vacof(type);
 }
 
 void format_cuflc(u8 type)
 {
-        format_mapcl();
-        format_mstof();
-        format_zdrup();
-        format_zmped();
-        format_dorfw();
-        format_dorcl();
-        format_vacof();
-        format_ywait();
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrup(type);
+    format_zmped(type);
+    format_dorfw(type);
+    format_dorcl(type);
+    format_vacof(type);
+    format_ywait(type);
 }
 
 void format_cudmp(u8 type)
 {
-	format_zdrup();
-	format_zmpst(); 
-	format_mapop(); 
-	format_mston(); 
-	format_zdrmp(); 
-	format_mapcl(); 
-	format_mstof(); 
-	format_zdrup(); 
-	format_zmped(); 
-	format_dorfw(); 
-	format_dorcl(); 
-	format_vacof(); 
-	format_ywait(); 
-	format_podop(); 
+    format_zdrup(type);
+    format_zmpst(type);
+    format_mapop(type);
+    format_mston(type);
+    format_zdrmp(type);
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrup(type);
+    format_zmped(type);
+    format_dorfw(type);
+    format_dorcl(type);
+    format_vacof(type);
+    format_ywait(type);
+    format_podop(type);
 }
 
 void format_cumdk(u8 type)
 {
-        format_zdrup();
-        format_zmpst();
-        format_mapop();
-        format_mston();
-        format_zdrmp();
-        format_mapcl();
-        format_mstof();
-        format_zdrup();
-        format_zmped();
-        format_dorfw();
+    format_zdrup(type);
+    format_zmpst(type);
+    format_mapop(type);
+    format_mston(type);
+    format_zdrmp(type);
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrup(type);
+    format_zmped(type);
+    format_dorfw(type);
 }
 
 void format_cumfc(u8 type)
 {
-        format_zdrup();
-        format_zmpst();
-        format_mapop();
-        format_mston();
-        format_zdrmp();
-        format_mapcl();
-        format_mstof();
-        format_zdrup();
-        format_zmped();
-        format_dorfw();
-        format_dorcl();
-        format_vacof();
-        format_ywait();
+    format_zdrup(type);
+    format_zmpst(type);
+    format_mapop(type);
+    format_mston(type);
+    format_zdrmp(type);
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrup(type);
+    format_zmped(type);
+    format_dorfw(type);
+    format_dorcl(type);
+    format_vacof(type);
+    format_ywait(type);
 }
 
 void format_mapdo(u8 type)
 {
-        format_zdrup();
-        format_dorbk();
-        format_zmpst();
-        format_mapop();
-        format_mston();
-        format_zdrmp();
-        format_mapcl();
-        format_mstof();
-        format_zdrdw();	
+    format_zdrup(type);
+    format_dorbk(type);
+    format_zmpst(type);
+    format_mapop(type);
+    format_mston(type);
+    format_zdrmp(type);
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrdw(type);
 }
 
 void format_remap(u8 type)
 {
-        format_zdrup();
-        format_dorbk();
-        format_zmpst();
-        format_mapop();
-        format_mston();
-        format_zdrmp();
-        format_mapcl();
-        format_mstof();
-        format_zdrdw();	
+    format_zdrup(type);
+    format_dorbk(type);
+    format_zmpst(type);
+    format_mapop(type);
+    format_mston(type);
+    format_zdrmp(type);
+    format_mapcl(type);
+    format_mstof(type);
+    format_zdrdw(type);
 }
 
 bool proc_set(u8* cmd_name)
@@ -626,87 +626,87 @@ bool proc_set(u8* cmd_name)
     }
     if((memcmp(cmd_name, "LPLOD", 5) == 0) || (memcmp(cmd_name, "LON01", 5) == 0))
     {
-			gLED_status[0] = 0x11;
+        gLED_status[0] = 0x11;
     }
     if((memcmp(cmd_name, "BLLOD", 5) == 0) || (memcmp(cmd_name, "LBL01", 5) == 0))
     {
-			gLED_status[0] = 0x12;
+        gLED_status[0] = 0x12;
     }
     if((memcmp(cmd_name, "LOLOD", 5) == 0) || (memcmp(cmd_name, "LOF01", 5) == 0))
     {
-			gLED_status[0] = 0x13;
+        gLED_status[0] = 0x13;
     }
     if((memcmp(cmd_name, "LPULD", 5) == 0) || (memcmp(cmd_name, "LON02", 5) == 0))
     {
-			gLED_status[1] = 0x11;
+        gLED_status[1] = 0x11;
     }
     if((memcmp(cmd_name, "BLULD", 5) == 0) || (memcmp(cmd_name, "LBL02", 5) == 0))
     {
-			gLED_status[1] = 0x12;
+        gLED_status[1] = 0x12;
     }
     if((memcmp(cmd_name, "LOULD", 5) == 0) || (memcmp(cmd_name, "LOF02", 5) == 0))
     {
-			gLED_status[1] = 0x13;
+        gLED_status[1] = 0x13;
     }
     if((memcmp(cmd_name, "LPMSW", 5) == 0) || (memcmp(cmd_name, "LON03", 5) == 0))
     {
-			gLED_status[2] = 0x11;
+        gLED_status[2] = 0x11;
     }
     if((memcmp(cmd_name, "BLMSW", 5) == 0) || (memcmp(cmd_name, "LBL03", 5) == 0))
     {
-			gLED_status[2] = 0x12;
+        gLED_status[2] = 0x12;
     }
     if((memcmp(cmd_name, "LOMSW", 5) == 0) || (memcmp(cmd_name, "LOF03", 5) == 0))
     {
-			gLED_status[2] = 0x13;
+        gLED_status[2] = 0x13;
     }
     if((memcmp(cmd_name, "LPCON", 5) == 0) || (memcmp(cmd_name, "LON04", 5) == 0))
     {
-			gLED_status[3] = 0x11;
+        gLED_status[3] = 0x11;
     }
     if((memcmp(cmd_name, "BLCON", 5) == 0) || (memcmp(cmd_name, "LBL04", 5) == 0))
     {
-			gLED_status[3] = 0x12;
+        gLED_status[3] = 0x12;
     }
     if((memcmp(cmd_name, "LOCON", 5) == 0) || (memcmp(cmd_name, "LOF04", 5) == 0))
     {
-			gLED_status[3] = 0x13;
+        gLED_status[3] = 0x13;
     }
     if((memcmp(cmd_name, "LPCST", 5) == 0) || (memcmp(cmd_name, "LON05", 5) == 0))
     {
-			gLED_status[4] = 0x11;
+        gLED_status[4] = 0x11;
     }
     if((memcmp(cmd_name, "BLCST", 5) == 0) || (memcmp(cmd_name, "LBL05", 5) == 0))
     {
-			gLED_status[4] = 0x12;
+        gLED_status[4] = 0x12;
     }
     if((memcmp(cmd_name, "LOCST", 5) == 0) || (memcmp(cmd_name, "LOF05", 5) == 0))
     {
-			gLED_status[4] = 0x13;
+        gLED_status[4] = 0x13;
     }
     if(memcmp(cmd_name, "LON07", 5) == 0)
     {
-			gLED_status[6] = 0x11;
+        gLED_status[6] = 0x11;
     }
     if(memcmp(cmd_name, "LBL07", 5) == 0)
     {
-			gLED_status[6] = 0x12;
+        gLED_status[6] = 0x12;
     }
     if(memcmp(cmd_name, "LOF07", 5) == 0)
     {
-			gLED_status[6] = 0x13;
+        gLED_status[6] = 0x13;
     }
     if(memcmp(cmd_name, "LON08", 5) == 0)
     {
-			gLED_status[7] = 0x11;
+        gLED_status[7] = 0x11;
     }
     if(memcmp(cmd_name, "LBL08", 5) == 0)
     {
-			gLED_status[7] = 0x12;
+        gLED_status[7] = 0x12;
     }
     if(memcmp(cmd_name, "LOF08", 5) == 0)
     {
-			gLED_status[7] = 0x13;
+        gLED_status[7] = 0x13;
     }
 }
 
@@ -714,11 +714,11 @@ bool proc_mod(u8* cmd_name)
 {
     if(memcmp(cmd_name, "ONMGV", 5) == 0)
     {
-			gCom_mod = 0;
+        gCom_mod = 0;
     }
     if(memcmp(cmd_name, "MENTE", 5) == 0)
     {
-			gCom_mod = 1;
+        gCom_mod = 1;
     }
 }
 
@@ -726,37 +726,37 @@ bool proc_get(u8* cmd_name)
 {
     if(memcmp(cmd_name, "STATE", 5) == 0)
     {
-			u8 param[21];
-			format_state(param);
-			send_msg(0x00, "VERSN", param, 21);
+        u8 param[21];
+        format_state(param);
+        send_msg(0x00, "VERSN", param, 21);
     }
     if(memcmp(cmd_name, "VERSN", 5) == 0)
     {
-			send_msg(0x00, "STATE", gVersion, 13);
+        send_msg(0x00, "STATE", gVersion, 13);
     }
     if(memcmp(cmd_name, "LEDST", 5) == 0)
     {
-			u8 param[10];
-			format_ledst(param);
-			send_msg(0x00, "VERSN", param, 10);
+        u8 param[10];
+        format_ledst(param);
+        send_msg(0x00, "VERSN", param, 10);
     }
     if(memcmp(cmd_name, "MAPDT", 5) == 0)
     {
-			u8 param[26];
-			format_mapdt(param);
-			send_msg(0x00, "MAPDT", param, 26);
+        u8 param[26];
+        format_mapdt(param);
+        send_msg(0x00, "MAPDT", param, 26);
     }
     if(memcmp(cmd_name, "MAPRD", 5) == 0)
     {
-			u8 param[26];
-			format_maprd(param);
-			send_msg(0x00, "MAPRD", param, 26);
+        u8 param[26];
+        format_maprd(param);
+        send_msg(0x00, "MAPRD", param, 26);
     }
     if(memcmp(cmd_name, "WFCNT", 5) == 0)
     {
-			u8 param[3];
-			format_wfcnt(param);
-			send_msg(0x00, "WFCNT", param, 3);
+        u8 param[3];
+        format_wfcnt(param);
+        send_msg(0x00, "WFCNT", param, 3);
     }
 }
 
@@ -941,9 +941,9 @@ bool proc_cmd(u8* msg)
     memcpy(cmd_n, msg+9, 5);
 
     if(!check_sum(msg))
-    {	    
-	    send_msg(0x01, (char*)cmd_n, (u8*)"/CKSUM", 6);
-	    return false;
+    {
+        send_msg(0x01, (char*)cmd_n, (u8*)"/CKSUM", 6);
+        return false;
     }
 
     if(memcmp(cmd_t, "SET", 3) == 0)
@@ -1028,12 +1028,12 @@ void tCMD_Proc(void *p_arg)
             ONLINE_Read(msg, 1);
             continue;
         }
-	lencmd += 4;
-	if(lencmd > 100)
-	{
-		ONLINE_Read(msg, 1);
-		continue;
-	}
+        lencmd += 4;
+        if(lencmd > 100)
+        {
+            ONLINE_Read(msg, 1);
+            continue;
+        }
         len = ONLINE_RxLen();
         if(lencmd > len)
         {
