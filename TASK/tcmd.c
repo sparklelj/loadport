@@ -361,7 +361,7 @@ void format_zmpst(u8 type)
 
 void format_zmped(u8 type)
 {
-	
+	gAction_seq[gAction_num++] = 15 + type;	
 }
 
 void format_mston(u8 type)
@@ -396,97 +396,224 @@ void format_dorfw(u8 type)
 
 void format_orgsh(u8 type)
 {
-	
+	format_mapcl();
+	format_zmped();
+	format_mstof();
+	format_dorbk();
+	format_zdrup();
+	format_dorfw();
+	format_dorcl();
+	format_vacof();
+	format_ywait();
+	format_podop();
 }
 
 void format_aborg(u8 type)
 {
-	
+        format_mapcl();
+        format_zmped();
+        format_mstof();
+        format_dorbk();
+        format_zdrup();
+        format_dorfw();
+        format_dorcl();
+        format_vacof();
+        format_ywait();
+        format_podop();	
 }
 
 void format_cload(u8 type)
 {
-	
+	format_podcl();
+	format_ydoor();
+	format_vacon();
+	format_dorop();
+	format_dorbk();
+	format_zdrmp();
+	format_zdrdw();
 }
 
 void format_clddk(u8 type)
 {
-	
+	format_podcl();
+	format_ydoor();
+	format_vacon();
+	format_dorop();
 }
 
 void format_cldyd(u8 type)
 {
-	
+	format_podcl();
+	format_ydoor();
 }
 
 void format_cldop(u8 type)
 {
-	
+	format_dorbk();
+	format_zdrdw();
 }
 
 void format_cldmp(u8 type)
 {
-	
+	format_podcl();
+	format_ydoor();
+	format_vacon();
+	format_dorop();
+	format_dorbk();
+	format_zmpst();
+	format_mapop();
+	format_mston();
+	format_zdrmp();
+	format_mapcl();
+	format_mstof();
+	format_zdrdw();	
 }
 
-void format_clmop(u8 type)
+void format_clmpo(u8 type)
 {
-	
+	format_dorbk();
+	format_zmpst();
+	format_mapop();
+	format_mston();
+	format_zdrmp();
+	format_mapcl();
+	format_mstof();
+	format_zdrdw();	
 }
 
 void format_culod(u8 type)
 {
-	
+        format_mapcl();
+        format_mstof();
+        format_zdrup();
+        format_zmped();
+        format_dorfw();
+        format_dorcl();
+        format_vacof();
+        format_ywait();
+        format_podop();	
 }
 
 void format_culdk(u8 type)
 {
-	
+        format_mapcl();
+        format_mstof();
+        format_zdrup();
+        format_zmped();
+        format_dorfw();
 }
 
 void format_cudcl(u8 type)
 {
-	
+        format_dorcl();
+        format_vacof();
+        format_ywait();
 }
 
 void format_cudnc(u8 type)
 {
-	
+        format_dorcl();
+        format_vacof();
+        format_ywait();
+        format_podop();	
 }
 
 void format_culyd(u8 type)
 {
-	
+        format_mapcl();
+        format_mstof();
+        format_zdrup();
+        format_zmped();
+        format_dorfw();
+        format_dorcl();
+        format_vacof();
 }
 
 void format_cuflc(u8 type)
 {
-	
+        format_mapcl();
+        format_mstof();
+        format_zdrup();
+        format_zmped();
+        format_dorfw();
+        format_dorcl();
+        format_vacof();
+        format_ywait();
 }
 
 void format_cudmp(u8 type)
 {
-	
+	format_zdrup();
+	format_zmpst(); 
+	format_mapop(); 
+	format_mston(); 
+	format_zdrmp(); 
+	format_mapcl(); 
+	format_mstof(); 
+	format_zdrup(); 
+	format_zmped(); 
+	format_dorfw(); 
+	format_dorcl(); 
+	format_vacof(); 
+	format_ywait(); 
+	format_podop(); 
 }
 
 void format_cumdk(u8 type)
 {
-	
+        format_zdrup();
+        format_zmpst();
+        format_mapop();
+        format_mston();
+        format_zdrmp();
+        format_mapcl();
+        format_mstof();
+        format_zdrup();
+        format_zmped();
+        format_dorfw();
 }
 
 void format_cumfc(u8 type)
 {
-	
+        format_zdrup();
+        format_zmpst();
+        format_mapop();
+        format_mston();
+        format_zdrmp();
+        format_mapcl();
+        format_mstof();
+        format_zdrup();
+        format_zmped();
+        format_dorfw();
+        format_dorcl();
+        format_vacof();
+        format_ywait();
 }
 
 void format_mapdo(u8 type)
 {
-	
+        format_zdrup();
+        format_dorbk();
+        format_zmpst();
+        format_mapop();
+        format_mston();
+        format_zdrmp();
+        format_mapcl();
+        format_mstof();
+        format_zdrdw();	
 }
 
 void format_remap(u8 type)
 {
-	
+        format_zdrup();
+        format_dorbk();
+        format_zmpst();
+        format_mapop();
+        format_mston();
+        format_zdrmp();
+        format_mapcl();
+        format_mstof();
+        format_zdrdw();	
 }
 
 bool proc_set(u8* cmd_name)
