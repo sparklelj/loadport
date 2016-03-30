@@ -21,7 +21,14 @@
 #define MS_INITING   0x02
 #define MS_PRKEND    0x03
 #define MS_INITED    0x04
-#define MS_SCANNING  0x10
+#define MS_GOINIT    0x05
+#define MS_GOMAPSTR  0x06
+#define MS_MAPSTR    0x07
+#define MS_SCANNING  0x08
+#define MS_SCANED    0x09
+#define MS_GOEND     0x0A
+#define MS_END       0x0B
+#define MS_BAKINIT   0x0C
 
 #define VEL_MAX 	 0xFF
 #define VEL_MIN 	 0xFFF0
