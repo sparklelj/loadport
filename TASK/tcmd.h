@@ -11,6 +11,7 @@
 #define G_CUR_STA_ABO 5
 #define G_CUR_STA_STP 6
 
+#define G_CUR_CMD_NO 0
 
 extern u8 gAddr[2];
 extern u8 gLED_status[8];

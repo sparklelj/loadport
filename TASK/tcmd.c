@@ -10,10 +10,20 @@ u8 gCom_mod = 0;
 u8 gLED_status[8];
 u8 gVersion[13] = {'/','V','E','R',' ','1','.','0','1',' ',' ',' ',' '};
 u8 gCUr_status = G_CUR_STA_UNI; //uninit
+u8 gCur_CMD = G_CUR_CMD_NO;
 
 u8 gAction_seq[32];
 u8 gAction_num = 0;
 u8 gAction_sta = 0;
+
+bool is_error(void)
+{
+
+}
+bool is_run(void)
+{
+
+}
 
 bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
 {
