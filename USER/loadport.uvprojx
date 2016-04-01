@@ -429,16 +429,6 @@
           <GroupName>HARDWARE</GroupName>
           <Files>
             <File>
-              <FileName>input..c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\INPUT\input..c</FilePath>
-            </File>
-            <File>
-              <FileName>output..c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\OUTPUT\output..c</FilePath>
-            </File>
-            <File>
               <FileName>uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\UART\uart.c</FilePath>
@@ -452,6 +442,16 @@
               <FileName>motor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\MOTOR\motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>input.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\INPUT\input.c</FilePath>
+            </File>
+            <File>
+              <FileName>output.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\OUTPUT\output.c</FilePath>
             </File>
           </Files>
         </Group>
