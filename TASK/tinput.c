@@ -689,60 +689,278 @@ bool is_sf_clamdwnd(void)
     }
 }
 
+
+bool is_no_foup(void)
+{
+    if((INPUT_ReadOne(CS_I_15,PH01_15) == 0x00) &&\
+            (INPUT_ReadOne(CS_I_15,PH02_15) == 0x00) && \
+            (INPUT_ReadOne(CS_I_15,PH03_15) == 0x00) && \
+            (INPUT_ReadOne(CS_I_12,ES01_12) == 0x00))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_foup_place(void)
+{
+    if((INPUT_ReadOne(CS_I_15,PH01_15) == 0x01) &&\
+            (INPUT_ReadOne(CS_I_15,PH02_15) == 0x01) && \
+            (INPUT_ReadOne(CS_I_15,PH03_15) == 0x01) && \
+            (INPUT_ReadOne(CS_I_12,ES01_12) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_obstacle(void)
+{
+    if((INPUT_ReadOne(CS_I_12,ES04_12) == 0x01) &&\
+            (INPUT_ReadOne(CS_I_12,ES05_12) == 0x01) && \
+            (INPUT_ReadOne(CS_I_12,ES06_12) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_protrusion(void)
+{
+    if((INPUT_ReadOne(CS_I_12,FS01_12) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_clampup(void)
+{
+    if((INPUT_ReadOne(CS_I_9,CLS01A_9) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_clampdown(void)
+{
+    if((INPUT_ReadOne(CS_I_9,CLS01B_9) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_clamplock(void)
+{
+    if((INPUT_ReadOne(CS_I_9,CLS01C_9) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_clampfwd(void)
+{
+    if((INPUT_ReadOne(CS_I_9,CLS02A_9) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_clampbwd(void)
+{
+    if((INPUT_ReadOne(CS_I_9,CLS02B_9) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_dock(void)
+{
+    if((INPUT_ReadOne(CS_I_9,CLS03A_9) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_undock(void)
+{
+    if((INPUT_ReadOne(CS_I_9,CLS03B_9) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_vacuumon(void)
+{
+    if((INPUT_ReadOne(CS_I_10,VS01_10) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_vacuumoff(void)
+{
+    if((is_vacuumon()))
+    {
+        return false;
+    }
+    return true;
+}
+bool is_latch(void)
+{
+    if((INPUT_ReadOne(CS_I_10,CLS04B_10) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_unlatch(void)
+{
+    if((INPUT_ReadOne(CS_I_10,CLS04A_10) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_dropen(void)
+{
+    if((INPUT_ReadOne(CS_I_10,CLS05A_10) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_drclose(void)
+{
+    if((INPUT_ReadOne(CS_I_10,CLS05B_10) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_druplmt(void)
+{
+}
+bool is_mapstart(void)
+{
+}
+bool is_mapend(void)
+{
+}
+bool is_drdwlmt(void)
+{
+}
+bool is_mapopen(void)
+{
+    if((INPUT_ReadOne(CS_I_11,CLS08A_11) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_mapclose(void)
+{
+    if((INPUT_ReadOne(CS_I_11,CLS08B_11) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_stopperon(void)
+{
+    if((INPUT_ReadOne(CS_I_11,CLS07A_11) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_stopperoff(void)
+{
+    if((INPUT_ReadOne(CS_I_11,CLS07B_11) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_air(void)
+{
+    if((INPUT_ReadOne(CS_I_10,AS01_10) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_error(void)
+{
+}
+bool is_busy(void)
+{
+}
+
+u8 podop_before(void)
+{
+}
+u8 podop_running(void);
+u8 podcl_before(void);
+u8 podcl_running(void);
+u8 vacon_before(void);
+u8 vacon_running(void);
+u8 dorop_before(void);
+u8 dorop_running(void);
+u8 dorcl_before(void);
+u8 dorcl_running(void);
+u8 zdrup_before(void);
+u8 zdrup_running(void);
+u8 zdrmp_before(void);
+u8 zdrmp_running(void);
+u8 zdrdw_before(void);
+u8 zdrdw_running(void);
+u8 ywait_before(void);
+u8 ywait_running(void);
+u8 ydoor_before(void);
+u8 ydoor_running(void);
+u8 dorbk_before(void);
+u8 dorbk_running(void);
+u8 dorfw_before(void);
+u8 dorfw_running(void);
+u8 mapop_before(void);
+u8 mapop_running(void);
+u8 mapcl_before(void);
+u8 mapcl_running(void);
+u8 zmpst_before(void);
+u8 zmpst_running(void);
+u8 zmped_before(void);
+u8 zmped_running(void);
+u8 mston_before(void);
+u8 mston_running(void);
+u8 mstof_before(void);
+u8 mstof_running(void);
+
 u8 clam_sta(void)
 {
-	if((INPUT_ReadOne(CS_I_9, CLS01C_9) == 1) && (INPUT_ReadOne(CS_I_9, CLS02A_9) == 1))
-	{
-		return '1';
-	}
-	if((INPUT_ReadOne(CS_I_9, CLS01B_9) == 1) && (INPUT_ReadOne(CS_I_9, CLS02B_9) == 1))
-	{
-		return '0';
-	}
-	return '?';
+    if((INPUT_ReadOne(CS_I_9, CLS01C_9) == 1) && (INPUT_ReadOne(CS_I_9, CLS02A_9) == 1))
+    {
+        return '1';
+    }
+    if((INPUT_ReadOne(CS_I_9, CLS01B_9) == 1) && (INPUT_ReadOne(CS_I_9, CLS02B_9) == 1))
+    {
+        return '0';
+    }
+    return '?';
 }
 
 u8 latch_sta(void)
 {
-	if(INPUT_ReadOne(CS_I_10, CLS04B_10) == 1)
-	{
-		return '1';
-	}
-	if(INPUT_ReadOne(CS_I_10, CLS04A_10) == 1)
-	{
-		return '0';
-	}	
-	return '?';
+    if(INPUT_ReadOne(CS_I_10, CLS04B_10) == 1)
+    {
+        return '1';
+    }
+    if(INPUT_ReadOne(CS_I_10, CLS04A_10) == 1)
+    {
+        return '0';
+    }
+    return '?';
 }
 
 u8 vac_sta(void)
 {
-	if(INPUT_ReadOne(CS_I_10, VS01_10) == 1)
-	{
-		return '1';
-	}
-	else
-	{
-		return '0';
-	}	
-}
-
-u8 dr_pos(void)
-{
-	if(INPUT_ReadOne(CS_I_10, CLS05B_10) == 1)
-	{
-		return '1';
-	}
-	if(INPUT_ReadOne(CS_I_10, CLS05A_10) == 1)
-	{
-		return '0';
-	}
-	return '?';
-}
-
-u8 is_obstacle(void)
-{
-    if((gStatus_scan[6]&0x70) == 0x70)
+    if(INPUT_ReadOne(CS_I_10, VS01_10) == 1)
     {
         return '1';
     }
@@ -752,56 +970,81 @@ u8 is_obstacle(void)
     }
 }
 
+u8 dr_pos(void)
+{
+    if(INPUT_ReadOne(CS_I_10, CLS05B_10) == 1)
+    {
+        return '1';
+    }
+    if(INPUT_ReadOne(CS_I_10, CLS05A_10) == 1)
+    {
+        return '0';
+    }
+    return '?';
+}
+
+u8 is_block(void)
+{
+    if(is_obstacle())
+    {
+        return '0';
+    }
+    else
+    {
+        return '1';
+    }
+}
+
 u8 Z_pos(void)
 {
-	if(Get_MStatus() == 0x01)
-	{
-		return '0';
-	}
-	if(Get_MStatus() == 0x07)
-	{
-		return '1';
-	}
-	return '?';
+    if(Get_MStatus() == 0x01)
+    {
+        return '0';
+    }
+    if(Get_MStatus() == 0x07)
+    {
+        return '1';
+    }
+    return '?';
 }
 
 u8 Y_pos(void)
 {
-	if(INPUT_ReadOne(CS_I_9, CLS03A_9) == 1)
-	{
-		return '1';
-	}
-	if(INPUT_ReadOne(CS_I_9, CLS03B_9) == 1)
-	{
-		return '0';
-	}	
-	return '?';	
+    if(INPUT_ReadOne(CS_I_9, CLS03A_9) == 1)
+    {
+        return '1';
+    }
+    if(INPUT_ReadOne(CS_I_9, CLS03B_9) == 1)
+    {
+        return '0';
+    }
+    return '?';
 }
 
 u8 map_apos(void)
 {
-	if(INPUT_ReadOne(CS_I_11, CLS08B_11) == 1)
-	{
-		return '1';
-	}
-	if(INPUT_ReadOne(CS_I_11, CLS08A_11) == 1)
-	{
-		return '0';
-	}
-	return '?';
+    if(INPUT_ReadOne(CS_I_11, CLS08B_11) == 1)
+    {
+        return '1';
+    }
+    if(INPUT_ReadOne(CS_I_11, CLS08A_11) == 1)
+    {
+        return '0';
+    }
+    return '?';
 }
 
 u8 map_stp(void)
 {
-	if(INPUT_ReadOne(CS_I_11, CLS07B_11) == 1)
-	{
-		return '1';                     
-	}
-	if(INPUT_ReadOne(CS_I_11, CLS07A_11) == 1)
-	{
-		return '0';                             
-	}
-	return '?';
+    if(INPUT_ReadOne(CS_I_11, CLS07B_11) == 1)
+    {
+        return '1';
+    }
+    if(INPUT_ReadOne(CS_I_11, CLS07A_11) == 1)
+    {
+        return '0';
+    }
+    return '?';
 }
 
 bool is_low(void)

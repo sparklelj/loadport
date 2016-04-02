@@ -148,7 +148,7 @@ bool format_state(u8* param)
     param[9] = latch_sta();
     param[10] = vac_sta();
     param[11] = dr_pos();
-    param[12] = is_obstacle();
+    param[12] = is_block();
     param[13] = Z_pos();
     param[14] = Y_pos();
     param[15] = map_apos();
