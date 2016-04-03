@@ -4,6 +4,7 @@
 #include "includes.h"
 #include "tinput.h"
 #include "output.h"
+#include "tcmd.h"
 
 #define WAFER_THICK 100
 #define WTHICK_MARG 10
@@ -26,6 +27,7 @@
 #define PROC_UNS 4
 
 u8 scan_mode = SCAN_UPP;
+u8 gCur_action = CMD_ACTION_PODOP;
 bool gis_scan = false;
 
 u8 exe_clamup(bool bforce)
@@ -847,7 +849,25 @@ bool Analyze_Scan(u8* result)
     return true;
 }
 
-void start_init(void)
+u8 podop_action(void)
 {
+	
+}
 
+void tExe_Action(void *p_arg)
+{
+	OS_ERR err;
+	CPU_SR_ALLOC();
+	while(1)
+	{
+		gCur_action = gCmd_action;
+		switch (gCur_action)
+		{
+			case CMD_ACTION_NOACT:
+			break;
+			case CMD_ACTION_PODOP:
+				podop_action();
+			break;
+		}
+	}
 }

@@ -705,8 +705,15 @@ bool is_foup_place(void)
 {
     if((INPUT_ReadOne(CS_I_15,PH01_15) == 0x01) &&\
             (INPUT_ReadOne(CS_I_15,PH02_15) == 0x01) && \
-            (INPUT_ReadOne(CS_I_15,PH03_15) == 0x01) && \
-            (INPUT_ReadOne(CS_I_12,ES01_12) == 0x01))
+            (INPUT_ReadOne(CS_I_15,PH03_15) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+bool is_foup_presence(void)
+{
+    if(INPUT_ReadOne(CS_I_12,ES01_12) == 0x01)
     {
         return true;
     }
@@ -714,8 +721,8 @@ bool is_foup_place(void)
 }
 bool is_obstacle(void)
 {
-    if((INPUT_ReadOne(CS_I_12,ES04_12) == 0x01) &&\
-            (INPUT_ReadOne(CS_I_12,ES05_12) == 0x01) && \
+    if((INPUT_ReadOne(CS_I_12,ES04_12) == 0x01) ||\
+            (INPUT_ReadOne(CS_I_12,ES05_12) == 0x01) || \
             (INPUT_ReadOne(CS_I_12,ES06_12) == 0x01))
     {
         return true;
@@ -878,9 +885,9 @@ bool is_stopperoff(void)
     }
     return false;
 }
-bool is_air(void)
+bool is_noair(void)
 {
-    if((INPUT_ReadOne(CS_I_10,AS01_10) == 0x01))
+    if((INPUT_ReadOne(CS_I_10,AS01_10) == 0x00))
     {
         return true;
     }
@@ -892,45 +899,825 @@ bool is_error(void)
 bool is_busy(void)
 {
 }
-
-u8 podop_before(void)
+bool is_fanerr(void)
 {
+    return false;
 }
-u8 podop_running(void);
-u8 podcl_before(void);
-u8 podcl_running(void);
-u8 vacon_before(void);
-u8 vacon_running(void);
-u8 dorop_before(void);
-u8 dorop_running(void);
-u8 dorcl_before(void);
-u8 dorcl_running(void);
-u8 zdrup_before(void);
-u8 zdrup_running(void);
-u8 zdrmp_before(void);
-u8 zdrmp_running(void);
-u8 zdrdw_before(void);
-u8 zdrdw_running(void);
-u8 ywait_before(void);
-u8 ywait_running(void);
-u8 ydoor_before(void);
-u8 ydoor_running(void);
-u8 dorbk_before(void);
-u8 dorbk_running(void);
-u8 dorfw_before(void);
-u8 dorfw_running(void);
-u8 mapop_before(void);
-u8 mapop_running(void);
-u8 mapcl_before(void);
-u8 mapcl_running(void);
-u8 zmpst_before(void);
-u8 zmpst_running(void);
-u8 zmped_before(void);
-u8 zmped_running(void);
-u8 mston_before(void);
-u8 mston_running(void);
-u8 mstof_before(void);
-u8 mstof_running(void);
+u8 podop_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(is_dropen())
+    {
+        memcpy(error, (char*)"/DPOSI", 6);
+        return true;
+    }
+    return false;
+}
+u8 podop_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 podcl_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(!is_foup_place())
+    {
+        memcpy(error, (char*)"/FPILG", 6);
+        return true;
+    }
+    return false;
+}
+u8 podcl_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 vacon_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    return false;
+}
+u8 vacon_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 dorop_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    return false;
+}
+u8 dorop_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 dorcl_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(is_dropen())
+    {
+        memcpy(error, (char*)"/DPOSI", 6);
+        return true;
+    }
+    return false;
+}
+u8 dorcl_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 zdrup_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(!is_dropen())
+    {
+        memcpy(error, (char*)"/DPOSI", 6);
+        return true;
+    }
+    if(!is_foup_place())
+    {
+        memcpy(error, (char*)"/FPILG", 6);
+        return true;
+    }
+    if(!is_mapclose())
+    {
+        memcpy(error, (char*)"/MPARM", 6);
+        return true;
+    }
+    if(!is_stopperoff())
+    {
+        memcpy(error, (char*)"/MPSTP", 6);
+        return true;
+    }
+    return false;
+}
+u8 zdrup_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+		if(!is_dropen())
+    {
+        memcpy(error, (char*)"/DLMIT", 6);
+        return true;
+    }
+    if(is_protrusion())
+    {
+        memcpy(error, (char*)"/PROTS", 6);
+        return true;
+    }
+    return false;
+}
+u8 zdrmp_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(!is_dropen())
+    {
+        memcpy(error, (char*)"/DPOSI", 6);
+        return true;
+    }
+    if(!is_mapopen())
+    {
+        memcpy(error, (char*)"/MPARM", 6);
+        return true;
+    }
+    if(!is_mapstart())
+    {
+        memcpy(error, (char*)"/ZPOSI", 6);
+        return true;
+    }
+    return false;
+}
+u8 zdrmp_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    if(is_protrusion())
+    {
+        memcpy(error, (char*)"/PROTS", 6);
+        return true;
+    }
+    return false;
+}
+u8 zdrdw_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(!is_dropen())
+    {
+        memcpy(error, (char*)"/DPOSI", 6);
+        return true;
+    }
+    if(!is_mapclose())
+    {
+        memcpy(error, (char*)"/MPARM", 6);
+        return true;
+    }
+    if(!is_stopperoff())
+    {
+        memcpy(error, (char*)"/MPSTP", 6);
+        return true;
+    }
+    return false;
+}
+u8 zdrdw_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+		if(!is_dropen())
+    {
+        memcpy(error, (char*)"/DLMIT", 6);
+        return true;
+    }
+    if(is_protrusion())
+    {
+        memcpy(error, (char*)"/PROTS", 6);
+        return true;
+    }
+    return false;
+}
+u8 ywait_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(is_foup_place() && is_drclose() && is_vacuumon())
+    {
+        memcpy(error, (char*)"/DVACM", 6);
+        return true;
+    }
+    if(is_foup_place() && is_drclose() && is_unlatch())
+    {
+        memcpy(error, (char*)"/LATCH", 6);
+        return true;
+    }
+    return false;
+}
+u8 ywait_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 ydoor_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(!is_foup_place())
+    {
+        memcpy(error, (char*)"/FPILG", 6);
+        return true;
+    }
+    if(is_foup_place() && is_drclose() && is_vacuumoff() && (!is_unlatch()))
+    {
+        memcpy(error, (char*)"/LATCH", 6);
+        return true;
+    }
+    return false;
+}
+u8 ydoor_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 dorbk_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(is_foup_presence() && is_vacuumon() && (!is_unlatch()))
+    {
+        memcpy(error, (char*)"/LATCH", 6);
+        return true;
+    }
+    return false;
+}
+u8 dorbk_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+}
+u8 dorfw_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(!is_foup_place())
+    {
+        memcpy(error, (char*)"/FPILG", 6);
+        return true;
+    }
+    if(is_vacuumon() && is_latch())
+    {
+        memcpy(error, (char*)"/LATCH", 6);
+        return true;
+    }
+    if(is_foup_place() && is_dock() && is_vacuumoff() && is_latch())
+    {
+        memcpy(error, (char*)"/LATCH", 6);
+        return true;
+    }
+    if(!is_druplmt())
+    {
+        memcpy(error, (char*)"/DPOSI", 6);
+        return true;
+    }
+    return false;
+}
+u8 dorfw_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 mapop_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(!is_dropen())
+    {
+        memcpy(error, (char*)"/DPOSI", 6);
+        return true;
+    }
+    if(is_mapstart())
+    {
+        memcpy(error, (char*)"/MPARM", 6);
+        return true;
+    }
+    return false;
+}
+u8 mapop_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 mapcl_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    return false;
+}
+u8 mapcl_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    if(is_protrusion())
+    {
+        memcpy(error, (char*)"/PROTS", 6);
+        return true;
+    }
+    return false;
+}
+u8 zmpst_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(!is_dropen())
+    {
+        memcpy(error, (char*)"/DPOSI", 6);
+        return true;
+    }
+    if(is_mapclose())
+    {
+        memcpy(error, (char*)"/MPARM", 6);
+        return true;
+    }
+    return false;
+}
+u8 zmpst_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    if(is_protrusion())
+    {
+        memcpy(error, (char*)"/PROTS", 6);
+        return true;
+    }
+    return false;
+}
+u8 zmped_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(!is_dropen())
+    {
+        memcpy(error, (char*)"/DPOSI", 6);
+        return true;
+    }
+    if(is_mapclose())
+    {
+        memcpy(error, (char*)"/MPARM", 6);
+        return true;
+    }
+    return false;
+}
+u8 zmped_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    if(is_protrusion())
+    {
+        memcpy(error, (char*)"/PROTS", 6);
+        return true;
+    }
+    return false;
+}
+u8 mston_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    if(!is_druplmt() && (!is_mapstart()))
+    {
+        memcpy(error, (char*)"/ZPOSI", 6);
+        return true;
+    }
+    return false;
+}
+u8 mston_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 mstof_before(u8* error)
+{
+    if(is_error())
+    {
+        memcpy(error, (char*)"/ERROR", 6);
+        return true;
+    }
+    if(is_busy())
+    {
+        memcpy(error, (char*)"/CBUSY", 6);
+        return true;
+    }
+    return false;
+}
+u8 mstof_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        memcpy(error, (char*)"/SAFTY", 6);
+        return true;
+    }
+    if(is_noair())
+    {
+        memcpy(error, (char*)"/AIRSN", 6);
+        return true;
+    }
+    if(is_fanerr())
+    {
+        memcpy(error, (char*)"/FANST", 6);
+        return true;
+    }
+    return false;
+}
+u8 orgsh_before(u8* error)
+u8 orgsh_running(u8* error)
+u8 aborg_before(u8* error)
+u8 aborg_running(u8* error)
+u8 cload_before(u8* error)
+u8 cload_running(u8* error)
+u8 clddk_before(u8* error)
+u8 clddk_running(u8* error)
+u8 cldop_before(u8* error)
+u8 cldop_running(u8* error)
+u8 cldmp_before(u8* error)
+u8 cldmp_running(u8* error)
+u8 clmpo_before(u8* error)
+u8 clmpo_running(u8* error)
+u8 culod_before(u8* error)
+u8 culod_running(u8* error)
+u8 culdk_before(u8* error)
+u8 culdk_running(u8* error)
+u8 culyd_before(u8* error)
+u8 culyd_running(u8* error)
+u8 cudcl_before(u8* error)
+u8 cudcl_running(u8* error)
+u8 cudnc_before(u8* error)
+u8 cudnc_running(u8* error)
+u8 culfc_before(u8* error)
+u8 cuflc_running(u8* error)
+u8 mapod_before(u8* error)
+u8 mapod_running(u8* error)
+u8 remap_before(u8* error)
+u8 remap_running(u8* error)
+u8 cudmp_before(u8* error)
+u8 cudmp_running(u8* error)
+u8 cumdk_before(u8* error)
+u8 cumdk_running(u8* error)
+u8 cumfc_before(u8* error)
+u8 cumfc_running(u8* error)
+
 
 u8 clam_sta(void)
 {

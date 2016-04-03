@@ -13,6 +13,7 @@ u8 gCUr_status = G_CUR_STA_UNI; //uninit
 u8 gCur_CMD = G_CUR_CMD_NO;
 
 u8 gAction_seq[32];
+u8 gCmd_action = CMD_ACTION_NOACT;
 u8 gAction_num = 0;
 u8 gAction_sta = 0;
 
@@ -835,6 +836,15 @@ bool proc_mov(u8* cmd_name)
     }
     if(memcmp(cmd_name, "PODOP", 5) == 0)
     {
+			if(gCur_action != CMD_ACTION_PODOP)
+			{
+				send_msg(0x01, (char*)"PODOP", (u8*)"/INTER/CBUSY", 12);
+				return true;
+			}
+			else
+			{
+				gCmd_action = CMD_ACTION_PODOP;
+			}
     }
     if(memcmp(cmd_name, "PODCL", 5) == 0)
     {
