@@ -30,7 +30,9 @@ u8 scan_mode = SCAN_UPP;
 u8 gCur_action = CMD_ACTION_PODOP;
 u8 gCur_pause = 0;
 u8 gCur_stop = 0;
+u8 gErr_no = 0;
 
+bool gErr_mod = false;
 bool gIs_init = false;
 bool gis_scan = false;
 
@@ -853,6 +855,49 @@ bool Analyze_Scan(u8* result)
     return true;
 }
 
+
+void set_errno(u8 cmd, u8 errno)
+{
+    switch(errno)
+    {
+    case 0x27:
+    case 0x12:
+    case 0x23:
+    case 0x24:
+    case 0x25:
+    case 0x26:
+    case 0xA1:
+    case 0xA2:
+    case 0xA3:
+    case 0xA4:
+    case 0xFC:
+    case 0xFD:
+    case 0xFE:
+    case 0xFF:
+        gErr_no = errno;
+        return;
+        break;
+    }
+    if(gErr_mod)
+    {
+        switch (cmd)
+        {
+        case CMD_ACTION_PODOP:
+            gErr_no = errno;
+            break;
+        }
+    }
+    else
+    {
+        switch (cmd)
+        {
+        case CMD_ACTION_PODOP:
+            gErr_no =0x21;
+            break;
+        }
+    }
+}
+
 u8 podop_action(u8* error)
 {
     u8 time = 30;
@@ -1005,6 +1050,11 @@ void tExe_Action(void *p_arg)
                     break;
                 case 0xFC:
                     memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x61:
+                case 0x21:
+                case 0x62:
+                    memcpy(param, (char*)"/CLOPS", 6);
                     break;
                 }
                 send_msg(gCom_mod & BCAK_ABS, (char*)"PODOP", param, 6);
