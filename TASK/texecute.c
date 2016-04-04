@@ -28,6 +28,10 @@
 
 u8 scan_mode = SCAN_UPP;
 u8 gCur_action = CMD_ACTION_PODOP;
+u8 gCur_pause = 0;
+u8 gCur_stop = 0;
+
+bool gIs_init = false;
 bool gis_scan = false;
 
 u8 exe_clamup(bool bforce)
@@ -849,25 +853,168 @@ bool Analyze_Scan(u8* result)
     return true;
 }
 
-u8 podop_action(void)
+u8 podop_action(u8* error)
 {
-	
+    u8 time = 30;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(podop_running(error) == true)
+        {
+            return false;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_clamulk(gCur_pause);
+            *error = 0x61;
+            if(is_clampup())
+            {
+                seq = 0x02;
+            }
+            break;
+        case 0x02:
+            run_clambwd(gCur_pause);
+            *error = 0x21;
+            if(is_clampbwd())
+            {
+                seq = 0x03;
+            }
+            break;
+        case 0x03:
+            run_clamdwn(gCur_pause);
+            *error = 0x62;
+            if(is_clampdown())
+            {
+                return true;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return true;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            if(gCur_stop == 0x01)
+            {
+                return true;
+            }
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+    }
+    return false;
+}
+
+u8 podcl_action(u8* error)
+{
+    u8 time = 30;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(podcl_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_clamup(gCur_pause);
+            if(is_clampup())
+            {
+                seq = 0x02;
+            }
+            break;
+        case 0x02:
+            run_clamfwd(gCur_pause);
+            if(is_clampfwd())
+            {
+                seq = 0x03;
+            }
+            break;
+        case 0x03:
+            run_clamlck(gCur_pause);
+            if(is_clamplock())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x01;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            if(gCur_stop == 0x01)
+            {
+                return 0x01;
+            }
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+    }
+    return 0x00;
 }
 
 void tExe_Action(void *p_arg)
 {
-	OS_ERR err;
-	CPU_SR_ALLOC();
-	while(1)
-	{
-		gCur_action = gCmd_action;
-		switch (gCur_action)
-		{
-			case CMD_ACTION_NOACT:
-			break;
-			case CMD_ACTION_PODOP:
-				podop_action();
-			break;
-		}
-	}
+    OS_ERR err;
+    CPU_SR_ALLOC();
+    u8 error;
+    u8 ret = 0;
+    u8 param[10];
+    while(1)
+    {
+        if(gCUr_status == G_CUR_STA_ERR || \
+                gCUr_status == G_CUR_STA_INT || \
+                gCUr_status == G_CUR_STA_NAC || \
+                gCUr_status == G_CUR_STA_UNI || \
+                gCUr_status == G_CUR_STA_STP)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            continue;
+        }
+        gCur_action = gCmd_action;
+        switch (gCur_action)
+        {
+        case CMD_ACTION_NOACT:
+            break;
+        case CMD_ACTION_PODOP:
+            ret = podop_action(&error);
+            if(ret == 0x01)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"PODOP", (u8*)NULL, 0);
+                gCUr_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_PODOP;
+            }
+            else
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                }
+                send_msg(gCom_mod & BCAK_ABS, (char*)"PODOP", param, 6);
+                gCUr_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_PODCL:
+            podcl_action(&error);
+            break;
+        }
+    }
 }

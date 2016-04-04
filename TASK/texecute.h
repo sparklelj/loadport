@@ -8,6 +8,8 @@
 
 extern u8 scan_mode;
 extern u8 gCur_action;
+extern bool gIs_init;
+
 bool Analyze_Scan(u8* result);
 
 #endif

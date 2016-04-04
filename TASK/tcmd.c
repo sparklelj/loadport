@@ -1,12 +1,12 @@
-#include "tcmd.h"
 #include "includes.h"
 #include "uart.h"
 #include "texecute.h"
 #include "stdio.h"
 #include "tinput.h"
+#include "tcmd.h"
 
 u8 gAddr[2] = {'0','0'};
-u8 gCom_mod = 0;
+u8 gCom_mod = 0x0F;
 u8 gLED_status[8];
 u8 gVersion[13] = {'/','V','E','R',' ','1','.','0','1',' ',' ',' ',' '};
 u8 gCUr_status = G_CUR_STA_UNI; //uninit
@@ -16,6 +16,7 @@ u8 gAction_seq[32];
 u8 gCmd_action = CMD_ACTION_NOACT;
 u8 gAction_num = 0;
 u8 gAction_sta = 0;
+u8 gEnd_act = CMD_ACTION_NOACT;
 
 bool is_error(void)
 {
@@ -61,6 +62,42 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
         msg[mlen] = 'A';
         mlen++;
         msg[mlen] = 'K';
+        mlen++;
+    }
+		if((type & 0x0F) == 0x2)
+    {
+        msg[mlen] = 'I';
+        mlen++;
+        msg[mlen] = 'N';
+        mlen++;
+        msg[mlen] = 'F';
+        mlen++;
+    }
+    if((type & 0x0F) == 0x3)
+    {
+        msg[mlen] = 'A';
+        mlen++;
+        msg[mlen] = 'B';
+        mlen++;
+        msg[mlen] = 'S';
+        mlen++;
+    }
+		if((type & 0x0F) == 0x4)
+    {
+        msg[mlen] = 'R';
+        mlen++;
+        msg[mlen] = 'I';
+        mlen++;
+        msg[mlen] = 'F';
+        mlen++;
+    }
+    if((type & 0x0F) == 0x5)
+    {
+        msg[mlen] = 'R';
+        mlen++;
+        msg[mlen] = 'A';
+        mlen++;
+        msg[mlen] = 'S';
         mlen++;
     }
     msg[mlen] = ':';
@@ -739,35 +776,35 @@ bool proc_get(u8* cmd_name)
     {
         u8 param[21];
         format_state(param);
-        send_msg(0x00, "VERSN", param, 21);
+        send_msg(gCom_mod & BCAK_ACK, "VERSN", param, 21);
     }
     if(memcmp(cmd_name, "VERSN", 5) == 0)
     {
-        send_msg(0x00, "STATE", gVersion, 13);
+        send_msg(gCom_mod & BCAK_ACK, "STATE", gVersion, 13);
     }
     if(memcmp(cmd_name, "LEDST", 5) == 0)
     {
         u8 param[10];
         format_ledst(param);
-        send_msg(0x00, "VERSN", param, 10);
+        send_msg(gCom_mod & BCAK_ACK, "VERSN", param, 10);
     }
     if(memcmp(cmd_name, "MAPDT", 5) == 0)
     {
         u8 param[26];
         format_mapdt(param);
-        send_msg(0x00, "MAPDT", param, 26);
+        send_msg(gCom_mod & BCAK_ACK, "MAPDT", param, 26);
     }
     if(memcmp(cmd_name, "MAPRD", 5) == 0)
     {
         u8 param[26];
         format_maprd(param);
-        send_msg(0x00, "MAPRD", param, 26);
+        send_msg(gCom_mod & BCAK_ACK, "MAPRD", param, 26);
     }
     if(memcmp(cmd_name, "WFCNT", 5) == 0)
     {
         u8 param[3];
         format_wfcnt(param);
-        send_msg(0x00, "WFCNT", param, 3);
+        send_msg(gCom_mod & BCAK_ACK, "WFCNT", param, 3);
     }
 }
 
@@ -836,14 +873,30 @@ bool proc_mov(u8* cmd_name)
     }
     if(memcmp(cmd_name, "PODOP", 5) == 0)
     {
-			if(gCur_action != CMD_ACTION_PODOP)
-			{
-				send_msg(0x01, (char*)"PODOP", (u8*)"/INTER/CBUSY", 12);
-				return true;
-			}
+			u8 ret = 0;
+			u8 error;
+				ret = podop_before(&error);
+				if(ret == true)
+				{
+					switch(error)
+					{
+						case 0x30:
+							send_msg(gCom_mod & BCAK_NAK, (char*)"PODOP", (u8*)"/INTER/ERROR", 12);
+							break;
+						case 0x31:
+							send_msg(gCom_mod & BCAK_NAK, (char*)"PODOP", (u8*)"/INTER/CBUSY", 12);
+							break;
+						case 0x33:
+							send_msg(gCom_mod & BCAK_NAK, (char*)"PODOP", (u8*)"/INTER/DPOSI", 12);
+							break;
+					}
+					gCUr_status = G_CUR_STA_INT;
+				}
 			else
 			{
 				gCmd_action = CMD_ACTION_PODOP;
+				gCUr_status = G_CUR_STA_RUN;
+				send_msg(gCom_mod & BCAK_ACK, (char*)"PODOP", (u8*)NULL, 0);
 			}
     }
     if(memcmp(cmd_name, "PODCL", 5) == 0)
@@ -962,7 +1015,7 @@ bool proc_cmd(u8* msg)
 
     if(!check_sum(msg))
     {
-        send_msg(0x01, (char*)cmd_n, (u8*)"/CKSUM", 6);
+        send_msg(gCom_mod & BCAK_NAK, (char*)cmd_n, (u8*)"/CKSUM", 6);
         return false;
     }
 
@@ -1011,7 +1064,7 @@ bool proc_cmd(u8* msg)
         res = proc_rmv(cmd_n);
     }
 
-    send_msg(0x01, (char*)cmd_n, (u8*)"/CMDER", 6);
+    send_msg(gCom_mod & BCAK_NAK, (char*)cmd_n, (u8*)"/CMDER", 6);
     return false;
 }
 
