@@ -15,7 +15,7 @@
 #define G_CUR_STA_ERR 7
 #define G_CUR_STA_INT 8
 #define G_CUR_STA_NAC 9
-//#define G_CUR_STA_STP 10
+#define G_CUR_STA_END 10
 
 #define G_CUR_CMD_NO 0
 

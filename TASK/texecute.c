@@ -30,6 +30,8 @@ u8 scan_mode = SCAN_UPP;
 u8 gCur_action = CMD_ACTION_PODOP;
 u8 gCur_pause = 0;
 u8 gCur_stop = 0;
+u8 gCur_abort = 0;
+u8 gCur_retry = 0;
 u8 gErr_no = 0;
 
 bool gErr_mod = false;
@@ -898,6 +900,11 @@ void set_errno(u8 cmd, u8 errno)
     }
 }
 
+#define ACT_ERR  0x00
+#define ACT_END  0x01
+#define ACT_STP  0x02
+#define ACT_ABT  0x03
+
 u8 podop_action(u8* error)
 {
     u8 time = 30;
@@ -908,7 +915,7 @@ u8 podop_action(u8* error)
     {
         if(podop_running(error) == true)
         {
-            return false;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -933,25 +940,26 @@ u8 podop_action(u8* error)
             *error = 0x62;
             if(is_clampdown())
             {
-                return true;
+                return ACT_END;
             }
             break;
-        }
-        if(gCur_stop == 0x01)
-        {
-            return true;
         }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
-            if(gCur_stop == 0x01)
-            {
-                return true;
-            }
+
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
     }
-    return false;
+    return ACT_ERR;
 }
 
 u8 podcl_action(u8* error)
@@ -1020,6 +1028,7 @@ void tExe_Action(void *p_arg)
                 gCUr_status == G_CUR_STA_INT || \
                 gCUr_status == G_CUR_STA_NAC || \
                 gCUr_status == G_CUR_STA_UNI || \
+                gCUr_status == G_CUR_STA_ABO || \
                 gCUr_status == G_CUR_STA_STP)
         {
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
@@ -1032,13 +1041,13 @@ void tExe_Action(void *p_arg)
             break;
         case CMD_ACTION_PODOP:
             ret = podop_action(&error);
-            if(ret == 0x01)
+            if(ret == ACT_END)
             {
                 send_msg(gCom_mod & BCAK_FIN, (char*)"PODOP", (u8*)NULL, 0);
-                gCUr_status = G_CUR_STA_STP;
+                gCUr_status = G_CUR_STA_END;
                 gEnd_act = CMD_ACTION_PODOP;
             }
-            else
+            else if(ret == ACT_ERR)
             {
                 switch (error)
                 {
@@ -1057,8 +1066,21 @@ void tExe_Action(void *p_arg)
                     memcpy(param, (char*)"/CLOPS", 6);
                     break;
                 }
+								set_errno(CMD_ACTION_PODOP, error);
                 send_msg(gCom_mod & BCAK_ABS, (char*)"PODOP", param, 6);
                 gCUr_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"PODOP", param, 6);
+                gCUr_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"PODOP", param, 6);
+                gCUr_status = G_CUR_STA_STP;
                 gEnd_act = CMD_ACTION_NOACT;
             }
             break;

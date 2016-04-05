@@ -20,11 +20,22 @@ u8 gEnd_act = CMD_ACTION_NOACT;
 
 bool is_error(void)
 {
-
+	if(gCUr_status == G_CUR_STA_ERR)
+	{
+		return true;
+	}
+	return false;
 }
 bool is_run(void)
 {
-
+    if(gCUr_status == G_CUR_STA_RUN || \
+            gCUr_status == G_CUR_STA_PAU || \
+            gCUr_status == G_CUR_STA_RSM || \
+            gCUr_status == G_CUR_STA_INT)
+    {
+        return true;
+    }
+    return false;
 }
 
 bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
@@ -64,7 +75,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
         msg[mlen] = 'K';
         mlen++;
     }
-		if((type & 0x0F) == 0x2)
+    if((type & 0x0F) == 0x2)
     {
         msg[mlen] = 'I';
         mlen++;
@@ -82,7 +93,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
         msg[mlen] = 'S';
         mlen++;
     }
-		if((type & 0x0F) == 0x4)
+    if((type & 0x0F) == 0x4)
     {
         msg[mlen] = 'R';
         mlen++;
@@ -816,9 +827,11 @@ bool proc_mov(u8* cmd_name)
 {
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
+			gCUr_status = G_CUR_STA_UNI;
     }
     if(memcmp(cmd_name, "ABORG", 5) == 0)
     {
+			gCUr_status = G_CUR_STA_UNI;
     }
     if(memcmp(cmd_name, "CLOAD", 5) == 0)
     {
@@ -873,31 +886,31 @@ bool proc_mov(u8* cmd_name)
     }
     if(memcmp(cmd_name, "PODOP", 5) == 0)
     {
-			u8 ret = 0;
-			u8 error;
-				ret = podop_before(&error);
-				if(ret == true)
-				{
-					switch(error)
-					{
-						case 0x30:
-							send_msg(gCom_mod & BCAK_NAK, (char*)"PODOP", (u8*)"/INTER/ERROR", 12);
-							break;
-						case 0x31:
-							send_msg(gCom_mod & BCAK_NAK, (char*)"PODOP", (u8*)"/INTER/CBUSY", 12);
-							break;
-						case 0x33:
-							send_msg(gCom_mod & BCAK_NAK, (char*)"PODOP", (u8*)"/INTER/DPOSI", 12);
-							break;
-					}
-					gCUr_status = G_CUR_STA_INT;
-				}
-			else
-			{
-				gCmd_action = CMD_ACTION_PODOP;
-				gCUr_status = G_CUR_STA_RUN;
-				send_msg(gCom_mod & BCAK_ACK, (char*)"PODOP", (u8*)NULL, 0);
-			}
+        u8 ret = 0;
+        u8 error;
+        ret = podop_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"PODOP", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"PODOP", (u8*)"/INTER/CBUSY", 12);
+                break;
+            case 0x33:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"PODOP", (u8*)"/INTER/DPOSI", 12);
+                break;
+            }
+            //        gCUr_status = G_CUR_STA_INT;
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_PODOP;
+            gCUr_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"PODOP", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "PODCL", 5) == 0)
     {
@@ -955,18 +968,38 @@ bool proc_mov(u8* cmd_name)
     }
     if(memcmp(cmd_name, "RETRY", 5) == 0)
     {
+        gCur_pause = 0;
+        gCur_stop = 0;
+        gCur_abort = 0;
+        gCur_retry = 1;
     }
     if(memcmp(cmd_name, "STOP_", 5) == 0)
     {
+        gCur_pause = 0;
+        gCur_stop = 1;
+        gCur_abort = 0;
+        gCur_retry = 0;
     }
     if(memcmp(cmd_name, "PAUSE", 5) == 0)
     {
+        gCur_pause = 1;
+        gCur_stop = 0;
+        gCur_abort = 0;
+        gCur_retry = 0;
     }
     if(memcmp(cmd_name, "ABORT", 5) == 0)
     {
+        gCur_pause = 0;
+        gCur_stop = 0;
+        gCur_abort = 1;
+        gCur_retry = 0;
     }
     if(memcmp(cmd_name, "RESUM", 5) == 0)
     {
+        gCur_pause = 0;
+        gCur_stop = 0;
+        gCur_abort = 0;
+        gCur_retry = 0;
     }
 }
 
