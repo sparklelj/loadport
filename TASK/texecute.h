@@ -13,7 +13,12 @@ extern u8 gCur_pause;
 extern u8 gCur_stop;
 extern u8 gCur_abort;
 extern u8 gCur_retry;
+extern u8 gErr_no;
+extern u8 gMap_status;
 
+u8 get_init(void);
+u8 get_oper(void);
+u8 get_mapsts(void);
 bool Analyze_Scan(u8* result);
 
 #endif

@@ -18,14 +18,7 @@ u8 gAction_num = 0;
 u8 gAction_sta = 0;
 u8 gEnd_act = CMD_ACTION_NOACT;
 
-bool is_error(void)
-{
-	if(gCUr_status == G_CUR_STA_ERR)
-	{
-		return true;
-	}
-	return false;
-}
+
 bool is_run(void)
 {
     if(gCUr_status == G_CUR_STA_RUN || \
@@ -186,12 +179,12 @@ bool check_fornat(u8* msg)
 bool format_state(u8* param)
 {
     param[0] = '/';
-    param[1] = gEqu_sta + 0x30;
+    param[1] = get_equ();
     param[2] = '0';
-    param[3] = gInit_pos + 0x30;
-    param[4] = gOpe_sta + 0x30;
-    param[5] = (gErr_code >> 4) + 0x30;
-    param[6] = (gErr_code & 0x0F) + 0x30;
+    param[3] = get_init();
+    param[4] = get_oper() + 0x30;
+    param[5] = (gErr_no >> 4) + 0x30;
+    param[6] = (gErr_no & 0x0F) + 0x30;
     param[7] = '0';
     param[8] = clam_sta();
     param[9] = latch_sta();
@@ -201,11 +194,11 @@ bool format_state(u8* param)
     param[13] = Z_pos();
     param[14] = Y_pos();
     param[15] = map_apos();
-    param[16] = ;
+    param[16] = get_mapzpos();
     param[17] = map_stp();
-    param[18] = ;
-    param[19] = ;
-    param[20] = ;
+    param[18] = get_mapsts();
+    param[19] = '1';
+    param[20] = '0';
     return true;
 }
 
@@ -767,6 +760,7 @@ bool proc_set(u8* cmd_name)
     {
         gLED_status[7] = 0x13;
     }
+		return true;
 }
 
 bool proc_mod(u8* cmd_name)
@@ -779,6 +773,7 @@ bool proc_mod(u8* cmd_name)
     {
         gCom_mod = 1;
     }
+		return true;
 }
 
 bool proc_get(u8* cmd_name)
@@ -817,10 +812,12 @@ bool proc_get(u8* cmd_name)
         format_wfcnt(param);
         send_msg(gCom_mod & BCAK_ACK, "WFCNT", param, 3);
     }
+		return true;
 }
 
 bool proc_fin(u8* cmd_name)
 {
+	return true;
 }
 
 bool proc_mov(u8* cmd_name)
@@ -1001,6 +998,7 @@ bool proc_mov(u8* cmd_name)
         gCur_abort = 0;
         gCur_retry = 0;
     }
+		return true;
 }
 
 bool proc_evt(u8* cmd_name)
@@ -1017,18 +1015,22 @@ bool proc_evt(u8* cmd_name)
     if(memcmp(cmd_name, "FPEOF", 5) == 0)
     {
     }
+		return true;
 }
 
 bool proc_rst(u8* cmd_name)
 {
+	return true;
 }
 
 bool proc_rfn(u8* cmd_name)
 {
+	return true;
 }
 
 bool proc_rmv(u8* cmd_name)
 {
+	return true;
 }
 
 bool proc_cmd(u8* msg)

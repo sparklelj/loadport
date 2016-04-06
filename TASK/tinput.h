@@ -218,8 +218,10 @@ u8 dr_pos(void);
 u8 is_block(void);
 u8 Z_pos(void);
 u8 Y_pos(void);
+u8 get_equ(void);
 u8 map_apos(void);
 u8 map_stp(void);
+u8 get_mapzpos(void);
 bool is_low(void);
 
 #endif

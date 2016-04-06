@@ -19,6 +19,8 @@ u16 gVel_cmd = 0;
 
 u8 gMotion_status;
 
+
+
 bool is_mstop(void)
 {
     if((gMotion_cmd == gMotion_num) && (gCur_vel == 0))

@@ -2,7 +2,8 @@
 #include "output.h"
 #include "tcmd.h"
 
-int tLED_Control(void *p_arg)
+
+void tLED_Control(void *p_arg)
 {
 	OS_ERR err;
 	while(1)

@@ -33,10 +33,13 @@ u8 gCur_stop = 0;
 u8 gCur_abort = 0;
 u8 gCur_retry = 0;
 u8 gErr_no = 0;
+u8 gMap_status = 0;
 
 bool gErr_mod = false;
 bool gIs_init = false;
 bool gis_scan = false;
+
+
 
 u8 exe_clamup(bool bforce)
 {
@@ -463,6 +466,7 @@ u8 run_clamup(bool pause)
     {
         OUTPUT_SetOne(CS_O_1,SOL01A_1);
     }
+		return 0;
 }
 
 u8 run_clamfwd(bool pause)
@@ -477,6 +481,7 @@ u8 run_clamfwd(bool pause)
     {
         OUTPUT_SetOne(CS_O_1,SOL02A_1);
     }
+		return 0;
 }
 
 u8 run_clamlck(bool pause)
@@ -490,6 +495,7 @@ u8 run_clamlck(bool pause)
     {
         OUTPUT_SetOne(CS_O_1,SOL01B_1);
     }
+		return 0;
 }
 
 u8 run_fpdck(bool pause)
@@ -503,6 +509,7 @@ u8 run_fpdck(bool pause)
     {
         OUTPUT_SetOne(CS_O_1,SOL03A_1);
     }
+		return 0;
 }
 
 u8 run_dradsp(bool pause)
@@ -516,6 +523,7 @@ u8 run_dradsp(bool pause)
     {
         OUTPUT_SetOne(CS_O_2,SOL09A_2);
     }
+		return 0;
 }
 
 u8 run_drunlt(bool pause)
@@ -529,6 +537,7 @@ u8 run_drunlt(bool pause)
     {
         OUTPUT_SetOne(CS_O_1,SOL04A_1);
     }
+		return 0;
 }
 
 u8 run_drop(bool pause)
@@ -542,6 +551,7 @@ u8 run_drop(bool pause)
     {
         OUTPUT_SetOne(CS_O_2,SOL05A_2);
     }
+		return 0;
 }
 
 u8 run_drdwns(bool pause)
@@ -553,6 +563,7 @@ u8 run_drdwns(bool pause)
     {
         START_Motion(M_STRMP, M_VEL);
     }
+		return 0;
 }
 
 u8 run_mpaop(bool pause)
@@ -566,6 +577,7 @@ u8 run_mpaop(bool pause)
     {
         OUTPUT_SetOne(CS_O_0,SOL08A_0);
     }
+		return 0;
 }
 
 u8 run_stpon(bool pause)
@@ -579,6 +591,7 @@ u8 run_stpon(bool pause)
     {
         OUTPUT_SetOne(CS_O_0,SOL07A_0);
     }
+		return 0;
 }
 
 u8 run_drdwne(bool pause)
@@ -590,6 +603,7 @@ u8 run_drdwne(bool pause)
     {
         START_Motion(M_STPMP, M_VEL);
     }
+		return 0;
 }
 
 u8 run_mpac(bool pause)
@@ -603,6 +617,7 @@ u8 run_mpac(bool pause)
     {
         OUTPUT_SetOne(CS_O_0,SOL08B_0);
     }
+		return 0;
 }
 
 u8 run_stpoff(bool pause)
@@ -616,6 +631,7 @@ u8 run_stpoff(bool pause)
     {
         OUTPUT_SetOne(CS_O_0,SOL07B_0);
     }
+		return 0;
 }
 
 u8 run_drdwnl(bool pause)
@@ -627,6 +643,7 @@ u8 run_drdwnl(bool pause)
     {
         START_Motion(M_DNLMT, M_VEL);
     }
+		return 0;
 }
 
 u8 run_drupl(bool pause)
@@ -638,6 +655,7 @@ u8 run_drupl(bool pause)
     {
         START_Motion(M_UPLMT, M_VEL);
     }
+		return 0;
 }
 
 u8 run_drcls(bool pause)
@@ -651,6 +669,7 @@ u8 run_drcls(bool pause)
     {
         OUTPUT_SetOne(CS_O_2,SOL05B_2);
     }
+		return 0;
 }
 
 u8 run_drlt(bool pause)
@@ -664,6 +683,7 @@ u8 run_drlt(bool pause)
     {
         OUTPUT_SetOne(CS_O_1,SOL04B_1);
     }
+		return 0;
 }
 
 u8 run_dradsr(bool pause)
@@ -677,6 +697,7 @@ u8 run_dradsr(bool pause)
     {
         OUTPUT_SetOne(CS_O_2,SOL09A_2);
     }
+		return 0;
 }
 
 u8 run_fpundk(bool pause)
@@ -690,6 +711,7 @@ u8 run_fpundk(bool pause)
     {
         OUTPUT_SetOne(CS_O_1,SOL03B_1);
     }
+		return 0;
 }
 
 u8 run_clamulk(bool pause)
@@ -703,6 +725,7 @@ u8 run_clamulk(bool pause)
     {
         OUTPUT_SetOne(CS_O_1,SOL01A_1);
     }
+		return 0;
 }
 
 u8 run_clambwd(bool pause)
@@ -716,6 +739,7 @@ u8 run_clambwd(bool pause)
     {
         OUTPUT_SetOne(CS_O_1,SOL02B_1);
     }
+		return 0;
 }
 
 u8 run_clamdwn(bool pause)
@@ -729,6 +753,47 @@ u8 run_clamdwn(bool pause)
     {
         OUTPUT_SetOne(CS_O_1,SOL01B_1);
     }
+		return 0;
+}
+
+u8 get_init(void)
+{
+	if(gIs_init == true)
+	{
+		return '1';
+	}
+	else
+	{
+		return '0';
+	}
+}
+
+u8 get_oper(void)
+{
+	if(gCUr_status == G_CUR_STA_RUN || \
+		gCUr_status == G_CUR_STA_PAU || \
+	gCUr_status == G_CUR_STA_RSM || \
+		gCUr_status == G_CUR_STA_INT)
+	{
+		return '1';
+	}
+	else
+	{
+		return '0';
+	}
+}
+
+u8 get_mapsts(void)
+{
+	if(gMap_status == 0x01)
+	{
+		return '1';
+	}
+	if(gMap_status == 0x02)
+	{
+		return '2';
+	}
+	return '0';
 }
 
 u8 is_inslot(s32 cpos, u8 slot)
@@ -878,7 +943,6 @@ void set_errno(u8 cmd, u8 errno)
     case 0xFF:
         gErr_no = errno;
         return;
-        break;
     }
     if(gErr_mod)
     {

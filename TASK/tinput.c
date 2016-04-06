@@ -4,8 +4,6 @@
 #include "tmotion.h"
 #include "tcmd.h"
 
-
-
 u8 gStatus_scan[INPUT_NUM];
 
 /*
@@ -844,15 +842,19 @@ bool is_drclose(void)
 }
 bool is_druplmt(void)
 {
+	return true;
 }
 bool is_mapstart(void)
 {
+	return true;
 }
 bool is_mapend(void)
 {
+	return true;
 }
 bool is_drdwlmt(void)
 {
+	return true;
 }
 bool is_mapopen(void)
 {
@@ -900,6 +902,7 @@ bool is_error(void)
     {
         return true;
     }
+		return false;
 }
 bool is_busy(void)
 {
@@ -909,6 +912,7 @@ bool is_busy(void)
     {
         return true;
     }
+		return false;
 }
 bool is_fanerr(void)
 {
@@ -1694,42 +1698,149 @@ u8 mstof_running(u8* error)
     return false;
 }
 u8 orgsh_before(u8* error)
+{
+	return false;
+}
 u8 orgsh_running(u8* error)
+{
+	return false;
+}
 u8 aborg_before(u8* error)
+{
+	return false;
+}
 u8 aborg_running(u8* error)
+{
+	return false;
+}
 u8 cload_before(u8* error)
+{
+	return false;
+}
 u8 cload_running(u8* error)
+{
+	return false;
+}
 u8 clddk_before(u8* error)
+{
+	return false;
+}
 u8 clddk_running(u8* error)
+{
+	return false;
+}
 u8 cldop_before(u8* error)
+{
+	return false;
+}
 u8 cldop_running(u8* error)
+{
+	return false;
+}
 u8 cldmp_before(u8* error)
+{
+	return false;
+}
 u8 cldmp_running(u8* error)
+{
+	return false;
+}
 u8 clmpo_before(u8* error)
+{
+	return false;
+}
 u8 clmpo_running(u8* error)
+{
+	return false;
+}
 u8 culod_before(u8* error)
+{
+	return false;
+}
 u8 culod_running(u8* error)
+{
+	return false;
+}
 u8 culdk_before(u8* error)
+{
+	return false;
+}
 u8 culdk_running(u8* error)
+{
+	return false;
+}
 u8 culyd_before(u8* error)
+{
+	return false;
+}
 u8 culyd_running(u8* error)
+{
+	return false;
+}
 u8 cudcl_before(u8* error)
+{
+	return false;
+}
 u8 cudcl_running(u8* error)
+{
+	return false;
+}
 u8 cudnc_before(u8* error)
+{
+	return false;
+}
 u8 cudnc_running(u8* error)
+{
+	return false;
+}
 u8 culfc_before(u8* error)
+{
+	return false;
+}
 u8 cuflc_running(u8* error)
+{
+	return false;
+}
 u8 mapod_before(u8* error)
+{
+	return false;
+}
 u8 mapod_running(u8* error)
+{
+	return false;
+}
 u8 remap_before(u8* error)
+{
+	return false;
+}
 u8 remap_running(u8* error)
+{
+	return false;
+}
 u8 cudmp_before(u8* error)
+{
+	return false;
+}
 u8 cudmp_running(u8* error)
+{
+	return false;
+}
 u8 cumdk_before(u8* error)
+{
+	return false;
+}
 u8 cumdk_running(u8* error)
+{
+	return false;
+}
 u8 cumfc_before(u8* error)
+{
+	return false;
+}
 u8 cumfc_running(u8* error)
-
+{
+	return false;
+}
 
 u8 clam_sta(void)
 {
@@ -1818,6 +1929,35 @@ u8 Y_pos(void)
         return '0';
     }
     return '?';
+}
+
+u8 get_equ(void)
+{
+	if(gCUr_status != G_CUR_STA_ERR)
+	{
+		return '0';
+	}
+	if(1)
+	{
+		return 'E';
+	}
+	if(0)
+	{
+		return 'A';
+	}
+}
+
+u8 get_mapzpos(void)
+{
+	if(Get_MStatus() == 0)
+	{
+		return '?';
+	}
+	if(Get_MStatus() == 0x01)
+	{
+		return '0';
+	}
+	return '1';
 }
 
 u8 map_apos(void)

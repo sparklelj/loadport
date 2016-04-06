@@ -3,7 +3,15 @@
 #include "usart.h"
 #include "led.h"
 #include "includes.h"
-
+#include "tmotion.h"
+#include "motor.h"
+#include "texecute.h"
+#include "tinput.h"
+#include "input.h"
+#include "uart.h"
+#include "output.h"
+#include "tcmd.h"
+#include "tled.h"
 
 //任务优先级
 #define START_TASK_PRIO		3
@@ -36,6 +44,54 @@ OS_TCB Task2_TaskTCB;
 CPU_STK TASK2_TASK_STK[TASK2_STK_SIZE];
 //任务函数
 void task2_task(void *p_arg);
+
+
+
+//任务优先级
+#define CMD_TASK_PRIO		3
+//任务堆栈大小	
+#define CMD_STK_SIZE 		1024
+//任务控制块
+OS_TCB CMDTaskTCB;
+//任务堆栈	
+CPU_STK CMD_TASK_STK[CMD_STK_SIZE];
+
+//任务优先级
+#define LED_TASK_PRIO		3
+//任务堆栈大小	
+#define LED_STK_SIZE 		1024
+//任务控制块
+OS_TCB LEDTaskTCB;
+//任务堆栈	
+CPU_STK LED_TASK_STK[LED_STK_SIZE];
+
+//任务优先级
+#define EXE_TASK_PRIO		3
+//任务堆栈大小	
+#define EXE_STK_SIZE 		2048
+//任务控制块
+OS_TCB EXETaskTCB;
+//任务堆栈	
+CPU_STK EXE_TASK_STK[EXE_STK_SIZE];
+
+//任务优先级
+#define INPUT_TASK_PRIO		3
+//任务堆栈大小	
+#define INPUT_STK_SIZE 		256
+//任务控制块
+OS_TCB INPUTTaskTCB;
+//任务堆栈	
+CPU_STK INPUT_TASK_STK[INPUT_STK_SIZE];
+
+//任务优先级
+#define MOTOR_TASK_PRIO		3
+//任务堆栈大小	
+#define MOTOR_STK_SIZE 		2048
+//任务控制块
+OS_TCB MOTORTaskTCB;
+//任务堆栈	
+CPU_STK MOTOR_TASK_STK[MOTOR_STK_SIZE];
+
 
 
 //主函数
