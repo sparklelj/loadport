@@ -52,4 +52,6 @@ extern s32 gScan_pos[SCAN_NUM_MAX];
 extern u8 gScan_num;
 
 void POS_SET(s32 target);
+void MOTOR_Init(void);
+
 #endif

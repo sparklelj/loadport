@@ -20,5 +20,5 @@ u8 get_init(void);
 u8 get_oper(void);
 u8 get_mapsts(void);
 bool Analyze_Scan(u8* result);
-
+void tExe_Action(void *p_arg);
 #endif

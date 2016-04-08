@@ -10,9 +10,12 @@
 
 #define M_VEL VEL_MAX
 
+u8 Get_MStatus(void);
+extern u8 gMotion_status;
+
 void STOP_Minit(void);
 void START_Motion(s32 target_pos, u16 target_vel);
 void STOP_Motion(void);
-u8 Get_MStatus(void);
-extern u8 gMotion_status;
+void tMotor_Motion(void *p_arg);
+
 #endif

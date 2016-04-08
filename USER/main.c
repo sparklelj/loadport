@@ -52,7 +52,7 @@ void task2_task(void *p_arg);
 //任务堆栈大小	
 #define CMD_STK_SIZE 		1024
 //任务控制块
-OS_TCB CMDTaskTCB;
+OS_TCB CMD_TaskTCB;
 //任务堆栈	
 CPU_STK CMD_TASK_STK[CMD_STK_SIZE];
 
@@ -61,7 +61,7 @@ CPU_STK CMD_TASK_STK[CMD_STK_SIZE];
 //任务堆栈大小	
 #define LED_STK_SIZE 		1024
 //任务控制块
-OS_TCB LEDTaskTCB;
+OS_TCB LED_TaskTCB;
 //任务堆栈	
 CPU_STK LED_TASK_STK[LED_STK_SIZE];
 
@@ -70,7 +70,7 @@ CPU_STK LED_TASK_STK[LED_STK_SIZE];
 //任务堆栈大小	
 #define EXE_STK_SIZE 		2048
 //任务控制块
-OS_TCB EXETaskTCB;
+OS_TCB EXE_TaskTCB;
 //任务堆栈	
 CPU_STK EXE_TASK_STK[EXE_STK_SIZE];
 
@@ -79,7 +79,7 @@ CPU_STK EXE_TASK_STK[EXE_STK_SIZE];
 //任务堆栈大小	
 #define INPUT_STK_SIZE 		256
 //任务控制块
-OS_TCB INPUTTaskTCB;
+OS_TCB INPUT_TaskTCB;
 //任务堆栈	
 CPU_STK INPUT_TASK_STK[INPUT_STK_SIZE];
 
@@ -88,11 +88,17 @@ CPU_STK INPUT_TASK_STK[INPUT_STK_SIZE];
 //任务堆栈大小	
 #define MOTOR_STK_SIZE 		2048
 //任务控制块
-OS_TCB MOTORTaskTCB;
+OS_TCB MOTOR_TaskTCB;
 //任务堆栈	
 CPU_STK MOTOR_TASK_STK[MOTOR_STK_SIZE];
 
-
+void init_all(void)
+{
+	UART_init();
+	INPUT_Init();
+	OUTPUT_Init();
+	MOTOR_Init();
+}
 
 //主函数
 int main(void)
@@ -105,7 +111,7 @@ int main(void)
 	uart_init(115200);   //串口初始化
 	LED_Init();         //LED初始化	
 
-	
+	init_all();
 	
 
 	
@@ -180,7 +186,78 @@ void start_task(void *p_arg)
                  (OS_TICK	  )0,					
                  (void   	* )0,				
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
-                 (OS_ERR 	* )&err);			 
+                 (OS_ERR 	* )&err);	
+
+OSTaskCreate((OS_TCB 	* )&CMD_TaskTCB,		
+				 (CPU_CHAR	* )"cmd task", 		
+                 (OS_TASK_PTR )tCMD_Proc, 			
+                 (void		* )0,					
+                 (OS_PRIO	  )CMD_TASK_PRIO,     	
+                 (CPU_STK   * )&CMD_TASK_STK[0],	
+                 (CPU_STK_SIZE)CMD_STK_SIZE/10,	
+                 (CPU_STK_SIZE)CMD_STK_SIZE,		
+                 (OS_MSG_QTY  )0,					
+                 (OS_TICK	  )0,					
+                 (void   	* )0,				
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
+                 (OS_ERR 	* )&err);	
+
+OSTaskCreate((OS_TCB 	* )&EXE_TaskTCB,		
+				 (CPU_CHAR	* )"exe task", 		
+                 (OS_TASK_PTR )tExe_Action, 			
+                 (void		* )0,					
+                 (OS_PRIO	  )EXE_TASK_PRIO,     	
+                 (CPU_STK   * )&EXE_TASK_STK[0],	
+                 (CPU_STK_SIZE)EXE_STK_SIZE/10,	
+                 (CPU_STK_SIZE)EXE_STK_SIZE,		
+                 (OS_MSG_QTY  )0,					
+                 (OS_TICK	  )0,					
+                 (void   	* )0,				
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
+                 (OS_ERR 	* )&err);	
+
+OSTaskCreate((OS_TCB 	* )&LED_TaskTCB,		
+				 (CPU_CHAR	* )"led task", 		
+                 (OS_TASK_PTR )tLED_Control, 			
+                 (void		* )0,					
+                 (OS_PRIO	  )LED_TASK_PRIO,     	
+                 (CPU_STK   * )&LED_TASK_STK[0],	
+                 (CPU_STK_SIZE)LED_STK_SIZE/10,	
+                 (CPU_STK_SIZE)LED_STK_SIZE,		
+                 (OS_MSG_QTY  )0,					
+                 (OS_TICK	  )0,					
+                 (void   	* )0,				
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
+                 (OS_ERR 	* )&err);	
+
+OSTaskCreate((OS_TCB 	* )&INPUT_TaskTCB,		
+				 (CPU_CHAR	* )"input task", 		
+                 (OS_TASK_PTR )tInput_Scan, 			
+                 (void		* )0,					
+                 (OS_PRIO	  )INPUT_TASK_PRIO,     	
+                 (CPU_STK   * )&INPUT_TASK_STK[0],	
+                 (CPU_STK_SIZE)INPUT_STK_SIZE/10,	
+                 (CPU_STK_SIZE)INPUT_STK_SIZE,		
+                 (OS_MSG_QTY  )0,					
+                 (OS_TICK	  )0,					
+                 (void   	* )0,				
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
+                 (OS_ERR 	* )&err);	
+
+OSTaskCreate((OS_TCB 	* )&MOTOR_TaskTCB,		
+				 (CPU_CHAR	* )"motor task", 		
+                 (OS_TASK_PTR )tMotor_Motion, 			
+                 (void		* )0,					
+                 (OS_PRIO	  )MOTOR_TASK_PRIO,     	
+                 (CPU_STK   * )&MOTOR_TASK_STK[0],	
+                 (CPU_STK_SIZE)MOTOR_STK_SIZE/10,	
+                 (CPU_STK_SIZE)MOTOR_STK_SIZE,		
+                 (OS_MSG_QTY  )0,					
+                 (OS_TICK	  )0,					
+                 (void   	* )0,				
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
+                 (OS_ERR 	* )&err);	
+
 	OS_CRITICAL_EXIT();	//退出临界区
 	OSTaskDel((OS_TCB*)0,&err);	//删除start_task任务自身
 }
@@ -226,8 +303,11 @@ void task2_task(void *p_arg)
 		task2_num++;	//任务2执行次数加1 注意task1_num2加到255的时候会清零！！
 		LED1=~LED1;
 		printf("任务2已经执行：%d次\r\n",task2_num);
-
+OUTPUT_SetOne(CS_O_0, SOL07A_0);
+		OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+		OUTPUT_ResetOne(CS_O_0, SOL07A_0);
 		OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
 	}
 }
+
 

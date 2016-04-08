@@ -224,4 +224,6 @@ u8 map_stp(void);
 u8 get_mapzpos(void);
 bool is_low(void);
 
+void tInput_Scan(void *p_arg);
+
 #endif
