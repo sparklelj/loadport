@@ -31,14 +31,18 @@ u8 INPUT_Read(u8 cs_num)
 	assert_param(IS_INPUT_CS(cs_num));
 	PDout(cs_num) = 0; //相应片选，低有效
 	tmp = GPIO_ReadInputData(GPIOE);
+	PDout(cs_num) = 1; //相应片选，低有效
 	input = tmp >> 8;
 	return input;
 }
 
 u8 INPUT_ReadOne(u8 cs_num, u8 pin)
 {
+	u8 tmp = 0;
 	assert_param(IS_INPUT_CS(cs_num));
 	assert_param(IS_INPUT_PIN(pin));
 	PDout(cs_num) = 0; //相应片选，低有效
-	return PEin(pin);
+	tmp = PEin(pin);
+	PDout(cs_num) = 1;
+	return tmp;
 }

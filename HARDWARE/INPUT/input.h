@@ -66,7 +66,7 @@
 #define PH13_15    14
 #define FZ01_15    15
 
-#define CS_I_9    9    //PF
+#define CS_I_9    9    //PD
 #define CS_I_10   10
 #define CS_I_11   11
 #define CS_I_12   12
@@ -76,7 +76,7 @@
 
 
 #define IS_INPUT_CS(CS) (((CS) == 9))  || \
-												 ((CS) == 10))  || \
+												 ((CS) == 10)) || \
 												 ((CS) == 11)) || \
 												 ((CS) == 12)) || \
 												 ((CS) == 13)) || \
