@@ -95,9 +95,9 @@ CPU_STK MOTOR_TASK_STK[MOTOR_STK_SIZE];
 void init_all(void)
 {
     UART_init();
-//    INPUT_Init();
-//    OUTPUT_Init();
-//    MOTOR_Init();
+    INPUT_Init();
+    OUTPUT_Init();
+    MOTOR_Init();
 }
 
 //主函数
@@ -267,23 +267,25 @@ void start_task(void *p_arg)
 void task1_task(void *p_arg)
 {
     u8 task1_num=0;
+	s32 tt1;
     OS_ERR err;
 //	CPU_SR_ALLOC();
     p_arg = p_arg;
-
+		
     while(1)
     {
         task1_num++;	//任务执1行次数加1 注意task1_num1加到255的时候会清零！！
         LED0= ~LED0;
         printf("任务1已经执行：%d次\r\n",task1_num);
-        if(task1_num==5)
+        if(task1_num==1)
         {
+					tt1 = gPos_num;
   //          OSTaskDel((OS_TCB*)&Task2_TaskTCB,&err);	//任务1执行5此后删除掉任务2
             printf("任务1删除了任务2!\r\n");
+					task1_num = 0;
         }
-
-        OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
-
+				 
+OSTimeDlyHMSM(0,0,3,20,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
 
@@ -302,13 +304,10 @@ OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
     {
         task2_num++;	//任务2执行次数加1 注意task1_num2加到255的时候会清零！！
 //        LED1=~LED1;
-			input = ONLINE_Read(tmp,128);
-			input = ONLINE_Write(tmp, input);
-			input = CMD_Read(tmp,128);
-			input = CMD_Write(tmp, input);
-        printf("任务2已经执行：%x次\r\n",input);
-        
-        OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+			OUTPUT_TogOne(CS_O_0, SOL07A_0);
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+				OUTPUT_TogOne(CS_O_0, SOL07B_0);
+				OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
    //     OUTPUT_ResetOne(CS_O_0, SOL07A_0);
     //    OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
     }
