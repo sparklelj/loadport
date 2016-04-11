@@ -23,7 +23,7 @@ u8 gMotion_status;
 
 bool is_mstop(void)
 {
-    if((gMotion_cmd == gMotion_num) && (gCur_vel == 0))
+    if((gMotion_cmd == gMotion_num) && (is_stop == true))
     {
         return true;
     }
@@ -39,10 +39,15 @@ void tMotor_Motion(void *p_arg)
     CPU_SR_ALLOC();
     while(1)
     {
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         OS_CRITICAL_ENTER();
-        if(gCur_vel !=0)
+        if(gMotion_cmd == gMotion_num)
         {
-            if(gMotion_cmd >= ((gCur_vel - VEL_MIN) >> VEL_ACCB) * gDir_vel + 1 + gMotion_num)
+            continue;
+        }
+        if(!is_stop)
+        {
+            if(gMotion_cmd >= ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel + 1 + gMotion_num)
             {
                 if(gDir_vel == DIR_POS)
                 {
@@ -50,7 +55,22 @@ void tMotor_Motion(void *p_arg)
                 }
                 else
                 {
-                    gPulse_num = ((gCur_vel - VEL_MIN) >> VEL_ACCB) + 1;
+                    if((gMotion_cmd - gMotion_num) > 5)
+                    {
+                        gPulse_num = ((VEL_MIN - gCur_vel) >> VEL_ACCB) + 1;
+                    }
+                    else 
+                    {
+											if(gMotion_cmd > gMotion_num)
+											{
+                        gPulse_num = gMotion_cmd - gMotion_num;
+											}
+											else
+											{
+												gPulse_num = gMotion_num - gMotion_cmd;
+											}
+                    }
+										
                 }
             }
             else
@@ -61,7 +81,21 @@ void tMotor_Motion(void *p_arg)
                 }
                 else
                 {
-                    gPulse_num = ((gCur_vel - VEL_MIN) >> VEL_ACCB) + 1;
+                    if(((VEL_MIN - gCur_vel) >> VEL_ACCB) > 5)
+                    {
+                        gPulse_num = ((VEL_MIN - gCur_vel) >> VEL_ACCB) + 1;
+                    }
+                    else
+                    {
+											if(gMotion_cmd > gMotion_num)
+											{
+                        gPulse_num = gMotion_cmd - gMotion_num;
+											}
+											else
+											{
+												gPulse_num = gMotion_num - gMotion_cmd;
+											}
+                    }
                 }
             }
         }
@@ -112,7 +146,7 @@ void tMotor_Motion(void *p_arg)
                 break;
             }
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+//       OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
 
@@ -136,7 +170,7 @@ void STOP_Motion(void)
 
 void START_Motion(s32 target_pos, u16 target_vel)
 {
-    gMotion_cmd = target_pos << 1;
+    gMotion_cmd = target_pos;
     gVel_cmd = target_vel;
 }
 
@@ -224,7 +258,7 @@ BEGIN:
     OS_CRITICAL_ENTER();
 //	gPos_num = gPos_num - gPark_num;
     POS_SET(gPark_num);
-    gMotion_num = gPos_num << 1;
+    gMotion_num = gPos_num ;
     gMotion_cmd = gMotion_num;
     OS_CRITICAL_EXIT();
 

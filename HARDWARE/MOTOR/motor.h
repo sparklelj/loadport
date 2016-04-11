@@ -30,7 +30,7 @@
 #define MS_END       0x0B
 #define MS_BAKINIT   0x0C
 
-#define VEL_MAX 	 0xFF
+#define VEL_MAX 	 0xF0
 #define VEL_MIN 	 0xFFF0
 #define VEL_ACCB   3
 #define VEL_ACC 	 0x08
@@ -46,6 +46,8 @@ extern s8  gDir_vel;
 extern s32 gPos_num;
 extern s32 gPark_num;
 extern u8 gMotor_state;
+extern bool is_stop;
+extern u32 gPulse_num;
 
 #define SCAN_NUM_MAX 100
 extern s32 gScan_pos[SCAN_NUM_MAX];

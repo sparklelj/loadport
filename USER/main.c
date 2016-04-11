@@ -243,7 +243,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-
+*/
     OSTaskCreate((OS_TCB 	* )&MOTOR_TaskTCB,
                  (CPU_CHAR	* )"motor task",
                  (OS_TASK_PTR )tMotor_Motion,
@@ -257,7 +257,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-*/
+
     OS_CRITICAL_EXIT();	//退出临界区
     OSTaskDel((OS_TCB*)0,&err);	//删除start_task任务自身
 }
@@ -280,12 +280,13 @@ void task1_task(void *p_arg)
         if(task1_num==1)
         {
 					tt1 = gPos_num;
+					printf("m:%d v:%d d:%d p:%d cm:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num ,gMotion_cmd);
   //          OSTaskDel((OS_TCB*)&Task2_TaskTCB,&err);	//任务1执行5此后删除掉任务2
-            printf("任务1删除了任务2!\r\n");
+  //          printf("任务1删除了任务2!\r\n");
 					task1_num = 0;
         }
 				 
-OSTimeDlyHMSM(0,0,3,20,OS_OPT_TIME_HMSM_STRICT,&err);
+OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
 
@@ -299,17 +300,30 @@ void task2_task(void *p_arg)
 //	CPU_SR_ALLOC();
     p_arg = p_arg;
 OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
-
+START_Motion(10, 0xEFF0);
     while(1)
     {
         task2_num++;	//任务2执行次数加1 注意task1_num2加到255的时候会清零！！
+//			printf("m:%d v:%d d:%d p:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num);
 //        LED1=~LED1;
-			OUTPUT_TogOne(CS_O_0, SOL07A_0);
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
-				OUTPUT_TogOne(CS_O_0, SOL07B_0);
+//			OUTPUT_TogOne(CS_O_0, SOL07A_0);
+//        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+//				OUTPUT_TogOne(CS_O_0, SOL07B_0);
 				OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
    //     OUTPUT_ResetOne(CS_O_0, SOL07A_0);
     //    OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+			while(!(is_mstop() && (gMotion_num == 10)))
+			{}
+				OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
+				START_Motion(-100, 0xEFF0);
+			while(gMotion_num > -50)
+			{}
+				printf("-300");
+				START_Motion(-200, 0xEFF0);
+			while(gMotion_num > -150)
+			{}
+				printf("100");
+				START_Motion(100, 0xDFF0);	
     }
 }
 
