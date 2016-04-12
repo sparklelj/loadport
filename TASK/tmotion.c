@@ -47,76 +47,47 @@ void tMotor_Motion(void *p_arg)
         }
         if(!is_stop)
         {
-            if(gMotion_cmd >= ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel + 1 + gMotion_num)
-            {
-                if(gDir_vel == DIR_POS)
-                {
-                    gPulse_num = gMotion_cmd - gMotion_num;
-                }
-                else
-                {
-                    if((gMotion_cmd - gMotion_num) > 5)
-                    {
-                        gPulse_num = ((VEL_MIN - gCur_vel) >> VEL_ACCB) + 1;
-                    }
-                    else 
-                    {
-											if(gMotion_cmd > gMotion_num)
-											{
-                        gPulse_num = gMotion_cmd - gMotion_num;
-											}
-											else
-											{
-												gPulse_num = gMotion_num - gMotion_cmd;
-											}
-                    }
-										
-                }
-            }
-            else
-            {
-                if(gDir_vel == DIE_NEG)
-                {
-                    gPulse_num = gMotion_num - gMotion_cmd ;
-                }
-                else
-                {
-                    if(((VEL_MIN - gCur_vel) >> VEL_ACCB) > 5)
-                    {
-                        gPulse_num = ((VEL_MIN - gCur_vel) >> VEL_ACCB) + 1;
-                    }
-                    else
-                    {
-											if(gMotion_cmd > gMotion_num)
-											{
-                        gPulse_num = gMotion_cmd - gMotion_num;
-											}
-											else
-											{
-												gPulse_num = gMotion_num - gMotion_cmd;
-											}
-                    }
-                }
-            }
-        }
-        else
-        {
-            if(gMotion_cmd - gMotion_num >= 0)
-            {
-                gPulse_num = gMotion_cmd - gMotion_num;
-                if(gDir_vel == DIE_NEG)
-                {
-                    OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
-                    PEout(M_DIR) = 1;
-                    gDir_vel = DIR_POS;
-                    OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
-                }
-            }
-            else
-            {
-                gPulse_num = gMotion_num - gMotion_cmd;
-                if(gDir_vel == DIR_POS)
-                {
+		if(gMotion_cmd >= ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel + gMotion_num)
+		{
+			if(gDir_vel == DIR_POS)
+			{
+				gPulse_num = gMotion_cmd - gMotion_num;
+			}
+			else
+			{
+					gPulse_num = (VEL_MIN - gCur_vel) >> VEL_ACCB;
+			}
+		}
+		else
+		{
+			if(gDir_vel == DIE_NEG)
+			{
+				gPulse_num = gMotion_num - gMotion_cmd ;
+			}
+			else
+			{
+					gPulse_num = (VEL_MIN - gCur_vel) >> VEL_ACCB;
+			}
+		}
+	}
+	else
+	{
+		if(gMotion_cmd - gMotion_num >= 0)
+		{
+			gPulse_num = gMotion_cmd - gMotion_num;
+			if(gDir_vel == DIE_NEG)
+			{
+				OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
+				PEout(M_DIR) = 1;
+				gDir_vel = DIR_POS;
+				OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
+			}
+		}
+		else
+		{
+			gPulse_num = gMotion_num - gMotion_cmd;
+			if(gDir_vel == DIR_POS)
+			{
                     OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);
                     PEout(M_DIR) = 0;
                     gDir_vel = DIE_NEG;
