@@ -92,6 +92,15 @@ OS_TCB MOTOR_TaskTCB;
 //任务堆栈
 CPU_STK MOTOR_TASK_STK[MOTOR_STK_SIZE];
 
+//任务优先级
+#define MINIT_TASK_PRIO		3
+//任务堆栈大小
+#define MINIT_STK_SIZE 		512
+//任务控制块
+OS_TCB MINIT_TaskTCB;
+//任务堆栈
+CPU_STK MINIT_TASK_STK[MINIT_STK_SIZE];
+
 void init_all(void)
 {
     UART_init();
@@ -244,6 +253,20 @@ void start_task(void *p_arg)
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
 */
+OSTaskCreate((OS_TCB 	* )&MINIT_TaskTCB,
+                 (CPU_CHAR	* )"minittor task",
+                 (OS_TASK_PTR )tMotor_Init,
+                 (void		* )0,
+                 (OS_PRIO	  )MINIT_TASK_PRIO,
+                 (CPU_STK   * )&MINIT_TASK_STK[0],
+                 (CPU_STK_SIZE)MINIT_STK_SIZE/10,
+                 (CPU_STK_SIZE)MINIT_STK_SIZE,
+                 (OS_MSG_QTY  )0,
+                 (OS_TICK	  )0,
+                 (void   	* )0,
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
+                 (OS_ERR 	* )&err);
+								 
     OSTaskCreate((OS_TCB 	* )&MOTOR_TaskTCB,
                  (CPU_CHAR	* )"motor task",
                  (OS_TASK_PTR )tMotor_Motion,
@@ -280,12 +303,14 @@ void task1_task(void *p_arg)
         if(task1_num==1)
         {
 					tt1 = gPos_num;
-					printf("m:%d v:%d d:%d p:%d cm:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num ,gMotion_cmd);
+					printf("m:%d v:%d d:%d p:%d cm:%d ps:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num ,gMotion_cmd,gPos_num);
   //          OSTaskDel((OS_TCB*)&Task2_TaskTCB,&err);	//任务1执行5此后删除掉任务2
   //          printf("任务1删除了任务2!\r\n");
 					task1_num = 0;
         }
-				 
+				OUTPUT_TogOne(CS_O_0, SOL07A_0);
+        OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+				OUTPUT_TogOne(CS_O_0, SOL07B_0);		 
 OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
@@ -300,7 +325,10 @@ void task2_task(void *p_arg)
 //	CPU_SR_ALLOC();
     p_arg = p_arg;
 OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
-START_Motion(10, 0xEFF0);
+	OUTPUT_SetOne(CS_O_0, SOL08A_0);
+START_Motion(100, 0xEFF0);
+	OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
+OSTaskResume(&MINIT_TaskTCB,&err);	
     while(1)
     {
         task2_num++;	//任务2执行次数加1 注意task1_num2加到255的时候会清零！！
@@ -309,21 +337,29 @@ START_Motion(10, 0xEFF0);
 //			OUTPUT_TogOne(CS_O_0, SOL07A_0);
 //        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
 //				OUTPUT_TogOne(CS_O_0, SOL07B_0);
-				OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
+				OSTimeDlyHMSM(0,0,15,100,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
+			OUTPUT_ResetOne(CS_O_0, SOL08A_0);
+			OSTimeDlyHMSM(0,0,19,100,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
+			OUTPUT_SetOne(CS_O_0, SOL08A_0);
+			while(1)
+			{
+			}
    //     OUTPUT_ResetOne(CS_O_0, SOL07A_0);
     //    OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+			/*
 			while(!(is_mstop() && (gMotion_num == 10)))
 			{}
 				OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
-				START_Motion(-100, 0xEFF0);
-			while(gMotion_num > -50)
+				START_Motion(-50, 0xEFF0);
+			while(gMotion_num > -10)
 			{}
 				printf("-300");
-				START_Motion(-200, 0xEFF0);
-			while(gMotion_num > -150)
+				START_Motion(-100, 0xEFF0);
+			while(gMotion_num > -40)
 			{}
 				printf("100");
 				START_Motion(100, 0xDFF0);	
+				*/
     }
 }
 
