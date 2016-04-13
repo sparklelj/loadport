@@ -35,8 +35,8 @@ u16 gCur_vel = 0;
 u16 gMax_vel = VEL_MAX;
 s8  gDir_vel = 1;
 
-s32 gScan_pos[SCAN_NUM_MAX];
-u8  gScan_num = 0;
+s32 gScan_pos[SCAN_NUM_MAX] = {26100,26000,25200,25000,24100,24000,22800,22600,21100,21000,20200,20000,19200,19000,17800,17600,16200,16000,15200,15000,14100,14000,12800,12600,11100,11000,8800,8600,6800,6600,3100,3000};
+u8  gScan_num = 32;
 
 void CTRL_Init(void)
 {
@@ -180,7 +180,7 @@ void MOTION_Scan(void)
 
     EXTI_InitStructure.EXTI_Line = CONN(EXTI_Line, M_SCAN);
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
 

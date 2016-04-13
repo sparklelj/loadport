@@ -156,7 +156,7 @@ bool check_sum(u8* msg)
         sum += *(msg + i);
     }
     sprintf((char*)strsum, "%2X", sum);
-    if(strsum[0] == *(msg+len+1) && strsum[0] == *(msg+len+2))
+    if(strsum[0] == *(msg+len+1) && strsum[1] == *(msg+len+2))
     {
         return true;
     }

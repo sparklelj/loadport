@@ -201,50 +201,66 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>349</LineNumber>
+          <LineNumber>846</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134222378</Address>
+          <Address>134278044</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\HARDWARE\MOTOR\motor.c</Filename>
+          <Filename>..\TASK\texecute.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\loadport\../HARDWARE/MOTOR/motor.c\349</Expression>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>844</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134278042</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\TASK\texecute.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>tmp</ItemText>
+          <ItemText>result</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GPIO_PinSource</ItemText>
+          <ItemText>cntp</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>gPos_num,0x0A</ItemText>
+          <ItemText>\\loadport\../HARDWARE/MOTOR/motor.c\gScan_pos,0x10</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>tt1f,0x0A</ItemText>
+          <ItemText>result</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>task2_num</ItemText>
+          <ItemText>param</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>gMotion_num,0x0A</ItemText>
+          <ItemText>cnts</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -258,7 +274,7 @@
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>0</SubType>
-          <ItemText>buff</ItemText>
+          <ItemText>result</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
@@ -1252,7 +1268,7 @@
       <GroupNumber>12</GroupNumber>
       <FileNumber>67</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>

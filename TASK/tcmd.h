@@ -80,4 +80,5 @@ extern u8 gEnd_act;
 
 bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen);
 void tCMD_Proc(void *p_arg);
+bool format_mapdt(u8* param);
 #endif

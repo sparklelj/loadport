@@ -25,7 +25,7 @@ CPU_STK START_TASK_STK[START_STK_SIZE];
 void start_task(void *p_arg);
 
 //任务优先级
-#define TASK1_TASK_PRIO		4
+#define TASK1_TASK_PRIO		5
 //任务堆栈大小
 #define TASK1_STK_SIZE 		128
 //任务控制块
@@ -122,7 +122,7 @@ int main(void)
 
     init_all();
 
-
+gMotor_state = MS_SCANNING;
 
     OSInit(&err);		    //初始化UCOSIII
     OS_CRITICAL_ENTER();	//进入临界区
@@ -196,7 +196,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-/*
+
     OSTaskCreate((OS_TCB 	* )&CMD_TaskTCB,
                  (CPU_CHAR	* )"cmd task",
                  (OS_TASK_PTR )tCMD_Proc,
@@ -210,7 +210,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-
+/*
     OSTaskCreate((OS_TCB 	* )&EXE_TaskTCB,
                  (CPU_CHAR	* )"exe task",
                  (OS_TASK_PTR )tExe_Action,
@@ -303,15 +303,15 @@ void task1_task(void *p_arg)
         if(task1_num==1)
         {
 					tt1 = gPos_num;
-					printf("m:%d v:%d d:%d p:%d cm:%d ps:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num ,gMotion_cmd,gPos_num);
+	//				printf("m:%d v:%d d:%d p:%d cm:%d ps:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num ,gMotion_cmd,gPos_num);
   //          OSTaskDel((OS_TCB*)&Task2_TaskTCB,&err);	//任务1执行5此后删除掉任务2
   //          printf("任务1删除了任务2!\r\n");
 					task1_num = 0;
         }
-				OUTPUT_TogOne(CS_O_0, SOL07A_0);
-        OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
-				OUTPUT_TogOne(CS_O_0, SOL07B_0);		 
-OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err);
+				OUTPUT_TogOne(CS_O_0, SOL07B_0);
+        OSTimeDlyHMSM(0,0,0,50,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+				OUTPUT_TogOne(CS_O_0, SOL07A_0);		 
+       	OSTimeDlyHMSM(0,0,0,50,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
 
@@ -321,14 +321,15 @@ void task2_task(void *p_arg)
     u8 task2_num=0;
 	u8 input;
 	u8 tmp[128];
+	u8 param[30];
     OS_ERR err;
 //	CPU_SR_ALLOC();
     p_arg = p_arg;
 OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
 	OUTPUT_SetOne(CS_O_0, SOL08A_0);
 START_Motion(100, 0xEFF0);
-	OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
-OSTaskResume(&MINIT_TaskTCB,&err);	
+//	OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
+//OSTaskResume(&MINIT_TaskTCB,&err);	
     while(1)
     {
         task2_num++;	//任务2执行次数加1 注意task1_num2加到255的时候会清零！！
@@ -337,13 +338,18 @@ OSTaskResume(&MINIT_TaskTCB,&err);
 //			OUTPUT_TogOne(CS_O_0, SOL07A_0);
 //        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
 //				OUTPUT_TogOne(CS_O_0, SOL07B_0);
-				OSTimeDlyHMSM(0,0,15,100,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
-			OUTPUT_ResetOne(CS_O_0, SOL08A_0);
-			OSTimeDlyHMSM(0,0,19,100,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
-			OUTPUT_SetOne(CS_O_0, SOL08A_0);
-			while(1)
+				OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
+//			if(task2_num == 1)
 			{
+				format_mapdt(param);
 			}
+//			OUTPUT_ResetOne(CS_O_0, SOL08A_0);
+//			OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
+//			OUTPUT_SetOne(CS_O_0, SOL08A_0);
+//			OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err);
+//			while(1)
+//			{
+//			}
    //     OUTPUT_ResetOne(CS_O_0, SOL07A_0);
     //    OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
 			/*
