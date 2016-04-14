@@ -72,7 +72,7 @@
 #define BCAK_RAS 0x05
 
 extern u8 gAddr[2];
-extern u8 gLED_status[8];
+extern u8 gLED_status[9];
 extern u8 gCmd_action;
 extern u8 gCom_mod;
 extern u8 gCUr_status;

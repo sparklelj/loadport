@@ -210,7 +210,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-/*
+
     OSTaskCreate((OS_TCB 	* )&EXE_TaskTCB,
                  (CPU_CHAR	* )"exe task",
                  (OS_TASK_PTR )tExe_Action,
@@ -252,7 +252,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-*/
+
 OSTaskCreate((OS_TCB 	* )&MINIT_TaskTCB,
                  (CPU_CHAR	* )"minittor task",
                  (OS_TASK_PTR )tMotor_Init,

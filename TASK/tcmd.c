@@ -7,7 +7,7 @@
 
 u8 gAddr[2] = {'0','0'};
 u8 gCom_mod = 0x0F;
-u8 gLED_status[8];
+u8 gLED_status[9] = {0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C};
 u8 gVersion[13] = {'/','V','E','R',' ','1','.','0','1',' ',' ',' ',' '};
 u8 gCUr_status = G_CUR_STA_UNI; //uninit
 u8 gCur_CMD = G_CUR_CMD_NO;
@@ -210,31 +210,31 @@ bool format_ledst(u8* param)
     {
         if((gLED_status[cnt] & 0xF0) == 0x10)
         {
-            switch (gLED_status[7] & 0x03)
+            switch (gLED_status[cnt] & 0x03)
             {
             case 1:
-                param[cnt+1] = '0';
+                param[cnt+1] = '1';
                 break;
             case 2:
                 param[cnt+1] = '2';
                 break;
             case 3:
-                param[cnt+1] = '1';
+                param[cnt+1] = '0';
                 break;
             }
         }
         else
         {
-            switch (gLED_status[7] & 0x0C)
+            switch (gLED_status[cnt] & 0x0C)
             {
-            case 1:
-                param[cnt+1] = '0';
+            case 0x04:
+                param[cnt+1] = '1';
                 break;
-            case 2:
+            case 0x08:
                 param[cnt+1] = '2';
                 break;
-            case 3:
-                param[cnt+1] = '1';
+            case 0x0C:
+                param[cnt+1] = '0';
                 break;
             }
         }
@@ -288,16 +288,16 @@ bool format_maprd(u8* param)
             switch (result[i])
             {
             case 0:
-                param[26-i] = '0';
+                param[25-i] = '0';
                 break;
             case 1:
-                param[26-i] = '1';
+                param[25-i] = '1';
                 break;
             case 2:
-                param[26-i] = 'W';
+                param[25-i] = 'W';
                 break;
             case 3:
-                param[26-i] = '2';
+                param[25-i] = '2';
                 break;
             }
         }
@@ -670,6 +670,7 @@ void format_remap(u8 type)
 
 bool proc_set(u8* cmd_name)
 {
+	send_msg(gCom_mod & BCAK_ACK, (char*)cmd_name, (u8*)NULL, 0);
     if(memcmp(cmd_name, "RESET", 5) == 0)
     {
     }
@@ -760,7 +761,8 @@ bool proc_set(u8* cmd_name)
     {
         gLED_status[7] = 0x13;
     }
-		return true;
+		send_msg(gCom_mod & BCAK_FIN, (char*)cmd_name, (u8*)NULL, 0);
+    return true;
 }
 
 bool proc_mod(u8* cmd_name)
@@ -773,7 +775,7 @@ bool proc_mod(u8* cmd_name)
     {
         gCom_mod = 1;
     }
-		return true;
+    return true;
 }
 
 bool proc_get(u8* cmd_name)
@@ -792,7 +794,7 @@ bool proc_get(u8* cmd_name)
     {
         u8 param[10];
         format_ledst(param);
-        send_msg(gCom_mod & BCAK_ACK, "VERSN", param, 10);
+        send_msg(gCom_mod & BCAK_ACK, "LEDST", param, 10);
     }
     if(memcmp(cmd_name, "MAPDT", 5) == 0)
     {
@@ -812,23 +814,23 @@ bool proc_get(u8* cmd_name)
         format_wfcnt(param);
         send_msg(gCom_mod & BCAK_ACK, "WFCNT", param, 3);
     }
-		return true;
+    return true;
 }
 
 bool proc_fin(u8* cmd_name)
 {
-	return true;
+    return true;
 }
 
 bool proc_mov(u8* cmd_name)
 {
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
-			gCUr_status = G_CUR_STA_UNI;
+        gCUr_status = G_CUR_STA_UNI;
     }
     if(memcmp(cmd_name, "ABORG", 5) == 0)
     {
-			gCUr_status = G_CUR_STA_UNI;
+        gCUr_status = G_CUR_STA_UNI;
     }
     if(memcmp(cmd_name, "CLOAD", 5) == 0)
     {
@@ -998,7 +1000,7 @@ bool proc_mov(u8* cmd_name)
         gCur_abort = 0;
         gCur_retry = 0;
     }
-		return true;
+    return true;
 }
 
 bool proc_evt(u8* cmd_name)
@@ -1015,22 +1017,22 @@ bool proc_evt(u8* cmd_name)
     if(memcmp(cmd_name, "FPEOF", 5) == 0)
     {
     }
-		return true;
+    return true;
 }
 
 bool proc_rst(u8* cmd_name)
 {
-	return true;
+    return true;
 }
 
 bool proc_rfn(u8* cmd_name)
 {
-	return true;
+    return true;
 }
 
 bool proc_rmv(u8* cmd_name)
 {
-	return true;
+    return true;
 }
 
 bool proc_cmd(u8* msg)
@@ -1050,56 +1052,92 @@ bool proc_cmd(u8* msg)
 
     if(!check_sum(msg))
     {
-        send_msg(gCom_mod & BCAK_NAK, (char*)cmd_n, (u8*)"/CKSUM", 6);
-        return false;
+//       send_msg(gCom_mod & BCAK_NAK, (char*)cmd_n, (u8*)"/CKSUM", 6);
+//       return false;
     }
 
     if(memcmp(cmd_t, "SET", 3) == 0)
     {
         res = proc_set(cmd_n);
+        if(res)
+        {
+            return true;
+        }
     }
 
     if(memcmp(cmd_t, "MOD", 3) == 0)
     {
         res = proc_mod(cmd_n);
+        if(res)
+        {
+            return true;
+        }
     }
 
     if(memcmp(cmd_t, "GET", 3) == 0)
     {
         res = proc_get(cmd_n);
+        if(res)
+        {
+            return true;
+        }
     }
 
     if(memcmp(cmd_t, "FIN", 3) == 0)
     {
         res = proc_fin(cmd_n);
+        if(res)
+        {
+            return true;
+        }
     }
 
     if(memcmp(cmd_t, "MOV", 3) == 0)
     {
         res = proc_mov(cmd_n);
+        if(res)
+        {
+            return true;
+        }
     }
 
     if(memcmp(cmd_t, "EVT", 3) == 0)
     {
         res = proc_evt(cmd_n);
+        if(res)
+        {
+            return true;
+        }
     }
 
     if(memcmp(cmd_t, "RST", 3) == 0)
     {
         res = proc_rst(cmd_n);
+        if(res)
+        {
+            return true;
+        }
     }
 
     if(memcmp(cmd_t, "RFN", 3) == 0)
     {
         res = proc_rfn(cmd_n);
+        if(res)
+        {
+            return true;
+        }
     }
 
     if(memcmp(cmd_t, "RMV", 3) == 0)
     {
         res = proc_rmv(cmd_n);
+        if(res)
+        {
+            return true;
+        }
     }
 
-    send_msg(gCom_mod & BCAK_NAK, (char*)cmd_n, (u8*)"/CMDER", 6);
+    send_msg(gCom_mod & BCAK_NAK, (char*)cmd_t, (u8*)"/CMDER", 6);
     return false;
 }
 
