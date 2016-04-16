@@ -103,10 +103,28 @@ CPU_STK MINIT_TASK_STK[MINIT_STK_SIZE];
 
 void init_all(void)
 {
+	  u8 time = 10;
     UART_init();
     INPUT_Init();
     OUTPUT_Init();
     MOTOR_Init();
+	/*
+	  while((time--) && (is_m_err()))
+    {
+			delay_ms(500);
+		}
+	*/
+		if(time == 0)
+		{
+			enable_m(DIS_M);
+			while(true)
+			{
+			}
+		}
+		else
+		{
+			enable_m(ENA_M);
+		}		
 }
 
 //Ö÷º¯Êý

@@ -13,7 +13,7 @@
 #define M_SCAN   11 //PF
 #define M_POS_A  12 //PF
 #define M_POS_B  13
-#define M_POS_Z  14
+#define M_ERR    14
 #define M_POS_P  15
 
 #define MS_UNINIT    0x00

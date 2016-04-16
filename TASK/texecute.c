@@ -770,10 +770,10 @@ u8 get_init(void)
 
 u8 get_oper(void)
 {
-    if(gCUr_status == G_CUR_STA_RUN || \
-            gCUr_status == G_CUR_STA_PAU || \
-            gCUr_status == G_CUR_STA_RSM || \
-            gCUr_status == G_CUR_STA_INT)
+    if(gCur_status == G_CUR_STA_RUN || \
+            gCur_status == G_CUR_STA_PAU || \
+            gCur_status == G_CUR_STA_RSM || \
+            gCur_status == G_CUR_STA_INT)
     {
         return '1';
     }
@@ -839,7 +839,7 @@ bool Analyze_Scan(u8* result)
     memset(result, 0, WAFER_NUM);
     if(gis_scan == false)
     {
- //      return false;
+//      return false;
     }
     while(cntp < gScan_num)
     {
@@ -957,6 +957,9 @@ void set_errno(u8 cmd, u8 errno)
         case CMD_ACTION_PODOP:
             gErr_no = errno;
             break;
+        case CMD_ACTION_PODCL:
+            gErr_no = errno;
+            break;
         }
     }
     else
@@ -965,6 +968,9 @@ void set_errno(u8 cmd, u8 errno)
         {
         case CMD_ACTION_PODOP:
             gErr_no =0x21;
+            break;
+        case CMD_ACTION_PODCL:
+            gErr_no =0x22;
             break;
         }
     }
@@ -1017,7 +1023,6 @@ u8 podop_action(u8* error)
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
-
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
@@ -1048,6 +1053,7 @@ u8 podcl_action(u8* error)
         {
         case 0x01:
             run_clamup(gCur_pause);
+            *error = 0x61;
             if(is_clampup())
             {
                 seq = 0x02;
@@ -1055,6 +1061,7 @@ u8 podcl_action(u8* error)
             break;
         case 0x02:
             run_clamfwd(gCur_pause);
+            *error = 0x22;
             if(is_clampfwd())
             {
                 seq = 0x03;
@@ -1062,6 +1069,7 @@ u8 podcl_action(u8* error)
             break;
         case 0x03:
             run_clamlck(gCur_pause);
+            *error = 0x63;
             if(is_clamplock())
             {
                 return 0x01;
@@ -1070,16 +1078,120 @@ u8 podcl_action(u8* error)
         }
         if(gCur_stop == 0x01)
         {
-            return 0x01;
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
         }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
-            if(gCur_stop == 0x01)
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+
+u8 vacon_action(u8* error)
+{
+    u8 time = 50;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(vacon_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_dradsp(gCur_pause);
+            *error = 0x25;
+            if(is_vacuumon())
             {
                 return 0x01;
             }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+
+u8 vacof_action(u8* error)
+{
+    u8 time = 50;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(vacof_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_dradsr(gCur_pause);
+            *error = 0x26;
+            if(is_vacuumoff())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
         }
     }
     return 0x00;
@@ -1094,12 +1206,13 @@ void tExe_Action(void *p_arg)
     u8 param[10];
     while(1)
     {
-        if(gCUr_status == G_CUR_STA_ERR || \
-                gCUr_status == G_CUR_STA_INT || \
-                gCUr_status == G_CUR_STA_NAC || \
-                gCUr_status == G_CUR_STA_UNI || \
-                gCUr_status == G_CUR_STA_ABO || \
-                gCUr_status == G_CUR_STA_STP)
+        if(gCur_status == G_CUR_STA_ERR || \
+                gCur_status == G_CUR_STA_INT || \
+                gCur_status == G_CUR_STA_NAC || \
+                gCur_status == G_CUR_STA_UNI || \
+                gCur_status == G_CUR_STA_ABO || \
+                gCur_status == G_CUR_STA_END || \
+                gCur_status == G_CUR_STA_STP)
         {
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
             continue;
@@ -1114,7 +1227,7 @@ void tExe_Action(void *p_arg)
             if(ret == ACT_END)
             {
                 send_msg(gCom_mod & BCAK_FIN, (char*)"PODOP", (u8*)NULL, 0);
-                gCUr_status = G_CUR_STA_END;
+                gCur_status = G_CUR_STA_END;
                 gEnd_act = CMD_ACTION_PODOP;
             }
             else if(ret == ACT_ERR)
@@ -1138,24 +1251,158 @@ void tExe_Action(void *p_arg)
                 }
                 set_errno(CMD_ACTION_PODOP, error);
                 send_msg(gCom_mod & BCAK_ABS, (char*)"PODOP", param, 6);
-                gCUr_status = G_CUR_STA_ERR;
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
                 gEnd_act = CMD_ACTION_NOACT;
             }
             else if(ret == ACT_ABT)
             {
                 send_msg(gCom_mod & BCAK_FIN, (char*)"PODOP", param, 6);
-                gCUr_status = G_CUR_STA_ABO;
+                gCur_status = G_CUR_STA_ABO;
                 gEnd_act = CMD_ACTION_NOACT;
             }
             else if(ret == ACT_STP)
             {
                 send_msg(gCom_mod & BCAK_FIN, (char*)"PODOP", param, 6);
-                gCUr_status = G_CUR_STA_STP;
+                gCur_status = G_CUR_STA_STP;
                 gEnd_act = CMD_ACTION_NOACT;
             }
             break;
         case CMD_ACTION_PODCL:
-            podcl_action(&error);
+            ret = podcl_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"PODCL", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_PODCL;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x61:
+                case 0x22:
+                case 0x63:
+                    memcpy(param, (char*)"/CLCLS", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_PODCL, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"PODCL", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"PODCL", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"PODCL", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_VACON:
+            ret = vacon_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"VACON", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_VACON;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x25:
+                    memcpy(param, (char*)"/VACCS", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_VACON, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"VACCS", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"VACON", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"VACON", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_VACOF:
+            ret = vacof_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"VACOF", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_VACOF;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x26:
+                    memcpy(param, (char*)"/VACOS", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_VACOF, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"VACOS", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"VACOF", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"VACOF", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        default:
             break;
         }
     }

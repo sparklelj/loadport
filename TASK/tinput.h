@@ -143,6 +143,8 @@ u8 podcl_before(u8* error);
 u8 podcl_running(u8* error);
 u8 vacon_before(u8* error);
 u8 vacon_running(u8* error);
+u8 vacof_before(u8* error);
+u8 vacof_running(u8* error);
 u8 dorop_before(u8* error);
 u8 dorop_running(u8* error);
 u8 dorcl_before(u8* error);

@@ -75,7 +75,8 @@ extern u8 gAddr[2];
 extern u8 gLED_status[9];
 extern u8 gCmd_action;
 extern u8 gCom_mod;
-extern u8 gCUr_status;
+extern u8 gCur_status;
+extern u8 gPre_status;
 extern u8 gEnd_act;
 
 bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen);

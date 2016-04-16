@@ -33,6 +33,22 @@ bool is_mstop(void)
     }
 }
 
+bool is_m_err(void)
+{
+	if(PFin(M_ERR) == 0x00)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool enable_m(bool ctrl)
+{
+	PEout(M_ENABLE) = ctrl;
+	return true;
+}
+
+
 void tMotor_Motion(void *p_arg)
 {
     OS_ERR err;

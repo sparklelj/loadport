@@ -9,7 +9,8 @@ u8 gAddr[2] = {'0','0'};
 u8 gCom_mod = 0x0F;
 u8 gLED_status[9] = {0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C};
 u8 gVersion[13] = {'/','V','E','R',' ','1','.','0','1',' ',' ',' ',' '};
-u8 gCUr_status = G_CUR_STA_UNI; //uninit
+u8 gCur_status = G_CUR_STA_UNI; //uninit
+u8 gPre_status = G_CUR_STA_UNI;
 u8 gCur_CMD = G_CUR_CMD_NO;
 
 u8 gAction_seq[32];
@@ -21,10 +22,10 @@ u8 gEnd_act = CMD_ACTION_NOACT;
 
 bool is_run(void)
 {
-    if(gCUr_status == G_CUR_STA_RUN || \
-            gCUr_status == G_CUR_STA_PAU || \
-            gCUr_status == G_CUR_STA_RSM || \
-            gCUr_status == G_CUR_STA_INT)
+    if(gCur_status == G_CUR_STA_RUN || \
+            gCur_status == G_CUR_STA_PAU || \
+            gCur_status == G_CUR_STA_RSM || \
+            gCur_status == G_CUR_STA_INT)
     {
         return true;
     }
@@ -673,6 +674,14 @@ bool proc_set(u8* cmd_name)
 	send_msg(gCom_mod & BCAK_ACK, (char*)cmd_name, (u8*)NULL, 0);
     if(memcmp(cmd_name, "RESET", 5) == 0)
     {
+			if(gPre_status == G_CUR_STA_UNI)
+			{
+				gCur_status = G_CUR_STA_UNI;
+			}
+			else
+			{
+				gCur_status = gPre_status;
+			}
     }
     if(memcmp(cmd_name, "INITL", 5) == 0)
     {
@@ -826,11 +835,11 @@ bool proc_mov(u8* cmd_name)
 {
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
-        gCUr_status = G_CUR_STA_UNI;
+        gCur_status = G_CUR_STA_UNI;
     }
     if(memcmp(cmd_name, "ABORG", 5) == 0)
     {
-        gCUr_status = G_CUR_STA_UNI;
+        gCur_status = G_CUR_STA_UNI;
     }
     if(memcmp(cmd_name, "CLOAD", 5) == 0)
     {
@@ -888,6 +897,7 @@ bool proc_mov(u8* cmd_name)
         u8 ret = 0;
         u8 error;
         ret = podop_before(&error);
+			ret = false;
         if(ret == true)
         {
             switch(error)
@@ -902,20 +912,64 @@ bool proc_mov(u8* cmd_name)
                 send_msg(gCom_mod & BCAK_NAK, (char*)"PODOP", (u8*)"/INTER/DPOSI", 12);
                 break;
             }
-            //        gCUr_status = G_CUR_STA_INT;
         }
         else
         {
             gCmd_action = CMD_ACTION_PODOP;
-            gCUr_status = G_CUR_STA_RUN;
+            gCur_status = G_CUR_STA_RUN;
             send_msg(gCom_mod & BCAK_ACK, (char*)"PODOP", (u8*)NULL, 0);
         }
     }
     if(memcmp(cmd_name, "PODCL", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = podcl_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"PODCL", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"PODCL", (u8*)"/INTER/CBUSY", 12);
+                break;
+            case 0x32:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"PODCL", (u8*)"/INTER/FPILG", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_PODCL;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"PODCL", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "VACON", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = vacon_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"VACON", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"VACON", (u8*)"/INTER/CBUSY", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_VACON;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"VACON", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "VACOF", 5) == 0)
     {
@@ -966,7 +1020,8 @@ bool proc_mov(u8* cmd_name)
     {
     }
     if(memcmp(cmd_name, "RETRY", 5) == 0)
-    {
+    {		
+			send_msg(gCom_mod & BCAK_ACK, (char*)"RETRY", (u8*)NULL, 0);
         gCur_pause = 0;
         gCur_stop = 0;
         gCur_abort = 0;
@@ -974,6 +1029,7 @@ bool proc_mov(u8* cmd_name)
     }
     if(memcmp(cmd_name, "STOP_", 5) == 0)
     {
+			send_msg(gCom_mod & BCAK_ACK, (char*)"STOP_", (u8*)NULL, 0);
         gCur_pause = 0;
         gCur_stop = 1;
         gCur_abort = 0;
@@ -981,24 +1037,30 @@ bool proc_mov(u8* cmd_name)
     }
     if(memcmp(cmd_name, "PAUSE", 5) == 0)
     {
+			send_msg(gCom_mod & BCAK_ACK, (char*)"PAUSE", (u8*)NULL, 0);
         gCur_pause = 1;
         gCur_stop = 0;
         gCur_abort = 0;
         gCur_retry = 0;
+			send_msg(gCom_mod & BCAK_FIN, (char*)"PAUSE", (u8*)NULL, 0);
     }
     if(memcmp(cmd_name, "ABORT", 5) == 0)
     {
+			
         gCur_pause = 0;
         gCur_stop = 0;
         gCur_abort = 1;
         gCur_retry = 0;
+			send_msg(gCom_mod & BCAK_ACK, (char*)"ABORT", (u8*)NULL, 0);
     }
     if(memcmp(cmd_name, "RESUM", 5) == 0)
     {
+			
         gCur_pause = 0;
         gCur_stop = 0;
         gCur_abort = 0;
         gCur_retry = 0;
+			send_msg(gCom_mod & BCAK_ACK, (char*)"RESUM", (u8*)NULL, 0);
     }
     return true;
 }

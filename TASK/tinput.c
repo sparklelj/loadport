@@ -898,7 +898,7 @@ bool is_noair(void)
 }
 bool is_error(void)
 {
-    if(gCUr_status == G_CUR_STA_ERR)
+    if(gCur_status == G_CUR_STA_ERR)
     {
         return true;
     }
@@ -906,9 +906,9 @@ bool is_error(void)
 }
 bool is_busy(void)
 {
-    if(gCUr_status == G_CUR_STA_RUN || \
-            gCUr_status == G_CUR_STA_PAU || \
-            gCUr_status == G_CUR_STA_RSM)
+    if(gCur_status == G_CUR_STA_RUN || \
+            gCur_status == G_CUR_STA_PAU || \
+            gCur_status == G_CUR_STA_RSM)
     {
         return true;
     }
@@ -939,6 +939,7 @@ u8 podop_before(u8* error)
 }
 u8 podop_running(u8* error)
 {
+	return false;
     if(is_obstacle())
     {
         *error = 0xFF;
@@ -1009,6 +1010,39 @@ u8 vacon_before(u8* error)
     return false;
 }
 u8 vacon_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    return false;
+}
+u8 vacof_before(u8* error)
+{
+    if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+    return false;
+}
+u8 vacof_running(u8* error)
 {
     if(is_obstacle())
     {
@@ -1933,7 +1967,7 @@ u8 Y_pos(void)
 
 u8 get_equ(void)
 {
-	if(gCUr_status != G_CUR_STA_ERR)
+	if(gCur_status != G_CUR_STA_ERR)
 	{
 		return '0';
 	}

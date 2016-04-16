@@ -64,17 +64,17 @@ void ENC_Init(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-    GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_POS_Z) | CONN(GPIO_Pin_, M_POS_P);
+    GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_ERR) | CONN(GPIO_Pin_, M_POS_P);
     GPIO_Init(GPIOF, &GPIO_InitStructure);
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
 //	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource12);
 //	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource13);
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_Z));
+//    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_Z));
     SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_P));
 
-    EXTI_InitStructure.EXTI_Line = CONN(EXTI_Line, M_POS_Z) | CONN(EXTI_Line, M_POS_P);
+    EXTI_InitStructure.EXTI_Line = CONN(EXTI_Line, M_POS_P);
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
