@@ -973,18 +973,132 @@ bool proc_mov(u8* cmd_name)
     }
     if(memcmp(cmd_name, "VACOF", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = vacof_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"VACOF", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"VACOF", (u8*)"/INTER/CBUSY", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_VACOF;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"VACOF", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "DOROP", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = dorop_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DOROP", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DOROP", (u8*)"/INTER/CBUSY", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_DOROP;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"DOROP", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "DORCL", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = dorcl_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORCL", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORCL", (u8*)"/INTER/CBUSY", 12);
+                break;
+						 case 0x33:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORCL", (u8*)"/INTER/DPOSI", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_DORCL;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"DORCL", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "MAPOP", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = mapop_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MAPOP", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MAPOP", (u8*)"/INTER/CBUSY", 12);
+                break;
+						 case 0x33:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MAPOP", (u8*)"/INTER/DPOSI", 12);
+                break;
+						 case 0x34:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MAPOP", (u8*)"/INTER/MPARM", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_MAPOP;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"MAPOP", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "MAPCL", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = mapcl_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MAPCL", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MAPCL", (u8*)"/INTER/CBUSY", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_MAPCL;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"MAPCL", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "ZDRUP", 5) == 0)
     {
@@ -1003,21 +1117,178 @@ bool proc_mov(u8* cmd_name)
     }
     if(memcmp(cmd_name, "MSTON", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = mston_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MSTON", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MSTON", (u8*)"/INTER/CBUSY", 12);
+                break;
+						case 0x37:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MSTON", (u8*)"/INTER/ZPOSI", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_MSTON;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"MSTON", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "MSTOF", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = mstof_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MSTOF", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"MSTOF", (u8*)"/INTER/CBUSY", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_MSTOF;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"MSTOF", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "YWAIT", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = ywait_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"YWAIT", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"YWAIT", (u8*)"/INTER/CBUSY", 12);
+                break;
+						case 0x38:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"YWAIT", (u8*)"/INTER/DVACM", 12);
+                break;
+						case 0x39:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"YWAIT", (u8*)"/INTER/LATCH", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_YWAIT;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"YWAIT", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "YDOOR", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = ydoor_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"YDOOR", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"YDOOR", (u8*)"/INTER/CBUSY", 12);
+                break;
+						case 0x32:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"YDOOR", (u8*)"/INTER/FPILG", 12);
+                break;
+						case 0x39:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"YDOOR", (u8*)"/INTER/LATCH", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_YDOOR;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"YDOOR", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "DORBK", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = dorbk_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORBK", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORBK", (u8*)"/INTER/CBUSY", 12);
+                break;
+						case 0x39:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORBK", (u8*)"/INTER/LATCH", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_DORBK;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"DORBK", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "DORFW", 5) == 0)
     {
+			u8 ret = 0;
+        u8 error;
+        ret = dorfw_before(&error);
+        if(ret == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORFW", (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORFW", (u8*)"/INTER/CBUSY", 12);
+                break;
+						case 0x32:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORFW", (u8*)"/INTER/FPILG", 12);
+                break;
+						case 0x3A:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORFW", (u8*)"/INTER/LATCH", 12);
+                break;
+						case 0x4A:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORFW", (u8*)"/INTER/LATCH", 12);
+                break;
+						case 0x4B:
+                send_msg(gCom_mod & BCAK_NAK, (char*)"DORFW", (u8*)"/INTER/DPOSI", 12);
+                break;
+						
+            }
+        }
+        else
+        {
+            gCmd_action = CMD_ACTION_DORFW;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"DORFW", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "RETRY", 5) == 0)
     {		

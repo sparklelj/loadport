@@ -26,6 +26,12 @@
 #define PROC_END 2
 #define PROC_UNS 4
 
+#define ACT_ERR  0x00
+#define ACT_END  0x01
+#define ACT_STP  0x02
+#define ACT_ABT  0x03
+
+
 u8 scan_mode = SCAN_UPP;
 u8 gCur_action = CMD_ACTION_PODOP;
 u8 gCur_pause = 0;
@@ -558,6 +564,7 @@ u8 run_drdwns(bool pause)
 {
     if(pause)
     {
+        PAUSE_Motion(M_STRMP);
     }
     else
     {
@@ -598,6 +605,7 @@ u8 run_drdwne(bool pause)
 {
     if(pause)
     {
+        PAUSE_Motion(M_STPMP);
     }
     else
     {
@@ -638,6 +646,7 @@ u8 run_drdwnl(bool pause)
 {
     if(pause)
     {
+        PAUSE_Motion(M_DNLMT);
     }
     else
     {
@@ -650,6 +659,7 @@ u8 run_drupl(bool pause)
 {
     if(pause)
     {
+        PAUSE_Motion(M_UPLMT);
     }
     else
     {
@@ -933,6 +943,7 @@ void set_errno(u8 cmd, u8 errno)
 {
     switch(errno)
     {
+    case 0x07:
     case 0x27:
     case 0x12:
     case 0x23:
@@ -960,6 +971,30 @@ void set_errno(u8 cmd, u8 errno)
         case CMD_ACTION_PODCL:
             gErr_no = errno;
             break;
+        case CMD_ACTION_MAPOP:
+            gErr_no =errno;
+            break;
+        case CMD_ACTION_MAPCL:
+            gErr_no =errno;
+            break;
+        case CMD_ACTION_DORBK:
+            gErr_no =errno;
+            break;
+        case CMD_ACTION_DORFW:
+            gErr_no =errno;
+            break;
+        case CMD_ACTION_YDOOR:
+            gErr_no =errno;
+            break;
+        case CMD_ACTION_YWAIT:
+            gErr_no =errno;
+            break;
+        case CMD_ACTION_MSTON:
+            gErr_no =errno;
+            break;
+        case CMD_ACTION_MSTOF:
+            gErr_no =errno;
+            break;
         }
     }
     else
@@ -972,14 +1007,34 @@ void set_errno(u8 cmd, u8 errno)
         case CMD_ACTION_PODCL:
             gErr_no =0x22;
             break;
+        case CMD_ACTION_MAPOP:
+            gErr_no =0x09;
+            break;
+        case CMD_ACTION_MAPCL:
+            gErr_no =0x09;
+            break;
+        case CMD_ACTION_DORBK:
+            gErr_no =0x08;
+            break;
+        case CMD_ACTION_DORFW:
+            gErr_no =0x08;
+            break;
+        case CMD_ACTION_YDOOR:
+            gErr_no =0x04;
+            break;
+        case CMD_ACTION_YWAIT:
+            gErr_no =0x04;
+            break;
+        case CMD_ACTION_MSTON:
+            gErr_no =0x11;
+            break;
+        case CMD_ACTION_MSTOF:
+            gErr_no =0x11;
+            break;
         }
     }
 }
 
-#define ACT_ERR  0x00
-#define ACT_END  0x01
-#define ACT_STP  0x02
-#define ACT_ABT  0x03
 
 u8 podop_action(u8* error)
 {
@@ -1197,6 +1252,476 @@ u8 vacof_action(u8* error)
     return 0x00;
 }
 
+u8 dorop_action(u8* error)
+{
+    u8 time = 30;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(dorop_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_drunlt(gCur_pause);
+            *error = 0x23;
+            if(is_unlatch())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 dorcl_action(u8* error)
+{
+    u8 time = 30;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(dorcl_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_drlt(gCur_pause);
+            *error = 0x24;
+            if(is_latch())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 mapop_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(mapop_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_mpaop(gCur_pause);
+            *error = 0x09;
+            if(is_mapopen())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 mapcl_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(mapcl_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_mpac(gCur_pause);
+            *error = 0x49;
+            if(is_mapclose())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 dorbk_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(dorbk_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_drop(gCur_pause);
+            *error = 0x08;
+            if(is_dropen())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 dorfw_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(dorfw_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_drcls(gCur_pause);
+            *error = 0x48;
+            if(is_drclose())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 ydoor_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(ydoor_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_fpdck(gCur_pause);
+            *error = 0x04;
+            if(is_dock())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 ywait_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(ywait_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_fpundk(gCur_pause);
+            *error = 0x44;
+            if(is_undock())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 mston_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(mston_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_stpon(gCur_pause);
+            *error = 0x11;
+            if(is_stopperon())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 mstof_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(mstof_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_stpoff(gCur_pause);
+            *error = 0x51;
+            if(is_stopperoff())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        if(gCur_stop == 0x01)
+        {
+            return 0x02;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return 0x03;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
 void tExe_Action(void *p_arg)
 {
     OS_ERR err;
@@ -1340,7 +1865,7 @@ void tExe_Action(void *p_arg)
                     break;
                 }
                 set_errno(CMD_ACTION_VACON, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"VACCS", param, 6);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"VACON", param, 6);
                 gPre_status = gCur_status;
                 gCur_status = G_CUR_STA_ERR;
                 gEnd_act = CMD_ACTION_NOACT;
@@ -1384,7 +1909,7 @@ void tExe_Action(void *p_arg)
                     break;
                 }
                 set_errno(CMD_ACTION_VACOF, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"VACOS", param, 6);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"VACOF", param, 6);
                 gPre_status = gCur_status;
                 gCur_status = G_CUR_STA_ERR;
                 gEnd_act = CMD_ACTION_NOACT;
@@ -1398,6 +1923,449 @@ void tExe_Action(void *p_arg)
             else if(ret == ACT_STP)
             {
                 send_msg(gCom_mod & BCAK_FIN, (char*)"VACOF", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_DOROP:
+            ret = dorop_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DOROP", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_DOROP;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x23:
+                    memcpy(param, (char*)"/DROPS", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_DOROP, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"DOROP", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DOROP", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DOROP", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_DORCL:
+            ret = dorcl_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DORCL", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_DORCL;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x24:
+                    memcpy(param, (char*)"/DRCLS", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_DORCL, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"DORCL", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DORCL", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DORCL", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_MAPOP:
+            ret = mapop_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPOP", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_MAPOP;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x09:
+                    memcpy(param, (char*)"/MPBAR", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_MAPOP, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"MAPOP", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPOP", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPOP", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_MAPCL:
+            ret = mapcl_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPCL", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_MAPCL;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x07:
+                    memcpy(param, (char*)"/PROTS", 6);
+                    break;
+                case 0x49:
+                    memcpy(param, (char*)"/MPBAR", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_MAPCL, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"MAPCL", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPCL", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPCL", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_DORBK:
+            ret = dorbk_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DORBK", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_DORBK;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x08:
+                    memcpy(param, (char*)"/DLMIT", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_DORBK, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"DORBK", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DORBK", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DORBK", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_DORFW:
+            ret = dorfw_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DORFW", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_DORFW;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x26:
+                    memcpy(param, (char*)"/VACOS", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_DORFW, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"DORFW", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DORFW", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"DORFW", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_YDOOR:
+            ret = ydoor_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"YDOOR", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_YDOOR;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x04:
+                    memcpy(param, (char*)"/YLMIT", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_YDOOR, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"YDOOR", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"YDOOR", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"YDOOR", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_YWAIT:
+            ret = ywait_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"YWAIT", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_YWAIT;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x44:
+                    memcpy(param, (char*)"/YLMIT", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_YWAIT, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"YWAIT", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"YWAIT", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"YWAIT", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_MSTON:
+            ret = mston_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTON", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_MSTON;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x11:
+                    memcpy(param, (char*)"/MPSTP", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_MSTON, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"MSTON", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTON", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTON", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_MSTOF:
+            ret = mstof_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTOF", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_MSTOF;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x51:
+                    memcpy(param, (char*)"/MPSTP", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_MSTOF, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"MSTOF", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTOF", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTOF", param, 6);
                 gCur_status = G_CUR_STA_STP;
                 gEnd_act = CMD_ACTION_NOACT;
             }

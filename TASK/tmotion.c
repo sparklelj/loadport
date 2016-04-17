@@ -111,7 +111,7 @@ void tMotor_Motion(void *p_arg)
 								gPulse_num = gMotion_num - gMotion_cmd;
             }
         }
-        OS_CRITICAL_EXIT();
+        
         if(is_mstop())
         {
             switch (gMotor_state)
@@ -133,32 +133,91 @@ void tMotor_Motion(void *p_arg)
                 break;
             }
         }
+				OS_CRITICAL_EXIT();
 //       OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
 
 void STOP_Minit(void)
 {
+	CPU_SR_ALLOC();
+	OS_CRITICAL_ENTER();
     gMotor_state = MS_UNINIT;
     STOP_Motion();
+	OS_CRITICAL_EXIT();
 }
 
 void STOP_Motion(void)
 {
+	CPU_SR_ALLOC();
+	OS_CRITICAL_ENTER();
 //	if((gMotor_state < MS_INITED) && (gMotor_state > MS_UNINIT))
 //	{
 //		gMotor_state = MS_UNINIT;
 //	}
 //    if((gCur_vel != 0) || (gCur_vel < VEL_MIN))
  //   {
-        gMotion_cmd = gMotion_num + (((VEL_MIN - gCur_vel) >> VEL_ACCB) + 2) * gDir_vel ;
+        gMotion_cmd = gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel;
 //    }
+	OS_CRITICAL_EXIT();
 }
 
+void PAUSE_Motion(s32 target)
+{
+	CPU_SR_ALLOC();
+	OS_CRITICAL_ENTER();
+	switch(target)
+	{
+		case M_STRMP:
+			if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel < M_STRMP)
+			{
+				gMotion_cmd = M_STRMP;
+			}
+			else
+			{
+				STOP_Motion();
+			}
+			break;
+		case M_STPMP:
+			if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel < M_STPMP)
+			{
+				gMotion_cmd = M_STPMP;
+			}
+			else
+			{
+				STOP_Motion();
+			}
+			break;
+		case M_DNLMT:
+			if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel < M_DNLMT)
+			{
+				gMotion_cmd = M_DNLMT;
+			}
+			else
+			{
+				STOP_Motion();
+			}
+			break;
+		case M_UPLMT:
+			if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel > M_UPLMT)
+			{
+				gMotion_cmd = M_UPLMT;
+			}
+			else
+			{
+				STOP_Motion();
+			}
+			break;
+	}
+	OS_CRITICAL_EXIT();
+}
 void START_Motion(s32 target_pos, u16 target_vel)
 {
+	CPU_SR_ALLOC();
+	OS_CRITICAL_ENTER();
     gMotion_cmd = target_pos;
     gVel_cmd = target_vel;
+	OS_CRITICAL_EXIT();
 }
 
 void MOTOR_GO(s32 target_pos, u16 target_vel)
@@ -258,7 +317,7 @@ BEGIN:
     gMotion_cmd = gMotion_num;
     OS_CRITICAL_EXIT();
 
-    START_Motion(0, FORWD_VEL);
+    START_Motion(MS_GOINIT, FORWD_VEL);
 
     while(!is_mstop())
     {
