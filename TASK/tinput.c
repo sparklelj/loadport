@@ -925,7 +925,6 @@ u8 podop_before(u8* error)
 }
 u8 podop_running(u8* error)
 {
-	return false;
     if(is_obstacle())
     {
         *error = 0xFF;
@@ -1130,7 +1129,7 @@ u8 zdrup_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_dropen())
+    if(!is_dropen())
     {
         *error = 0x33;
         return true;
@@ -1253,12 +1252,12 @@ u8 zdrdw_before(u8* error)
     }
     if(!is_mapclose())
     {
-        *error = 0x34;
+        *error = 0x34; //MPARM
         return true;
     }
     if(!is_stopperoff())
     {
-        *error = 0x35; //MPARM
+        *error = 0x35; //MPSTP
         return true;
     }
     return false;
@@ -1562,12 +1561,12 @@ u8 zmpst_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_dropen())
+    if(!is_dropen())
     {
         *error = 0x33;
         return true;
     }
-    if(is_mapclose())
+    if(!is_mapclose())
     {
         *error = 0x34;
         return true;
@@ -1610,12 +1609,12 @@ u8 zmped_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_dropen())
+    if(!is_dropen())
     {
         *error = 0x33;
         return true;
     }
-    if(is_mapclose())
+    if(!is_mapclose())
     {
         *error = 0x34;
         return true;

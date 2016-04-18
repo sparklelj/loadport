@@ -995,6 +995,18 @@ void set_errno(u8 cmd, u8 errno)
         case CMD_ACTION_MSTOF:
             gErr_no =errno;
             break;
+        case CMD_ACTION_ZDRUP:
+            gErr_no =errno;
+            break;
+        case CMD_ACTION_ZDRDW:
+            gErr_no =errno;
+            break;
+        case CMD_ACTION_ZDRMP:
+            gErr_no =errno;
+            break;
+        case CMD_ACTION_ZMPST:
+            gErr_no =errno;
+            break;
         }
     }
     else
@@ -1030,6 +1042,18 @@ void set_errno(u8 cmd, u8 errno)
             break;
         case CMD_ACTION_MSTOF:
             gErr_no =0x11;
+            break;
+        case CMD_ACTION_ZDRUP:
+            gErr_no =0x02;
+            break;
+        case CMD_ACTION_ZDRDW:
+            gErr_no =0x02;
+            break;
+        case CMD_ACTION_ZDRMP:
+            gErr_no =0x10;
+            break;
+        case CMD_ACTION_ZMPST:
+            gErr_no =0x10;
             break;
         }
     }
@@ -1078,14 +1102,50 @@ u8 podop_action(u8* error)
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            switch (seq)
+            {
+            case 0x01:
+                run_clamulk(gCur_pause);
+                break;
+            case 0x02:
+                run_clambwd(gCur_pause);
+                break;
+            case 0x03:
+                run_clamdwn(gCur_pause);
+                break;
+            }
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            switch (seq)
+            {
+            case 0x01:
+                run_clamulk(gCur_pause);
+                break;
+            case 0x02:
+                run_clambwd(gCur_pause);
+                break;
+            case 0x03:
+                run_clamdwn(gCur_pause);
+                break;
+            }
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            switch (seq)
+            {
+            case 0x01:
+                run_clamulk(gCur_pause);
+                break;
+            case 0x02:
+                run_clambwd(gCur_pause);
+                break;
+            case 0x03:
+                run_clamdwn(gCur_pause);
+                break;
+            }
             return ACT_ABT;
         }
     }
@@ -1131,25 +1191,53 @@ u8 podcl_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            switch (seq)
+            {
+            case 0x01:
+                run_clamup(gCur_pause);
+                break;
+            case 0x02:
+                run_clamfwd(gCur_pause);
+                break;
+            case 0x03:
+                run_clamlck(gCur_pause);
+                break;
+            }
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            switch (seq)
+            {
+            case 0x01:
+                run_clamup(gCur_pause);
+                break;
+            case 0x02:
+                run_clamfwd(gCur_pause);
+                break;
+            case 0x03:
+                run_clamlck(gCur_pause);
+                break;
+            }
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            switch (seq)
+            {
+            case 0x01:
+                run_clamup(gCur_pause);
+                break;
+            case 0x02:
+                run_clamfwd(gCur_pause);
+                break;
+            case 0x03:
+                run_clamlck(gCur_pause);
+                break;
+            }
             return ACT_ABT;
         }
     }
@@ -1179,25 +1267,20 @@ u8 vacon_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_dradsp(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_dradsp(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_dradsp(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1227,25 +1310,20 @@ u8 vacof_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_dradsr(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_dradsr(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_dradsr(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1275,25 +1353,20 @@ u8 dorop_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_drunlt(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_drunlt(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_drunlt(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1322,25 +1395,20 @@ u8 dorcl_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_drlt(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_drlt(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_drlt(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1369,25 +1437,20 @@ u8 mapop_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_mpaop(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_mpaop(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_mpaop(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1416,25 +1479,20 @@ u8 mapcl_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_mpac(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_mpac(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_mpac(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1463,25 +1521,20 @@ u8 dorbk_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_drop(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_drop(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_drop(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1510,25 +1563,20 @@ u8 dorfw_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_drcls(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_drcls(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_drcls(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1557,25 +1605,20 @@ u8 ydoor_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_fpdck(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_fpdck(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_fpdck(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1604,25 +1647,20 @@ u8 ywait_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_fpundk(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_fpundk(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_fpundk(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1651,25 +1689,20 @@ u8 mston_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_stpon(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_stpon(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_stpon(gCur_abort);
             return ACT_ABT;
         }
     }
@@ -1698,30 +1731,237 @@ u8 mstof_action(u8* error)
             }
             break;
         }
-        if(gCur_stop == 0x01)
-        {
-            return 0x02;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return 0x03;
-        }
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
+            run_stpoff(gCur_pause);
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
+            run_stpoff(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            run_stpoff(gCur_abort);
+            return ACT_ABT;
+        }
+        return ACT_ABT;
+    }
+    return 0x00;
+}
+u8 zmpst_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(zmpst_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_drdwns(gCur_pause);
+            *error = 0x50;
+            if(is_mapstart())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            run_drdwns(gCur_pause);
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            run_drdwns(gCur_stop);
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            run_drdwns(gCur_abort);
             return ACT_ABT;
         }
     }
     return 0x00;
 }
+u8 zmped_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(zmped_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_drupl(gCur_pause);
+            *error = 0x42;
+            if(is_druplmt())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            run_drupl(gCur_pause);
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            run_drupl(gCur_stop);
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            run_drupl(gCur_abort);
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 zdrmp_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(zdrmp_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_drdwne(gCur_pause);
+            *error = 0x10;
+            if(is_mapend())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            run_drdwne(gCur_pause);
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            run_drdwne(gCur_stop);
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            run_drdwne(gCur_abort);
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 zdrdw_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(zdrdw_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_drdwnl(gCur_pause);
+            *error = 0x02;
+            if(is_drdwlmt())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            run_drdwnl(gCur_pause);
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            run_drdwnl(gCur_stop);
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            run_drdwnl(gCur_abort);
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+u8 zdrup_action(u8* error)
+{
+    u8 time = 100;
+    u8 seq = 0;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(zdrup_running(error) == true)
+        {
+            return 0x00;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_drupl(gCur_pause);
+            *error = 0x42;
+            if(is_druplmt())
+            {
+                return 0x01;
+            }
+            break;
+        }
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            run_drupl(gCur_pause);
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            run_drupl(gCur_stop);
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            run_drupl(gCur_abort);
+            return ACT_ABT;
+        }
+    }
+    return 0x00;
+}
+
 void tExe_Action(void *p_arg)
 {
     OS_ERR err;
@@ -2366,6 +2606,247 @@ void tExe_Action(void *p_arg)
             else if(ret == ACT_STP)
             {
                 send_msg(gCom_mod & BCAK_FIN, (char*)"MSTOF", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_ZMPST:
+            ret = zmpst_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPST", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_ZMPST;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x07:
+                    memcpy(param, (char*)"/PROTS", 6);
+                    break;
+                case 0x50:
+                    memcpy(param, (char*)"/MPZLM", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_ZMPST, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"ZMPST", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPST", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPST", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_ZMPED:
+            ret = zmped_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPED", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_ZMPED;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x07:
+                    memcpy(param, (char*)"/PROTS", 6);
+                    break;
+                case 0x50:
+                    memcpy(param, (char*)"/MPEDL", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_ZMPED, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"ZMPED", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPED", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPED", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_ZDRMP:
+            ret = zdrmp_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRMP", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_ZDRMP;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x07:
+                    memcpy(param, (char*)"/PROTS", 6);
+                    break;
+                case 0x10:
+                    memcpy(param, (char*)"/MPZLM", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_ZDRMP, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"ZDRMP", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRMP", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRMP", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_ZDRDW:
+            ret = zdrdw_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRDW", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_ZDRDW;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x36:
+                    memcpy(param, (char*)"/DLMIT", 6);
+                    break;
+                case 0x07:
+                    memcpy(param, (char*)"/PROTS", 6);
+                    break;
+                case 0x02:
+                    memcpy(param, (char*)"/ZLMIT", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_ZDRDW, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"ZDRDW", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRDW", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRDW", param, 6);
+                gCur_status = G_CUR_STA_STP;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            break;
+        case CMD_ACTION_ZDRUP:
+            ret = zdrup_action(&error);
+            if(ret == ACT_END)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRUP", (u8*)NULL, 0);
+                gCur_status = G_CUR_STA_END;
+                gEnd_act = CMD_ACTION_ZDRUP;
+            }
+            else if(ret == ACT_ERR)
+            {
+                switch (error)
+                {
+                case 0xFF:
+                    memcpy(param, (char*)"/SAFTY", 6);
+                    break;
+                case 0x27:
+                    memcpy(param, (char*)"/AIRSN", 6);
+                    break;
+                case 0xFC:
+                    memcpy(param, (char*)"/FNAST", 6);
+                    break;
+                case 0x36:
+                    memcpy(param, (char*)"/DLMIT", 6);
+                    break;
+                case 0x07:
+                    memcpy(param, (char*)"/PROTS", 6);
+                    break;
+                case 0x42:
+                    memcpy(param, (char*)"/ZLMIT", 6);
+                    break;
+                }
+                set_errno(CMD_ACTION_ZDRUP, error);
+                send_msg(gCom_mod & BCAK_ABS, (char*)"ZDRUP", param, 6);
+                gPre_status = gCur_status;
+                gCur_status = G_CUR_STA_ERR;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_ABT)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRUP", param, 6);
+                gCur_status = G_CUR_STA_ABO;
+                gEnd_act = CMD_ACTION_NOACT;
+            }
+            else if(ret == ACT_STP)
+            {
+                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRUP", param, 6);
                 gCur_status = G_CUR_STA_STP;
                 gEnd_act = CMD_ACTION_NOACT;
             }

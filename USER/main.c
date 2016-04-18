@@ -337,8 +337,6 @@ void task1_task(void *p_arg)
 void task2_task(void *p_arg)
 {
     u8 task2_num=0;
-	u8 input;
-	u8 tmp[128];
 	u8 param[30];
     OS_ERR err;
 //	CPU_SR_ALLOC();
