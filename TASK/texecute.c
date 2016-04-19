@@ -1809,7 +1809,7 @@ u8 zmped_action(u8* error)
         {
         case 0x01:
             run_drupl(gCur_pause);
-            *error = 0x42;
+            *error = 0x12;
             if(is_druplmt())
             {
                 return 0x01;
@@ -1962,6 +1962,185 @@ u8 zdrup_action(u8* error)
     return 0x00;
 }
 
+bool proc_result(u8 cmd, u8 rtype, u8 error)
+{
+    u8 chcmd[6];
+    u8 param[7];
+    switch (cmd)
+    {
+    case CMD_ACTION_PODOP:
+        memcpy(chcmd, "PODOP", 5);
+        break;
+    case CMD_ACTION_PODCL:
+        memcpy(chcmd, "PODCL", 5);
+        break;
+    case CMD_ACTION_VACON:
+        memcpy(chcmd, "VACON", 5);
+        break;
+    case CMD_ACTION_VACOF:
+        memcpy(chcmd, "VACOF", 5);
+        break;
+    case CMD_ACTION_DOROP:
+        memcpy(chcmd, "DOROP", 5);
+        break;
+    case CMD_ACTION_DORCL:
+        memcpy(chcmd, "DORCL", 5);
+        break;
+    case CMD_ACTION_MAPOP:
+        memcpy(chcmd, "MAPOP", 5);
+        break;
+    case CMD_ACTION_MAPCL:
+        memcpy(chcmd, "MAPCL", 5);
+        break;
+    case CMD_ACTION_DORBK:
+        memcpy(chcmd, "DORBK", 5);
+        break;
+    case CMD_ACTION_DORFW:
+        memcpy(chcmd, "DORFW", 5);
+        break;
+    case CMD_ACTION_YDOOR:
+        memcpy(chcmd, "YDOOR", 5);
+        break;
+    case CMD_ACTION_YWAIT:
+        memcpy(chcmd, "YWAIT", 5);
+        break;
+    case CMD_ACTION_MSTON:
+        memcpy(chcmd, "MSTON", 5);
+        break;
+    case CMD_ACTION_MSTOF:
+        memcpy(chcmd, "MSTOF", 5);
+        break;
+    case CMD_ACTION_ZMPST:
+        memcpy(chcmd, "ZMPST", 5);
+        break;
+    case CMD_ACTION_ZMPED:
+        memcpy(chcmd, "ZMPED", 5);
+        break;
+    case CMD_ACTION_ZDRMP:
+        memcpy(chcmd, "ZDRMP", 5);
+        break;
+    case CMD_ACTION_ZDRDW:
+        memcpy(chcmd, "ZDRDW", 5);
+        break;
+    case CMD_ACTION_ZDRUP:
+        memcpy(chcmd, "ZDRUP", 5);
+        break;
+    }
+
+
+    if(rtype == ACT_END)
+    {
+        send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, (u8*)NULL, 0);
+        gCur_status = G_CUR_STA_END;
+        gEnd_act = cmd;
+    }
+    else if(rtype == ACT_ERR)
+    {
+        switch(error)
+        {
+        case 0xFF:
+            memcpy(param, (char*)"/SAFTY", 6);
+            break;
+        case 0x27:
+            memcpy(param, (char*)"/AIRSN", 6);
+            break;
+        case 0xFC:
+            memcpy(param, (char*)"/FNAST", 6);
+            break;
+        case 0x02:
+            memcpy(param, (char*)"/ZLMIT", 6);
+            break;
+        case 0x42:
+            memcpy(param, (char*)"/ZLMIT", 6);
+            break;
+        case 0x04:
+            memcpy(param, (char*)"/YLMIT", 6);
+            break;
+        case 0x44:
+            memcpy(param, (char*)"/YLMIT", 6);
+            break;
+        case 0x07:
+            memcpy(param, (char*)"/PROTS", 6);
+            break;
+        case 0x08:
+            memcpy(param, (char*)"/DLMIT", 6);
+            break;
+        case 0x48:
+            memcpy(param, (char*)"/DLMIT", 6);
+            break;
+        case 0x09:
+            memcpy(param, (char*)"/MPBAR", 6);
+            break;
+        case 0x49:
+            memcpy(param, (char*)"/MPBAR", 6);
+            break;
+        case 0x10:
+            memcpy(param, (char*)"/MPZLM", 6);
+            break;
+        case 0x50:
+            memcpy(param, (char*)"/MPZLM", 6);
+            break;
+        case 0x11:
+            memcpy(param, (char*)"/MPSTP", 6);
+            break;
+        case 0x51:
+            memcpy(param, (char*)"/MPSTP", 6);
+            break;
+        case 0x12:
+            memcpy(param, (char*)"/MPEDL", 6);
+            break;
+        case 0x21:
+            memcpy(param, (char*)"/CLOPS", 6);
+            break;
+        case 0x22:
+            memcpy(param, (char*)"/CLCLS", 6);
+            break;
+        case 0x61:
+        case 0x62:
+            if(cmd == CMD_ACTION_PODOP)
+            {
+                memcpy(param, (char*)"/CLOPS", 6);
+            }
+            if(cmd == CMD_ACTION_PODCL)
+            {
+                memcpy(param, (char*)"/CLCLS", 6);
+            }
+            break;
+        case 0x23:
+            memcpy(param, (char*)"/DROPS", 6);
+            break;
+        case 0x24:
+            memcpy(param, (char*)"/DRCLS", 6);
+            break;
+        case 0x25:
+            memcpy(param, (char*)"/VACCS", 6);
+            break;
+        case 0x26:
+            memcpy(param, (char*)"/VACOS", 6);
+            break;
+
+        }
+        set_errno(cmd, error);
+        send_msg(gCom_mod & BCAK_ABS, (char*)chcmd, param, 6);
+        gPre_status = gCur_status;
+        gCur_status = G_CUR_STA_ERR;
+        gEnd_act = CMD_ACTION_NOACT;
+    }
+    else if(rtype == ACT_ABT)
+    {
+        send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, param, 6);
+        gCur_status = G_CUR_STA_ABO;
+        gEnd_act = CMD_ACTION_NOACT;
+    }
+    else if(rtype == ACT_STP)
+    {
+        send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, param, 6);
+        gCur_status = G_CUR_STA_STP;
+        gEnd_act = CMD_ACTION_NOACT;
+    }
+
+}
+
 void tExe_Action(void *p_arg)
 {
     OS_ERR err;
@@ -1982,6 +2161,7 @@ void tExe_Action(void *p_arg)
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
             continue;
         }
+
         gCur_action = gCmd_action;
         switch (gCur_action)
         {
@@ -2411,8 +2591,8 @@ void tExe_Action(void *p_arg)
                 case 0xFC:
                     memcpy(param, (char*)"/FNAST", 6);
                     break;
-                case 0x26:
-                    memcpy(param, (char*)"/VACOS", 6);
+                case 0x48:
+                    memcpy(param, (char*)"/DLMIT", 6);
                     break;
                 }
                 set_errno(CMD_ACTION_DORFW, error);
@@ -2681,7 +2861,7 @@ void tExe_Action(void *p_arg)
                 case 0x07:
                     memcpy(param, (char*)"/PROTS", 6);
                     break;
-                case 0x50:
+                case 0x12:
                     memcpy(param, (char*)"/MPEDL", 6);
                     break;
                 }
@@ -2854,5 +3034,11 @@ void tExe_Action(void *p_arg)
         default:
             break;
         }
+
+        gCur_pause = 0;
+        gCur_stop = 0;
+        gCur_abort = 0;
+        gCur_retry = 0;
+
     }
 }

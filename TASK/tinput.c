@@ -1170,7 +1170,7 @@ u8 zdrup_running(u8* error)
     }
     if(!is_dropen())
     {
-        *error = 0x36; //DLMIT
+        *error = 0x48; //DLMIT
         return true;
     }
     if(is_protrusion())
@@ -1281,7 +1281,7 @@ u8 zdrdw_running(u8* error)
     }
     if(!is_dropen())
     {
-        *error = 0x36; //DLMIT
+        *error = 0x48; //DLMIT
         return true;
     }
     if(is_protrusion())
