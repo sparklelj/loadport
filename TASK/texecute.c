@@ -30,6 +30,7 @@
 #define ACT_END  0x01
 #define ACT_STP  0x02
 #define ACT_ABT  0x03
+#define ACT_NAT  0x03
 
 
 u8 scan_mode = SCAN_UPP;
@@ -1059,6 +1060,23 @@ void set_errno(u8 cmd, u8 errno)
     }
 }
 
+u8 noact_action(u8* error)
+{
+    OS_ERR err;
+        while(gCur_pause == 0x01)
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            return ACT_ABT;
+        }
+    return ACT_NAT;
+}
 
 u8 podop_action(u8* error)
 {
@@ -1968,6 +1986,16 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
     u8 param[7];
     switch (cmd)
     {
+			case CMD_ACTION_NOACT:
+				if(rtype == ACT_STP)
+				{
+					memcpy(chcmd, "STOP_", 5);
+				}
+				if(rtype == ACT_ABT)
+				{
+					memcpy(chcmd, "ABORT", 5);
+				}
+				break;
     case CMD_ACTION_PODOP:
         memcpy(chcmd, "PODOP", 5);
         break;
@@ -2026,8 +2054,6 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         memcpy(chcmd, "ZDRUP", 5);
         break;
     }
-
-
     if(rtype == ACT_END)
     {
         send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, (u8*)NULL, 0);
@@ -2158,887 +2184,99 @@ void tExe_Action(void *p_arg)
                 gCur_status == G_CUR_STA_END || \
                 gCur_status == G_CUR_STA_STP)
         {
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
-            continue;
+ //           OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+//            continue;
         }
-
+				OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         gCur_action = gCmd_action;
         switch (gCur_action)
         {
         case CMD_ACTION_NOACT:
+					ret = noact_action(&error);
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_PODOP:
             ret = podop_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"PODOP", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_PODOP;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x61:
-                case 0x21:
-                case 0x62:
-                    memcpy(param, (char*)"/CLOPS", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_PODOP, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"PODOP", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"PODOP", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"PODOP", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_PODCL:
             ret = podcl_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"PODCL", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_PODCL;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x61:
-                case 0x22:
-                case 0x63:
-                    memcpy(param, (char*)"/CLCLS", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_PODCL, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"PODCL", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"PODCL", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"PODCL", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_VACON:
             ret = vacon_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"VACON", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_VACON;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x25:
-                    memcpy(param, (char*)"/VACCS", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_VACON, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"VACON", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"VACON", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"VACON", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_VACOF:
             ret = vacof_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"VACOF", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_VACOF;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x26:
-                    memcpy(param, (char*)"/VACOS", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_VACOF, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"VACOF", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"VACOF", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"VACOF", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_DOROP:
             ret = dorop_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DOROP", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_DOROP;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x23:
-                    memcpy(param, (char*)"/DROPS", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_DOROP, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"DOROP", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DOROP", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DOROP", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_DORCL:
             ret = dorcl_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DORCL", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_DORCL;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x24:
-                    memcpy(param, (char*)"/DRCLS", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_DORCL, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"DORCL", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DORCL", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DORCL", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_MAPOP:
             ret = mapop_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPOP", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_MAPOP;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x09:
-                    memcpy(param, (char*)"/MPBAR", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_MAPOP, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"MAPOP", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPOP", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPOP", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_MAPCL:
             ret = mapcl_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPCL", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_MAPCL;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x07:
-                    memcpy(param, (char*)"/PROTS", 6);
-                    break;
-                case 0x49:
-                    memcpy(param, (char*)"/MPBAR", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_MAPCL, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"MAPCL", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPCL", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MAPCL", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+           proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_DORBK:
             ret = dorbk_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DORBK", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_DORBK;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x08:
-                    memcpy(param, (char*)"/DLMIT", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_DORBK, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"DORBK", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DORBK", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DORBK", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_DORFW:
             ret = dorfw_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DORFW", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_DORFW;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x48:
-                    memcpy(param, (char*)"/DLMIT", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_DORFW, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"DORFW", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DORFW", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"DORFW", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_YDOOR:
             ret = ydoor_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"YDOOR", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_YDOOR;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x04:
-                    memcpy(param, (char*)"/YLMIT", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_YDOOR, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"YDOOR", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"YDOOR", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"YDOOR", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+           proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_YWAIT:
             ret = ywait_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"YWAIT", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_YWAIT;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x44:
-                    memcpy(param, (char*)"/YLMIT", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_YWAIT, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"YWAIT", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"YWAIT", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"YWAIT", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_MSTON:
             ret = mston_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTON", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_MSTON;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x11:
-                    memcpy(param, (char*)"/MPSTP", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_MSTON, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"MSTON", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTON", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTON", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_MSTOF:
             ret = mstof_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTOF", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_MSTOF;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x51:
-                    memcpy(param, (char*)"/MPSTP", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_MSTOF, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"MSTOF", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTOF", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"MSTOF", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_ZMPST:
             ret = zmpst_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPST", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_ZMPST;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x07:
-                    memcpy(param, (char*)"/PROTS", 6);
-                    break;
-                case 0x50:
-                    memcpy(param, (char*)"/MPZLM", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_ZMPST, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"ZMPST", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPST", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPST", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_ZMPED:
             ret = zmped_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPED", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_ZMPED;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x07:
-                    memcpy(param, (char*)"/PROTS", 6);
-                    break;
-                case 0x12:
-                    memcpy(param, (char*)"/MPEDL", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_ZMPED, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"ZMPED", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPED", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZMPED", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_ZDRMP:
             ret = zdrmp_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRMP", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_ZDRMP;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x07:
-                    memcpy(param, (char*)"/PROTS", 6);
-                    break;
-                case 0x10:
-                    memcpy(param, (char*)"/MPZLM", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_ZDRMP, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"ZDRMP", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRMP", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRMP", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+           proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_ZDRDW:
             ret = zdrdw_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRDW", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_ZDRDW;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x36:
-                    memcpy(param, (char*)"/DLMIT", 6);
-                    break;
-                case 0x07:
-                    memcpy(param, (char*)"/PROTS", 6);
-                    break;
-                case 0x02:
-                    memcpy(param, (char*)"/ZLMIT", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_ZDRDW, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"ZDRDW", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRDW", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRDW", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+           proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_ZDRUP:
             ret = zdrup_action(&error);
-            if(ret == ACT_END)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRUP", (u8*)NULL, 0);
-                gCur_status = G_CUR_STA_END;
-                gEnd_act = CMD_ACTION_ZDRUP;
-            }
-            else if(ret == ACT_ERR)
-            {
-                switch (error)
-                {
-                case 0xFF:
-                    memcpy(param, (char*)"/SAFTY", 6);
-                    break;
-                case 0x27:
-                    memcpy(param, (char*)"/AIRSN", 6);
-                    break;
-                case 0xFC:
-                    memcpy(param, (char*)"/FNAST", 6);
-                    break;
-                case 0x36:
-                    memcpy(param, (char*)"/DLMIT", 6);
-                    break;
-                case 0x07:
-                    memcpy(param, (char*)"/PROTS", 6);
-                    break;
-                case 0x42:
-                    memcpy(param, (char*)"/ZLMIT", 6);
-                    break;
-                }
-                set_errno(CMD_ACTION_ZDRUP, error);
-                send_msg(gCom_mod & BCAK_ABS, (char*)"ZDRUP", param, 6);
-                gPre_status = gCur_status;
-                gCur_status = G_CUR_STA_ERR;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_ABT)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRUP", param, 6);
-                gCur_status = G_CUR_STA_ABO;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
-            else if(ret == ACT_STP)
-            {
-                send_msg(gCom_mod & BCAK_FIN, (char*)"ZDRUP", param, 6);
-                gCur_status = G_CUR_STA_STP;
-                gEnd_act = CMD_ACTION_NOACT;
-            }
+            proc_result(gCur_action, ret, error);
             break;
         default:
             break;
         }
-
         gCur_pause = 0;
         gCur_stop = 0;
         gCur_abort = 0;
         gCur_retry = 0;
-
     }
 }

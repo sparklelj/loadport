@@ -831,8 +831,198 @@ bool proc_fin(u8* cmd_name)
     return true;
 }
 
+bool proc_before(char* cmd_name, bool rtype, u8 error)
+{
+	u8 ucmd;
+	if(memcmp(cmd_name, "ORGSH", 5) == 0)
+    {
+        gCur_status = G_CUR_STA_UNI;
+    }
+    if(memcmp(cmd_name, "ABORG", 5) == 0)
+    {
+        gCur_status = G_CUR_STA_UNI;
+    }
+    if(memcmp(cmd_name, "CLOAD", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CLDDK", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CLDYD", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CLDOP", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CLDMP", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CLMPO", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CULOD", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CULDK", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CUDCL", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CUDNC", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CULYD", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CULFC", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CUDMP", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CUMDK", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "CUMFC", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "MAPDO", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "REMAP", 5) == 0)
+    {
+    }
+    if(memcmp(cmd_name, "PODOP", 5) == 0)
+    {
+ucmd = CMD_ACTION_PODOP;
+    }
+    if(memcmp(cmd_name, "PODCL", 5) == 0)
+    {
+ucmd = CMD_ACTION_PODCL;
+    }
+    if(memcmp(cmd_name, "VACON", 5) == 0)
+    {
+ucmd = CMD_ACTION_VACON;
+    }
+    if(memcmp(cmd_name, "VACOF", 5) == 0)
+    {
+ucmd = CMD_ACTION_VACOF;
+    }
+    if(memcmp(cmd_name, "DOROP", 5) == 0)
+    {
+ucmd = CMD_ACTION_DOROP;
+    }
+    if(memcmp(cmd_name, "DORCL", 5) == 0)
+    {
+ucmd = CMD_ACTION_DORCL;
+    }
+    if(memcmp(cmd_name, "MAPOP", 5) == 0)
+    {
+ucmd = CMD_ACTION_MAPOP;
+    }
+    if(memcmp(cmd_name, "MAPCL", 5) == 0)
+    {
+ucmd = CMD_ACTION_MAPCL;
+    }
+    if(memcmp(cmd_name, "ZDRUP", 5) == 0)
+    {
+ucmd = CMD_ACTION_ZDRUP;
+    }
+    if(memcmp(cmd_name, "ZDRDW", 5) == 0)
+    {
+ ucmd = CMD_ACTION_ZDRDW;
+    }
+    if(memcmp(cmd_name, "ZDRMP", 5) == 0)
+    {
+ucmd = CMD_ACTION_ZDRMP;
+    }
+    if(memcmp(cmd_name, "ZMPST", 5) == 0)
+    {
+ ucmd = CMD_ACTION_ZMPST;
+    }
+    if(memcmp(cmd_name, "ZMPED", 5) == 0)
+    {
+ucmd = CMD_ACTION_ZMPED;
+    }
+    if(memcmp(cmd_name, "MSTON", 5) == 0)
+    {
+ucmd = CMD_ACTION_MSTON;
+    }
+    if(memcmp(cmd_name, "MSTOF", 5) == 0)
+    {
+ucmd = CMD_ACTION_MSTOF;
+    }
+    if(memcmp(cmd_name, "YWAIT", 5) == 0)
+    {
+      ucmd = CMD_ACTION_YWAIT;
+    }
+    if(memcmp(cmd_name, "YDOOR", 5) == 0)
+    {
+        ucmd = CMD_ACTION_YDOOR;
+    }
+    if(memcmp(cmd_name, "DORBK", 5) == 0)
+    {
+ucmd = CMD_ACTION_DORBK;
+    }
+    if(memcmp(cmd_name, "DORFW", 5) == 0)
+    {
+            ucmd = CMD_ACTION_DORFW;
+		}
+	if(rtype == true)
+        {
+            switch(error)
+            {
+            case 0x30:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/ERROR", 12);
+                break;
+            case 0x31:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/CBUSY", 12);
+                break;
+						case 0x32:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/FPILG", 12);
+                break;
+            case 0x33:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/DPOSI", 12);
+                break;
+						case 0x34:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/MPARM", 12);
+                break;
+						case 0x35:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/MPSTP", 12);
+                break;
+						case 0x37:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/ZPOSI", 12);
+                break;
+						case 0x38:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/DVACM", 12);
+                break;
+            case 0x39:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/LATCH", 12);
+                break;
+						case 0x3A:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/LATCH", 12);
+                break;
+            case 0x4A:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/LATCH", 12);
+                break;
+            case 0x4B:
+                send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/DPOSI", 12);
+                break;
+            }
+        }
+        else
+        {
+            gCmd_action = ucmd;
+            gCur_status = G_CUR_STA_RUN;
+            send_msg(gCom_mod & BCAK_ACK, (char*)cmd_name, (u8*)NULL, 0);
+        }
+}
+
 bool proc_mov(u8* cmd_name)
 {
+    CPU_SR_ALLOC();
+    OS_CRITICAL_ENTER();
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
         gCur_status = G_CUR_STA_UNI;
@@ -1455,12 +1645,19 @@ bool proc_mov(u8* cmd_name)
     }
     if(memcmp(cmd_name, "PAUSE", 5) == 0)
     {
-        send_msg(gCom_mod & BCAK_ACK, (char*)"PAUSE", (u8*)NULL, 0);
-        gCur_pause = 1;
-        gCur_stop = 0;
-        gCur_abort = 0;
-        gCur_retry = 0;
-        send_msg(gCom_mod & BCAK_FIN, (char*)"PAUSE", (u8*)NULL, 0);
+        if(gCur_status != G_CUR_STA_RUN)
+        {
+            send_msg(gCom_mod & BCAK_NAK, (char*)"PAUSE", (u8*)"/INTER/ERROR", 12);
+        }
+        else
+        {
+            send_msg(gCom_mod & BCAK_ACK, (char*)"PAUSE", (u8*)NULL, 0);
+            gCur_pause = 1;
+            gCur_stop = 0;
+            gCur_abort = 0;
+            gCur_retry = 0;
+            send_msg(gCom_mod & BCAK_FIN, (char*)"PAUSE", (u8*)NULL, 0);
+        }
     }
     if(memcmp(cmd_name, "ABORT", 5) == 0)
     {
@@ -1474,12 +1671,20 @@ bool proc_mov(u8* cmd_name)
     if(memcmp(cmd_name, "RESUM", 5) == 0)
     {
 
-        gCur_pause = 0;
-        gCur_stop = 0;
-        gCur_abort = 0;
-        gCur_retry = 0;
-        send_msg(gCom_mod & BCAK_ACK, (char*)"RESUM", (u8*)NULL, 0);
+        if(gCur_pause != 0x01)
+        {
+            send_msg(gCom_mod & BCAK_NAK, (char*)"RESUM", (u8*)"/INTER/ERROR", 12);
+        }
+        else
+        {
+            gCur_pause = 0;
+            gCur_stop = 0;
+            gCur_abort = 0;
+            gCur_retry = 0;
+            send_msg(gCom_mod & BCAK_ACK, (char*)"RESUM", (u8*)NULL, 0);
+        }
     }
+    OS_CRITICAL_EXIT();
     return true;
 }
 

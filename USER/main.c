@@ -48,7 +48,7 @@ void task2_task(void *p_arg);
 
 
 //任务优先级
-#define CMD_TASK_PRIO		3
+#define CMD_TASK_PRIO		6
 //任务堆栈大小
 #define CMD_STK_SIZE 		1024
 //任务控制块
@@ -57,7 +57,7 @@ OS_TCB CMD_TaskTCB;
 CPU_STK CMD_TASK_STK[CMD_STK_SIZE];
 
 //任务优先级
-#define LED_TASK_PRIO		3
+#define LED_TASK_PRIO		7
 //任务堆栈大小
 #define LED_STK_SIZE 		1024
 //任务控制块
@@ -66,7 +66,7 @@ OS_TCB LED_TaskTCB;
 CPU_STK LED_TASK_STK[LED_STK_SIZE];
 
 //任务优先级
-#define EXE_TASK_PRIO		3
+#define EXE_TASK_PRIO		4
 //任务堆栈大小
 #define EXE_STK_SIZE 		2048
 //任务控制块
@@ -75,7 +75,7 @@ OS_TCB EXE_TaskTCB;
 CPU_STK EXE_TASK_STK[EXE_STK_SIZE];
 
 //任务优先级
-#define INPUT_TASK_PRIO		3
+#define INPUT_TASK_PRIO		8
 //任务堆栈大小
 #define INPUT_STK_SIZE 		256
 //任务控制块
@@ -93,7 +93,7 @@ OS_TCB MOTOR_TaskTCB;
 CPU_STK MOTOR_TASK_STK[MOTOR_STK_SIZE];
 
 //任务优先级
-#define MINIT_TASK_PRIO		3
+#define MINIT_TASK_PRIO		6
 //任务堆栈大小
 #define MINIT_STK_SIZE 		512
 //任务控制块
