@@ -2164,16 +2164,14 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         gCur_status = G_CUR_STA_STP;
         gEnd_act = CMD_ACTION_NOACT;
     }
-
+		return true;
 }
 
 void tExe_Action(void *p_arg)
 {
     OS_ERR err;
-    CPU_SR_ALLOC();
     u8 error;
     u8 ret = 0;
-    u8 param[10];
     while(1)
     {
         if(gCur_status == G_CUR_STA_ERR || \
