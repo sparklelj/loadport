@@ -45,7 +45,7 @@ u8 gMap_status = 0;
 bool gErr_mod = false;
 bool gIs_init = false;
 bool gis_scan = false;
-
+bool is_origin = false;
 
 
 u8 exe_clamup(bool bforce)
@@ -2059,6 +2059,10 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, (u8*)NULL, 0);
         gCur_status = G_CUR_STA_END;
         gEnd_act = cmd;
+				if(cmd == CMD_ACTION_ORGSH || cmd == CMD_ACTION_ABORG)
+				{
+					is_origin = true;
+				}
     }
     else if(rtype == ACT_ERR)
     {

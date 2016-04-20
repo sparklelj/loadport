@@ -4,6 +4,7 @@
 #include "tmotion.h"
 #include "tcmd.h"
 #include "motor.h"
+#include "texecute.h"
 
 u8 gStatus_scan[INPUT_NUM];
 
@@ -1718,6 +1719,26 @@ u8 mstof_running(u8* error)
 }
 u8 orgsh_before(u8* error)
 {
+	 if(is_error())
+    {
+        *error = 0x30; //ERROR
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31; //BUSY
+        return true;
+    }
+		if(is_vacuumon())
+    {
+        *error = 0x38; // DVACM
+        return true;
+    }
+		if(!is_foup_place() && (!(is_no_foup() && is_drclose())))
+    {
+        *error = 0x39; //UN LATCH
+        return true;
+    }
 	return false;
 }
 u8 orgsh_running(u8* error)
@@ -1734,6 +1755,36 @@ u8 aborg_running(u8* error)
 }
 u8 cload_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_latch())
+    {
+        *error = 0x39; //UN LATCH
+        return true;
+    }
+		if(!is_drclose())
+    {
+        *error = 0x33; //DPOSI
+        return true;
+    }
 	return false;
 }
 u8 cload_running(u8* error)
@@ -1742,14 +1793,107 @@ u8 cload_running(u8* error)
 }
 u8 clddk_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_latch())
+    {
+        *error = 0x39; //UN LATCH
+        return true;
+    }
+		if(!is_drclose())
+    {
+        *error = 0x33; //DPOSI
+        return true;
+    }
 	return false;
 }
 u8 clddk_running(u8* error)
 {
 	return false;
 }
+u8 cldyd_before(u8* error)
+{
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_latch())
+    {
+        *error = 0x39; //UN LATCH
+        return true;
+    }
+		if(!is_drclose())
+    {
+        *error = 0x33; //DPOSI
+        return true;
+    }
+	return false;
+}
+u8 cldyd_running(u8* error)
+{
+	return false;
+}
 u8 cldop_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(gEnd_act != CMD_ACTION_CLDDK)
+    {
+        *error = 0x81; //CLDDK
+        return true;
+    }
 	return false;
 }
 u8 cldop_running(u8* error)

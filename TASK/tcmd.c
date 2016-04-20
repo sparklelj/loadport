@@ -836,10 +836,12 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
     u8 ucmd;
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
+			is_origin = false;
         gCur_status = G_CUR_STA_UNI;
     }
     if(memcmp(cmd_name, "ABORG", 5) == 0)
     {
+			is_origin = false;
         gCur_status = G_CUR_STA_UNI;
     }
     if(memcmp(cmd_name, "CLOAD", 5) == 0)
