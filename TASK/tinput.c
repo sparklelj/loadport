@@ -1902,6 +1902,41 @@ u8 cldop_running(u8* error)
 }
 u8 cldmp_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_latch())
+    {
+        *error = 0x39; //UN LATCH
+        return true;
+    }
+		if(!is_drclose())
+    {
+        *error = 0x33; //DPOSI
+        return true;
+    }
+		if(!is_druplmt())
+    {
+        *error = 0x82; //ZPOSI up limit
+        return true;
+    }
 	return false;
 }
 u8 cldmp_running(u8* error)
@@ -1910,6 +1945,36 @@ u8 cldmp_running(u8* error)
 }
 u8 clmpo_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(gEnd_act != CMD_ACTION_CLDDK)
+    {
+        *error = 0x81; //CLDDK
+        return true;
+    }
+		if(!is_druplmt())
+    {
+        *error = 0x81; //ZPOSI up limit
+        return true;
+    }
 	return false;
 }
 u8 clmpo_running(u8* error)
@@ -1918,6 +1983,36 @@ u8 clmpo_running(u8* error)
 }
 u8 culod_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_dock())
+    {
+        *error = 0x82; //YPOSI undock
+        return true;
+    }
+		if(!is_unlatch())
+    {
+        *error = 0x83; //LATCH
+        return true;
+    }
 	return false;
 }
 u8 culod_running(u8* error)
@@ -1926,6 +2021,36 @@ u8 culod_running(u8* error)
 }
 u8 culdk_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_dock())
+    {
+        *error = 0x82; //YPOSI undock
+        return true;
+    }
+		if(!is_unlatch())
+    {
+        *error = 0x83; //LATCH
+        return true;
+    }
 	return false;
 }
 u8 culdk_running(u8* error)
@@ -1934,6 +2059,36 @@ u8 culdk_running(u8* error)
 }
 u8 culyd_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_dock())
+    {
+        *error = 0x82; //YPOSI undock
+        return true;
+    }
+		if(!is_unlatch())
+    {
+        *error = 0x83; //LATCH
+        return true;
+    }
 	return false;
 }
 u8 culyd_running(u8* error)
@@ -1942,6 +2097,41 @@ u8 culyd_running(u8* error)
 }
 u8 cudcl_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_dock())
+    {
+        *error = 0x82; //YPOSI undock
+        return true;
+    }
+		if(!is_unlatch())
+    {
+        *error = 0x83; //LATCH
+        return true;
+    }
+		if(gEnd_act != CMD_ACTION_CULDK)
+    {
+        *error = 0x84; //CILDK
+        return true;
+    }
 	return false;
 }
 u8 cudcl_running(u8* error)
@@ -1950,6 +2140,41 @@ u8 cudcl_running(u8* error)
 }
 u8 cudnc_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_dock())
+    {
+        *error = 0x82; //YPOSI undock
+        return true;
+    }
+		if(!is_unlatch())
+    {
+        *error = 0x83; //LATCH
+        return true;
+    }
+		if(gEnd_act != CMD_ACTION_CULDK)
+    {
+        *error = 0x84; //CILDK
+        return true;
+    }
 	return false;
 }
 u8 cudnc_running(u8* error)
@@ -1958,6 +2183,36 @@ u8 cudnc_running(u8* error)
 }
 u8 culfc_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_dock())
+    {
+        *error = 0x82; //YPOSI undock
+        return true;
+    }
+		if(!is_unlatch())
+    {
+        *error = 0x83; //LATCH
+        return true;
+    }
 	return false;
 }
 u8 cuflc_running(u8* error)
@@ -1966,6 +2221,26 @@ u8 cuflc_running(u8* error)
 }
 u8 mapod_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(gEnd_act != CMD_ACTION_CLOAD)
+    {
+        *error = 0x85; //CLOAD
+        return true;
+    }
 	return false;
 }
 u8 mapod_running(u8* error)
@@ -1974,6 +2249,26 @@ u8 mapod_running(u8* error)
 }
 u8 remap_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(0)
+		{
+			*error = 0x86; //RMPOS
+			return true;
+		}
 	return false;
 }
 u8 remap_running(u8* error)
@@ -1982,6 +2277,46 @@ u8 remap_running(u8* error)
 }
 u8 cudmp_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_dock())
+    {
+        *error = 0x82; //YPOSI undock
+        return true;
+    }
+		if(!is_unlatch())
+    {
+        *error = 0x83; //LATCH
+        return true;
+    }
+		if(!is_dropen())
+    {
+        *error = 0x33; //DPOSI
+        return true;
+    }
+		if(!is_mapopen())
+    {
+        *error = 0x87; //MPARM
+        return true;
+    }
 	return false;
 }
 u8 cudmp_running(u8* error)
@@ -1990,6 +2325,46 @@ u8 cudmp_running(u8* error)
 }
 u8 cumdk_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_dock())
+    {
+        *error = 0x82; //YPOSI undock
+        return true;
+    }
+		if(!is_unlatch())
+    {
+        *error = 0x83; //LATCH
+        return true;
+    }
+		if(!is_dropen())
+    {
+        *error = 0x33; //DPOSI
+        return true;
+    }
+		if(!is_mapopen())
+    {
+        *error = 0x87; //MPARM
+        return true;
+    }
 	return false;
 }
 u8 cumdk_running(u8* error)
@@ -1998,6 +2373,46 @@ u8 cumdk_running(u8* error)
 }
 u8 cumfc_before(u8* error)
 {
+	if(is_error())
+    {
+        *error = 0x30;
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31;
+        return true;
+    }
+		if(is_origin == true)
+		{
+			*error = 0x80; //ORGYT
+			return true;
+		}
+		if(!is_foup_place())
+    {
+        *error = 0x4A; //FPILG
+        return true;
+    }
+		if(!is_dock())
+    {
+        *error = 0x82; //YPOSI undock
+        return true;
+    }
+		if(!is_unlatch())
+    {
+        *error = 0x83; //LATCH
+        return true;
+    }
+		if(!is_dropen())
+    {
+        *error = 0x33; //DPOSI
+        return true;
+    }
+		if(!is_mapopen())
+    {
+        *error = 0x87; //MPARM
+        return true;
+    }
 	return false;
 }
 u8 cumfc_running(u8* error)
