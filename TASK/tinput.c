@@ -813,35 +813,35 @@ bool is_drclose(void)
 }
 bool is_druplmt(void)
 {
-	if(gMotor_state == MS_INITED)
-	{
-		return true;
-	}
-	return false;
+    if(gMotor_state == MS_INITED)
+    {
+        return true;
+    }
+    return false;
 }
 bool is_mapstart(void)
 {
-	if(gMotor_state == MS_MAPSTR)
-	{
-		return true;
-	}
-	return false;
+    if(gMotor_state == MS_MAPSTR)
+    {
+        return true;
+    }
+    return false;
 }
 bool is_mapend(void)
 {
-	if(gMotor_state == MS_SCANED)
-	{
-		return true;
-	}
-	return false;
+    if(gMotor_state == MS_SCANED)
+    {
+        return true;
+    }
+    return false;
 }
 bool is_drdwlmt(void)
 {
-	if(gMotor_state == MS_END)
-	{
-		return true;
-	}
-	return false;
+    if(gMotor_state == MS_END)
+    {
+        return true;
+    }
+    return false;
 }
 bool is_mapopen(void)
 {
@@ -889,7 +889,7 @@ bool is_error(void)
     {
         return true;
     }
-		return false;
+    return false;
 }
 bool is_busy(void)
 {
@@ -899,7 +899,7 @@ bool is_busy(void)
     {
         return true;
     }
-		return false;
+    return false;
 }
 bool is_fanerr(void)
 {
@@ -1719,7 +1719,7 @@ u8 mstof_running(u8* error)
 }
 u8 orgsh_before(u8* error)
 {
-	 if(is_error())
+    if(is_error())
     {
         *error = 0x30; //ERROR
         return true;
@@ -1729,33 +1729,63 @@ u8 orgsh_before(u8* error)
         *error = 0x31; //BUSY
         return true;
     }
-		if(is_vacuumon())
+    if(is_vacuumon())
     {
         *error = 0x38; // DVACM
         return true;
     }
-		if(!is_foup_place() && (!(is_no_foup() && is_drclose())))
+    if(!is_foup_place() && (!(is_no_foup() && is_drclose())))
     {
         *error = 0x39; //UN LATCH
         return true;
     }
-	return false;
+    return false;
 }
 u8 orgsh_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    return false;
 }
 u8 aborg_before(u8* error)
 {
-	return false;
+    return false;
 }
 u8 aborg_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    return false;
 }
 u8 cload_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -1765,35 +1795,55 @@ u8 cload_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_latch())
+    if(!is_latch())
     {
         *error = 0x39; //UN LATCH
         return true;
     }
-		if(!is_drclose())
+    if(!is_drclose())
     {
         *error = 0x33; //DPOSI
         return true;
     }
-	return false;
+    return false;
 }
 u8 cload_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA1;
+        return true;
+    }
+    return false;
 }
 u8 clddk_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -1803,35 +1853,55 @@ u8 clddk_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_latch())
+    if(!is_latch())
     {
         *error = 0x39; //UN LATCH
         return true;
     }
-		if(!is_drclose())
+    if(!is_drclose())
     {
         *error = 0x33; //DPOSI
         return true;
     }
-	return false;
+    return false;
 }
 u8 clddk_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA1;
+        return true;
+    }
+    return false;
 }
 u8 cldyd_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -1841,35 +1911,55 @@ u8 cldyd_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_latch())
+    if(!is_latch())
     {
         *error = 0x39; //UN LATCH
         return true;
     }
-		if(!is_drclose())
+    if(!is_drclose())
     {
         *error = 0x33; //DPOSI
         return true;
     }
-	return false;
+    return false;
 }
 u8 cldyd_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA1;
+        return true;
+    }
+    return false;
 }
 u8 cldop_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -1879,30 +1969,50 @@ u8 cldop_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(gEnd_act != CMD_ACTION_CLDDK)
+    if(gEnd_act != CMD_ACTION_CLDDK)
     {
         *error = 0x81; //CLDDK
         return true;
     }
-	return false;
+    return false;
 }
 u8 cldop_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA1;
+        return true;
+    }
+    return false;
 }
 u8 cldmp_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -1912,40 +2022,60 @@ u8 cldmp_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_latch())
+    if(!is_latch())
     {
         *error = 0x39; //UN LATCH
         return true;
     }
-		if(!is_drclose())
+    if(!is_drclose())
     {
         *error = 0x33; //DPOSI
         return true;
     }
-		if(!is_druplmt())
+    if(!is_druplmt())
     {
         *error = 0x82; //ZPOSI up limit
         return true;
     }
-	return false;
+    return false;
 }
 u8 cldmp_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA1;
+        return true;
+    }
+    return false;
 }
 u8 clmpo_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -1955,35 +2085,55 @@ u8 clmpo_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(gEnd_act != CMD_ACTION_CLDDK)
+    if(gEnd_act != CMD_ACTION_CLDDK)
     {
         *error = 0x81; //CLDDK
         return true;
     }
-		if(!is_druplmt())
+    if(!is_druplmt())
     {
-        *error = 0x81; //ZPOSI up limit
+        *error = 0x82; //ZPOSI up limit
         return true;
     }
-	return false;
+    return false;
 }
 u8 clmpo_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA1;
+        return true;
+    }
+    return false;
 }
 u8 culod_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -1993,35 +2143,55 @@ u8 culod_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_dock())
+    if(!is_dock())
     {
         *error = 0x82; //YPOSI undock
         return true;
     }
-		if(!is_unlatch())
+    if(!is_unlatch())
     {
         *error = 0x83; //LATCH
         return true;
     }
-	return false;
+    return false;
 }
 u8 culod_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA2;
+        return true;
+    }
+    return false;
 }
 u8 culdk_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -2031,35 +2201,55 @@ u8 culdk_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_dock())
+    if(!is_dock())
     {
         *error = 0x82; //YPOSI undock
         return true;
     }
-		if(!is_unlatch())
+    if(!is_unlatch())
     {
         *error = 0x83; //LATCH
         return true;
     }
-	return false;
+    return false;
 }
 u8 culdk_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA2;
+        return true;
+    }
+    return false;
 }
 u8 culyd_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -2069,35 +2259,55 @@ u8 culyd_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_dock())
+    if(!is_dock())
     {
         *error = 0x82; //YPOSI undock
         return true;
     }
-		if(!is_unlatch())
+    if(!is_unlatch())
     {
         *error = 0x83; //LATCH
         return true;
     }
-	return false;
+    return false;
 }
 u8 culyd_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA2;
+        return true;
+    }
+    return false;
 }
 u8 cudcl_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -2107,40 +2317,60 @@ u8 cudcl_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_dock())
+    if(!is_dock())
     {
         *error = 0x82; //YPOSI undock
         return true;
     }
-		if(!is_unlatch())
+    if(!is_unlatch())
     {
         *error = 0x83; //LATCH
         return true;
     }
-		if(gEnd_act != CMD_ACTION_CULDK)
+    if(gEnd_act != CMD_ACTION_CULDK)
     {
-        *error = 0x84; //CILDK
+        *error = 0x84; //CULDK
         return true;
     }
-	return false;
+    return false;
 }
 u8 cudcl_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA2;
+        return true;
+    }
+    return false;
 }
 u8 cudnc_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -2150,40 +2380,60 @@ u8 cudnc_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_dock())
+    if(!is_dock())
     {
         *error = 0x82; //YPOSI undock
         return true;
     }
-		if(!is_unlatch())
+    if(!is_unlatch())
     {
         *error = 0x83; //LATCH
         return true;
     }
-		if(gEnd_act != CMD_ACTION_CULDK)
+    if(gEnd_act != CMD_ACTION_CULDK)
     {
         *error = 0x84; //CILDK
         return true;
     }
-	return false;
+    return false;
 }
 u8 cudnc_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA2;
+        return true;
+    }
+    return false;
 }
 u8 culfc_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -2193,35 +2443,55 @@ u8 culfc_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_dock())
+    if(!is_dock())
     {
         *error = 0x82; //YPOSI undock
         return true;
     }
-		if(!is_unlatch())
+    if(!is_unlatch())
     {
         *error = 0x83; //LATCH
         return true;
     }
-	return false;
+    return false;
 }
-u8 cuflc_running(u8* error)
+u8 culfc_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA2;
+        return true;
+    }
+    return false;
 }
-u8 mapod_before(u8* error)
+u8 mapdo_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -2231,25 +2501,45 @@ u8 mapod_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(gEnd_act != CMD_ACTION_CLOAD)
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(gEnd_act != CMD_ACTION_CLOAD)
     {
         *error = 0x85; //CLOAD
         return true;
     }
-	return false;
+    return false;
 }
-u8 mapod_running(u8* error)
+u8 mapdo_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA1;
+        return true;
+    }
+    return false;
 }
 u8 remap_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -2259,25 +2549,45 @@ u8 remap_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(0)
-		{
-			*error = 0x86; //RMPOS
-			return true;
-		}
-	return false;
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(0)
+    {
+        *error = 0x86; //RMPOS
+        return true;
+    }
+    return false;
 }
 u8 remap_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA1;
+        return true;
+    }
+    return false;
 }
 u8 cudmp_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -2287,45 +2597,65 @@ u8 cudmp_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_dock())
+    if(!is_dock())
     {
         *error = 0x82; //YPOSI undock
         return true;
     }
-		if(!is_unlatch())
+    if(!is_unlatch())
     {
         *error = 0x83; //LATCH
         return true;
     }
-		if(!is_dropen())
+    if(!is_dropen())
     {
         *error = 0x33; //DPOSI
         return true;
     }
-		if(!is_mapopen())
+    if(!is_mapopen())
     {
         *error = 0x87; //MPARM
         return true;
     }
-	return false;
+    return false;
 }
 u8 cudmp_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA2;
+        return true;
+    }
+    return false;
 }
 u8 cumdk_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -2335,45 +2665,65 @@ u8 cumdk_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_dock())
+    if(!is_dock())
     {
         *error = 0x82; //YPOSI undock
         return true;
     }
-		if(!is_unlatch())
+    if(!is_unlatch())
     {
         *error = 0x83; //LATCH
         return true;
     }
-		if(!is_dropen())
+    if(!is_dropen())
     {
         *error = 0x33; //DPOSI
         return true;
     }
-		if(!is_mapopen())
+    if(!is_mapopen())
     {
         *error = 0x87; //MPARM
         return true;
     }
-	return false;
+    return false;
 }
 u8 cumdk_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA2;
+        return true;
+    }
+    return false;
 }
 u8 cumfc_before(u8* error)
 {
-	if(is_error())
+    if(is_error())
     {
         *error = 0x30;
         return true;
@@ -2383,41 +2733,61 @@ u8 cumfc_before(u8* error)
         *error = 0x31;
         return true;
     }
-		if(is_origin == true)
-		{
-			*error = 0x80; //ORGYT
-			return true;
-		}
-		if(!is_foup_place())
+    if(is_origin == true)
+    {
+        *error = 0x80; //ORGYT
+        return true;
+    }
+    if(!is_foup_place())
     {
         *error = 0x4A; //FPILG
         return true;
     }
-		if(!is_dock())
+    if(!is_dock())
     {
         *error = 0x82; //YPOSI undock
         return true;
     }
-		if(!is_unlatch())
+    if(!is_unlatch())
     {
         *error = 0x83; //LATCH
         return true;
     }
-		if(!is_dropen())
+    if(!is_dropen())
     {
         *error = 0x33; //DPOSI
         return true;
     }
-		if(!is_mapopen())
+    if(!is_mapopen())
     {
         *error = 0x87; //MPARM
         return true;
     }
-	return false;
+    return false;
 }
 u8 cumfc_running(u8* error)
 {
-	return false;
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    if((!is_no_foup()) && (!is_foup_place()))
+    {
+        *error = 0xA2;
+        return true;
+    }
+    return false;
 }
 
 u8 clam_sta(void)
@@ -2511,31 +2881,31 @@ u8 Y_pos(void)
 
 u8 get_equ(void)
 {
-	if(gCur_status != G_CUR_STA_ERR)
-	{
-		return '0';
-	}
-	if(1)
-	{
-		return 'E';
-	}
-	if(0)
-	{
-		return 'A';
-	}
+    if(gCur_status != G_CUR_STA_ERR)
+    {
+        return '0';
+    }
+    if(1)
+    {
+        return 'E';
+    }
+    if(0)
+    {
+        return 'A';
+    }
 }
 
 u8 get_mapzpos(void)
 {
-	if(Get_MStatus() == 0)
-	{
-		return '?';
-	}
-	if(Get_MStatus() == 0x01)
-	{
-		return '0';
-	}
-	return '1';
+    if(Get_MStatus() == 0)
+    {
+        return '?';
+    }
+    if(Get_MStatus() == 0x01)
+    {
+        return '0';
+    }
+    return '1';
 }
 
 u8 map_apos(void)

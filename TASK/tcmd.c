@@ -836,64 +836,79 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
     u8 ucmd;
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
-			is_origin = false;
-        gCur_status = G_CUR_STA_UNI;
+        ucmd = CMD_ACTION_ORGSH;
     }
     if(memcmp(cmd_name, "ABORG", 5) == 0)
     {
-			is_origin = false;
-        gCur_status = G_CUR_STA_UNI;
+        ucmd = CMD_ACTION_ABORG;
     }
     if(memcmp(cmd_name, "CLOAD", 5) == 0)
     {
+        ucmd = CMD_ACTION_CLOAD;
     }
     if(memcmp(cmd_name, "CLDDK", 5) == 0)
     {
+        ucmd = CMD_ACTION_CLDDK;
     }
     if(memcmp(cmd_name, "CLDYD", 5) == 0)
     {
+        ucmd = CMD_ACTION_CLDYD;
     }
     if(memcmp(cmd_name, "CLDOP", 5) == 0)
     {
+        ucmd = CMD_ACTION_CLDOP;
     }
     if(memcmp(cmd_name, "CLDMP", 5) == 0)
     {
+        ucmd = CMD_ACTION_CLDMP;
     }
     if(memcmp(cmd_name, "CLMPO", 5) == 0)
     {
+        ucmd = CMD_ACTION_CLMPO;
     }
     if(memcmp(cmd_name, "CULOD", 5) == 0)
     {
+        ucmd = CMD_ACTION_CULOD;
     }
     if(memcmp(cmd_name, "CULDK", 5) == 0)
     {
+        ucmd = CMD_ACTION_CULDK;
     }
     if(memcmp(cmd_name, "CUDCL", 5) == 0)
     {
+        ucmd = CMD_ACTION_CUDCL;
     }
     if(memcmp(cmd_name, "CUDNC", 5) == 0)
     {
+        ucmd = CMD_ACTION_CUDNC;
     }
     if(memcmp(cmd_name, "CULYD", 5) == 0)
     {
+        ucmd = CMD_ACTION_CULYD;
     }
     if(memcmp(cmd_name, "CULFC", 5) == 0)
     {
+        ucmd = CMD_ACTION_CULFC;
     }
     if(memcmp(cmd_name, "CUDMP", 5) == 0)
     {
+        ucmd = CMD_ACTION_CUDMP;
     }
     if(memcmp(cmd_name, "CUMDK", 5) == 0)
     {
+        ucmd = CMD_ACTION_CUMDK;
     }
     if(memcmp(cmd_name, "CUMFC", 5) == 0)
     {
+        ucmd = CMD_ACTION_CUMFC;
     }
     if(memcmp(cmd_name, "MAPDO", 5) == 0)
     {
+        ucmd = CMD_ACTION_MAPDO;
     }
     if(memcmp(cmd_name, "REMAP", 5) == 0)
     {
+        ucmd = CMD_ACTION_REMAP;
     }
     if(memcmp(cmd_name, "PODOP", 5) == 0)
     {
@@ -1011,6 +1026,30 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
         case 0x4B:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/DPOSI", 12);
             break;
+        case 0x80:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/ORGYT", 12);
+            break;
+        case 0x81:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/CLDDK", 12);
+            break;
+        case 0x82:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/ZPOSI", 12);
+            break;
+        case 0x83:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/LATCH", 12);
+            break;
+        case 0x84:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/CULDK", 12);
+            break;
+        case 0x85:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/CLOAD", 12);
+            break;
+        case 0x86:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/RMPOS", 12);
+            break;
+        case 0x87:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/MPARM", 12);
+            break;
         }
     }
     else
@@ -1019,7 +1058,7 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
         gCur_status = G_CUR_STA_RUN;
         send_msg(gCom_mod & BCAK_ACK, (char*)cmd_name, (u8*)NULL, 0);
     }
-		return true;
+    return true;
 }
 
 bool proc_mov(u8* cmd_name)
@@ -1028,62 +1067,137 @@ bool proc_mov(u8* cmd_name)
     OS_CRITICAL_ENTER();
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
+        is_origin = false;
         gCur_status = G_CUR_STA_UNI;
     }
     if(memcmp(cmd_name, "ABORG", 5) == 0)
     {
+        is_origin = false;
+        is_aborg = true;
         gCur_status = G_CUR_STA_UNI;
+        gCur_pause = 0;
+        gCur_stop = 0;
+        gCur_abort = 1;
+        gCur_retry = 0;
     }
     if(memcmp(cmd_name, "CLOAD", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = cload_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CLDDK", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = clddk_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CLDYD", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = cldyd_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CLDOP", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = cldop_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CLDMP", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = cldmp_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CLMPO", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = clmpo_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CULOD", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = culod_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CULDK", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = culdk_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CUDCL", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = cudcl_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CUDNC", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = cudnc_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CULYD", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = culyd_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CULFC", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = culfc_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CUDMP", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = cudmp_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CUMDK", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = cumdk_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "CUMFC", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = cumfc_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "MAPDO", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = mapdo_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "REMAP", 5) == 0)
     {
+        u8 ret = 0;
+        u8 error;
+        ret = remap_before(&error);
+        proc_before(cmd_name, ret, error);
     }
     if(memcmp(cmd_name, "PODOP", 5) == 0)
     {

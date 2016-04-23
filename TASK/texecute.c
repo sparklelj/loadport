@@ -30,8 +30,8 @@
 #define ACT_END  0x01
 #define ACT_STP  0x02
 #define ACT_ABT  0x03
-#define ACT_NAT  0x03
-
+#define ACT_NAT  0x04
+#define ACT_STA  0x05
 
 u8 scan_mode = SCAN_UPP;
 u8 gCur_action = CMD_ACTION_PODOP;
@@ -41,11 +41,13 @@ u8 gCur_abort = 0;
 u8 gCur_retry = 0;
 u8 gErr_no = 0;
 u8 gMap_status = 0;
+u8 pod_s = CMD_ACTION_NOACT;
 
 bool gErr_mod = false;
 bool gIs_init = false;
 bool gis_scan = false;
 bool is_origin = false;
+bool is_aborg = false;
 
 
 u8 exe_clamup(bool bforce)
@@ -962,78 +964,46 @@ void set_errno(u8 cmd, u8 errno)
         gErr_no = errno;
         return;
     }
-    if(gErr_mod)
+    gErr_no = errno;
+
+    if(!gErr_mod)
     {
-        switch (cmd)
+        switch (gErr_no)
         {
-        case CMD_ACTION_PODOP:
-            gErr_no = errno;
+        case 0x42:
+            gErr_no = 0x02;
             break;
-        case CMD_ACTION_PODCL:
-            gErr_no = errno;
+        case 0x48:
+            gErr_no = 0x08;
             break;
-        case CMD_ACTION_MAPOP:
-            gErr_no =errno;
+        case 0x49:
+            gErr_no = 0x09;
             break;
-        case CMD_ACTION_MAPCL:
-            gErr_no =errno;
+        case 0x50:
+            gErr_no = 0x10;
             break;
-        case CMD_ACTION_DORBK:
-            gErr_no =errno;
+        case 0x51:
+            gErr_no = 0x11;
             break;
-        case CMD_ACTION_DORFW:
-            gErr_no =errno;
+        case 0x61:
+            if(pod_s == CMD_ACTION_PODOP)
+            {
+                gErr_no =0x21;
+            }
+            if(pod_s == CMD_ACTION_PODCL)
+            {
+                gErr_no =0x22;
+            }
             break;
-        case CMD_ACTION_YDOOR:
-            gErr_no =errno;
-            break;
-        case CMD_ACTION_YWAIT:
-            gErr_no =errno;
-            break;
-        case CMD_ACTION_MSTON:
-            gErr_no =errno;
-            break;
-        case CMD_ACTION_MSTOF:
-            gErr_no =errno;
-            break;
-        case CMD_ACTION_ZDRUP:
-            gErr_no =errno;
-            break;
-        case CMD_ACTION_ZDRDW:
-            gErr_no =errno;
-            break;
-        case CMD_ACTION_ZDRMP:
-            gErr_no =errno;
-            break;
-        case CMD_ACTION_ZMPST:
-            gErr_no =errno;
-            break;
-        }
-    }
-    else
-    {
-        switch (cmd)
-        {
-        case CMD_ACTION_PODOP:
-            gErr_no =0x21;
-            break;
-        case CMD_ACTION_PODCL:
-            gErr_no =0x22;
-            break;
-        case CMD_ACTION_MAPOP:
-            gErr_no =0x09;
-            break;
-        case CMD_ACTION_MAPCL:
-            gErr_no =0x09;
-            break;
-        case CMD_ACTION_DORBK:
-            gErr_no =0x08;
-            break;
-        case CMD_ACTION_DORFW:
-            gErr_no =0x08;
-            break;
-        case CMD_ACTION_YDOOR:
-            gErr_no =0x04;
+        case 0x62:
+            if(pod_s == CMD_ACTION_PODOP)
+            {
+                gErr_no =0x21;
+            }
+            if(pod_s == CMD_ACTION_PODCL)
+            {
+                gErr_no =0x22;
+            }
             break;
         case CMD_ACTION_YWAIT:
             gErr_no =0x04;
@@ -1063,18 +1033,18 @@ void set_errno(u8 cmd, u8 errno)
 u8 noact_action(u8* error)
 {
     OS_ERR err;
-        while(gCur_pause == 0x01)
-        {
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
-        }
-        if(gCur_stop == 0x01)
-        {
-            return ACT_STP;
-        }
-        if(gCur_abort == 0x01)
-        {
-            return ACT_ABT;
-        }
+    while(gCur_pause == 0x01)
+    {
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+    }
+    if(gCur_stop == 0x01)
+    {
+        return ACT_STP;
+    }
+    if(gCur_abort == 0x01)
+    {
+        return ACT_ABT;
+    }
     return ACT_NAT;
 }
 
@@ -1084,6 +1054,7 @@ u8 podop_action(u8* error)
     u8 seq = 0;
     OS_ERR err;
     seq = 0x01;
+    pod_s = CMD_ACTION_PODOP;
     while(time--)
     {
         if(podop_running(error) == true)
@@ -1176,11 +1147,12 @@ u8 podcl_action(u8* error)
     u8 seq = 0;
     OS_ERR err;
     seq = 0x01;
+    pod_s = CMD_ACTION_PODCL;
     while(time--)
     {
         if(podcl_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1205,7 +1177,7 @@ u8 podcl_action(u8* error)
             *error = 0x63;
             if(is_clamplock())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1259,7 +1231,7 @@ u8 podcl_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 
 u8 vacon_action(u8* error)
@@ -1272,7 +1244,7 @@ u8 vacon_action(u8* error)
     {
         if(vacon_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1281,7 +1253,7 @@ u8 vacon_action(u8* error)
             *error = 0x25;
             if(is_vacuumon())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1302,7 +1274,7 @@ u8 vacon_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 
 u8 vacof_action(u8* error)
@@ -1315,7 +1287,7 @@ u8 vacof_action(u8* error)
     {
         if(vacof_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1324,7 +1296,7 @@ u8 vacof_action(u8* error)
             *error = 0x26;
             if(is_vacuumoff())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1345,7 +1317,7 @@ u8 vacof_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 
 u8 dorop_action(u8* error)
@@ -1358,7 +1330,7 @@ u8 dorop_action(u8* error)
     {
         if(dorop_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1367,7 +1339,7 @@ u8 dorop_action(u8* error)
             *error = 0x23;
             if(is_unlatch())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1388,7 +1360,7 @@ u8 dorop_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 dorcl_action(u8* error)
 {
@@ -1400,7 +1372,7 @@ u8 dorcl_action(u8* error)
     {
         if(dorcl_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1409,7 +1381,7 @@ u8 dorcl_action(u8* error)
             *error = 0x24;
             if(is_latch())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1430,7 +1402,7 @@ u8 dorcl_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 mapop_action(u8* error)
 {
@@ -1442,7 +1414,7 @@ u8 mapop_action(u8* error)
     {
         if(mapop_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1451,7 +1423,7 @@ u8 mapop_action(u8* error)
             *error = 0x09;
             if(is_mapopen())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1472,7 +1444,7 @@ u8 mapop_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 mapcl_action(u8* error)
 {
@@ -1484,7 +1456,7 @@ u8 mapcl_action(u8* error)
     {
         if(mapcl_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1493,7 +1465,7 @@ u8 mapcl_action(u8* error)
             *error = 0x49;
             if(is_mapclose())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1514,7 +1486,7 @@ u8 mapcl_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 dorbk_action(u8* error)
 {
@@ -1526,7 +1498,7 @@ u8 dorbk_action(u8* error)
     {
         if(dorbk_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1535,7 +1507,7 @@ u8 dorbk_action(u8* error)
             *error = 0x08;
             if(is_dropen())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1556,7 +1528,7 @@ u8 dorbk_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 dorfw_action(u8* error)
 {
@@ -1568,7 +1540,7 @@ u8 dorfw_action(u8* error)
     {
         if(dorfw_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1577,7 +1549,7 @@ u8 dorfw_action(u8* error)
             *error = 0x48;
             if(is_drclose())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1598,7 +1570,7 @@ u8 dorfw_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 ydoor_action(u8* error)
 {
@@ -1610,7 +1582,7 @@ u8 ydoor_action(u8* error)
     {
         if(ydoor_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1619,7 +1591,7 @@ u8 ydoor_action(u8* error)
             *error = 0x04;
             if(is_dock())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1640,7 +1612,7 @@ u8 ydoor_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 ywait_action(u8* error)
 {
@@ -1652,7 +1624,7 @@ u8 ywait_action(u8* error)
     {
         if(ywait_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1661,7 +1633,7 @@ u8 ywait_action(u8* error)
             *error = 0x44;
             if(is_undock())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1682,7 +1654,7 @@ u8 ywait_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 mston_action(u8* error)
 {
@@ -1694,7 +1666,7 @@ u8 mston_action(u8* error)
     {
         if(mston_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1703,7 +1675,7 @@ u8 mston_action(u8* error)
             *error = 0x11;
             if(is_stopperon())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1724,7 +1696,7 @@ u8 mston_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 mstof_action(u8* error)
 {
@@ -1736,7 +1708,7 @@ u8 mstof_action(u8* error)
     {
         if(mstof_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1745,7 +1717,7 @@ u8 mstof_action(u8* error)
             *error = 0x51;
             if(is_stopperoff())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1767,7 +1739,7 @@ u8 mstof_action(u8* error)
         }
         return ACT_ABT;
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 zmpst_action(u8* error)
 {
@@ -1779,7 +1751,7 @@ u8 zmpst_action(u8* error)
     {
         if(zmpst_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1788,7 +1760,7 @@ u8 zmpst_action(u8* error)
             *error = 0x50;
             if(is_mapstart())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1809,7 +1781,7 @@ u8 zmpst_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 zmped_action(u8* error)
 {
@@ -1821,7 +1793,7 @@ u8 zmped_action(u8* error)
     {
         if(zmped_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1830,7 +1802,7 @@ u8 zmped_action(u8* error)
             *error = 0x12;
             if(is_druplmt())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1851,7 +1823,7 @@ u8 zmped_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 zdrmp_action(u8* error)
 {
@@ -1863,7 +1835,7 @@ u8 zdrmp_action(u8* error)
     {
         if(zdrmp_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1872,7 +1844,7 @@ u8 zdrmp_action(u8* error)
             *error = 0x10;
             if(is_mapend())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1893,7 +1865,7 @@ u8 zdrmp_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 zdrdw_action(u8* error)
 {
@@ -1905,7 +1877,7 @@ u8 zdrdw_action(u8* error)
     {
         if(zdrdw_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1914,7 +1886,7 @@ u8 zdrdw_action(u8* error)
             *error = 0x02;
             if(is_drdwlmt())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1935,7 +1907,7 @@ u8 zdrdw_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
 }
 u8 zdrup_action(u8* error)
 {
@@ -1947,7 +1919,7 @@ u8 zdrup_action(u8* error)
     {
         if(zdrup_running(error) == true)
         {
-            return 0x00;
+            return ACT_ERR;
         }
         switch (seq)
         {
@@ -1956,7 +1928,7 @@ u8 zdrup_action(u8* error)
             *error = 0x42;
             if(is_druplmt())
             {
-                return 0x01;
+                return ACT_END;
             }
             break;
         }
@@ -1977,7 +1949,897 @@ u8 zdrup_action(u8* error)
             return ACT_ABT;
         }
     }
-    return 0x00;
+    return ACT_ERR;
+}
+u8 orgsh_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(orgsh_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = mapcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = zmped_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = mstof_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = dorbk_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = zdrup_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = dorfw_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = dorcl_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = vacof_action(error);
+            seq = 0x09;
+            break;
+        case 0x09:
+            ret = ywait_action(error);
+            seq = 0x10;
+            break;
+        case 0x10:
+            ret = podop_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 aborg_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(aborg_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = mapcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = zmped_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = mstof_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = dorbk_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = zdrup_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = dorfw_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = dorcl_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = vacof_action(error);
+            seq = 0x09;
+            break;
+        case 0x09:
+            ret = ywait_action(error);
+            seq = 0x10;
+            break;
+        case 0x10:
+            ret = podop_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 cload_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(cload_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = podcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = ydoor_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = vacon_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = dorop_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = dorbk_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = zdrmp_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = zdrdw_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 cldmp_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(cldmp_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = podcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = ydoor_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = vacon_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = dorop_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = dorbk_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = zmpst_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = mapop_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = mston_action(error);
+            seq = 0x09;
+            break;
+        case 0x09:
+            ret = zdrmp_action(error);
+            seq = 0x10;
+            break;
+        case 0x10:
+            ret = mapcl_action(error);
+            seq = 0x11;
+            break;
+        case 0x11:
+            ret = mstof_action(error);
+            seq = 0x12;
+            break;
+        case 0x12:
+            ret = zdrdw_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 clddk_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(clddk_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = podcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = ydoor_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = vacon_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = dorop_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 cldyd_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(cldyd_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = podcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = ydoor_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 cldop_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(cldop_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = dorbk_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = zdrdw_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 clmpo_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(clmpo_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = dorbk_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = zmpst_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = mapop_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = mston_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = zdrmp_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = mapcl_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = mstof_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = zdrdw_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 mapdo_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(mapdo_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+
+        case 0x01:
+            ret = zdrup_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = dorbk_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = zmpst_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = mapop_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = mston_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = zdrmp_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = mapcl_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = mstof_action(error);
+            seq = 0x09;
+            break;
+        case 0x09:
+            ret = zdrdw_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 remap_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(remap_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+
+        case 0x01:
+            ret = zdrup_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = dorbk_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = zmpst_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = mapop_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = mston_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = zdrmp_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = mapcl_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = mstof_action(error);
+            seq = 0x09;
+            break;
+        case 0x09:
+            ret = zdrdw_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 culod_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(culod_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = mapcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = mstof_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = zdrup_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = zmped_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = dorfw_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = dorcl_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = vacof_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = ywait_action(error);
+            seq = 0x09;
+            break;
+        case 0x09:
+            ret = podop_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 cudmp_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(cudmp_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = zdrup_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = zmpst_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = mapop_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = mston_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = zdrmp_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = mapcl_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = mstof_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = zdrup_action(error);
+            seq = 0x09;
+            break;
+        case 0x09:
+            ret = zmped_action(error);
+            seq = 0x10;
+            break;
+        case 0x10:
+            ret = dorfw_action(error);
+            seq = 0x11;
+            break;
+        case 0x11:
+            ret = dorcl_action(error);
+            seq = 0x12;
+            break;
+        case 0x12:
+            ret = vacof_action(error);
+            seq = 0x13;
+            break;
+        case 0x13:
+            ret = ywait_action(error);
+            seq = 0x14;
+            break;
+        case 0x14:
+            ret = podop_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 culfc_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(culfc_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = mapcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = mstof_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = zdrup_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = zmped_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = dorfw_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = dorcl_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = vacof_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = ywait_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 cumfc_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(cumfc_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = zdrup_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = zmpst_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = mapop_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = mston_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = zdrmp_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = mapcl_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = mstof_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = zdrup_action(error);
+            seq = 0x09;
+            break;
+        case 0x09:
+            ret = zmped_action(error);
+            seq = 0x10;
+            break;
+        case 0x10:
+            ret = dorfw_action(error);
+            seq = 0x11;
+            break;
+        case 0x11:
+            ret = dorcl_action(error);
+            seq = 0x12;
+            break;
+        case 0x12:
+            ret = vacof_action(error);
+            seq = 0x13;
+            break;
+        case 0x13:
+            ret = ywait_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 culyd_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(culyd_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = mapcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = mstof_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = zdrup_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = zmped_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = dorfw_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = dorcl_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = vacof_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 culdk_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(culdk_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = mapcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = mstof_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = zdrup_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = zmped_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = dorfw_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 cumdk_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(cumdk_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = zdrup_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = zmpst_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = mapop_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = mston_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = zdrmp_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = mapcl_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = mstof_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = zdrup_action(error);
+            seq = 0x09;
+            break;
+        case 0x09:
+            ret = zmped_action(error);
+            seq = 0x10;
+            break;
+        case 0x10:
+            ret = dorfw_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 cudnc_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(cudnc_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = dorcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = vacof_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = ywait_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = podop_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+u8 cudcl_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(cudcl_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = dorcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = vacof_action(error);
+            seq = 0x03;
+            break;
+        case 0x03:
+            ret = ywait_action(error);
+            return ret;
+        }
+    }
+    return ret;
 }
 
 bool proc_result(u8 cmd, u8 rtype, u8 error)
@@ -1986,16 +2848,16 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
     u8 param[7];
     switch (cmd)
     {
-			case CMD_ACTION_NOACT:
-				if(rtype == ACT_STP)
-				{
-					memcpy(chcmd, "STOP_", 5);
-				}
-				if(rtype == ACT_ABT)
-				{
-					memcpy(chcmd, "ABORT", 5);
-				}
-				break;
+    case CMD_ACTION_NOACT:
+        if(rtype == ACT_STP)
+        {
+            memcpy(chcmd, "STOP_", 5);
+        }
+        if(rtype == ACT_ABT)
+        {
+            memcpy(chcmd, "ABORT", 5);
+        }
+        break;
     case CMD_ACTION_PODOP:
         memcpy(chcmd, "PODOP", 5);
         break;
@@ -2053,16 +2915,73 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
     case CMD_ACTION_ZDRUP:
         memcpy(chcmd, "ZDRUP", 5);
         break;
+    case CMD_ACTION_ORGSH:
+        memcpy(chcmd, "ORGSH", 5);
+        break;
+    case CMD_ACTION_ABORG:
+        memcpy(chcmd, "ABORG", 5);
+        break;
+    case CMD_ACTION_CLOAD:
+        memcpy(chcmd, "CLOAD", 5);
+        break;
+    case CMD_ACTION_CLDDK:
+        memcpy(chcmd, "CLDDK", 5);
+        break;
+    case CMD_ACTION_CLDYD:
+        memcpy(chcmd, "CLDYD", 5);
+        break;
+    case CMD_ACTION_CLDOP:
+        memcpy(chcmd, "CLDOP", 5);
+        break;
+    case CMD_ACTION_CLDMP:
+        memcpy(chcmd, "CLDMP", 5);
+        break;
+    case CMD_ACTION_CLMPO:
+        memcpy(chcmd, "CLMPO", 5);
+        break;
+    case CMD_ACTION_CULOD:
+        memcpy(chcmd, "CULOD", 5);
+        break;
+    case CMD_ACTION_CULDK:
+        memcpy(chcmd, "CULDK", 5);
+        break;
+    case CMD_ACTION_CUDCL:
+        memcpy(chcmd, "CUDCL", 5);
+        break;
+    case CMD_ACTION_CUDNC:
+        memcpy(chcmd, "CUDNC", 5);
+        break;
+    case CMD_ACTION_CULYD:
+        memcpy(chcmd, "CULYD", 5);
+        break;
+    case CMD_ACTION_CULFC:
+        memcpy(chcmd, "CULFC", 5);
+        break;
+    case CMD_ACTION_CUDMP:
+        memcpy(chcmd, "CUDMP", 5);
+        break;
+    case CMD_ACTION_CUMDK:
+        memcpy(chcmd, "CUMDK", 5);
+        break;
+    case CMD_ACTION_CUMFC:
+        memcpy(chcmd, "CUMFC", 5);
+        break;
+    case CMD_ACTION_MAPDO:
+        memcpy(chcmd, "MAPDO", 5);
+        break;
+    case CMD_ACTION_REMAP:
+        memcpy(chcmd, "REMAP", 5);
+        break;
     }
     if(rtype == ACT_END)
     {
         send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, (u8*)NULL, 0);
         gCur_status = G_CUR_STA_END;
         gEnd_act = cmd;
-				if(cmd == CMD_ACTION_ORGSH || cmd == CMD_ACTION_ABORG)
-				{
-					is_origin = true;
-				}
+        if(cmd == CMD_ACTION_ORGSH || cmd == CMD_ACTION_ABORG)
+        {
+            is_origin = true;
+        }
     }
     else if(rtype == ACT_ERR)
     {
@@ -2127,14 +3046,15 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
             break;
         case 0x61:
         case 0x62:
-            if(cmd == CMD_ACTION_PODOP)
+            if(pod_s == CMD_ACTION_PODOP)
             {
                 memcpy(param, (char*)"/CLOPS", 6);
             }
-            if(cmd == CMD_ACTION_PODCL)
+            if(pod_s == CMD_ACTION_PODCL)
             {
                 memcpy(param, (char*)"/CLCLS", 6);
             }
+            pod_s = CMD_ACTION_NOACT;
             break;
         case 0x23:
             memcpy(param, (char*)"/DROPS", 6);
@@ -2148,6 +3068,12 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         case 0x26:
             memcpy(param, (char*)"/VACOS", 6);
             break;
+        case 0xA1:
+            memcpy(param, (char*)"/INTOP", 6);
+            break;
+        case 0xA2:
+            memcpy(param, (char*)"/INTCL", 6);
+            break;
 
         }
         set_errno(cmd, error);
@@ -2158,9 +3084,17 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
     }
     else if(rtype == ACT_ABT)
     {
-        send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, param, 6);
-        gCur_status = G_CUR_STA_ABO;
-        gEnd_act = CMD_ACTION_NOACT;
+        if(is_aborg == false)
+        {
+            send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, param, 6);
+            gCur_status = G_CUR_STA_ABO;
+            gEnd_act = CMD_ACTION_NOACT;
+        }
+        else
+        {
+            is_aborg = false;
+        }
+
     }
     else if(rtype == ACT_STP)
     {
@@ -2168,7 +3102,7 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         gCur_status = G_CUR_STA_STP;
         gEnd_act = CMD_ACTION_NOACT;
     }
-		return true;
+    return true;
 }
 
 void tExe_Action(void *p_arg)
@@ -2186,15 +3120,15 @@ void tExe_Action(void *p_arg)
                 gCur_status == G_CUR_STA_END || \
                 gCur_status == G_CUR_STA_STP)
         {
- //           OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+//           OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
 //            continue;
         }
-				OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         gCur_action = gCmd_action;
         switch (gCur_action)
         {
         case CMD_ACTION_NOACT:
-					ret = noact_action(&error);
+            ret = noact_action(&error);
             proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_PODOP:
@@ -2227,7 +3161,7 @@ void tExe_Action(void *p_arg)
             break;
         case CMD_ACTION_MAPCL:
             ret = mapcl_action(&error);
-           proc_result(gCur_action, ret, error);
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_DORBK:
             ret = dorbk_action(&error);
@@ -2239,7 +3173,7 @@ void tExe_Action(void *p_arg)
             break;
         case CMD_ACTION_YDOOR:
             ret = ydoor_action(&error);
-           proc_result(gCur_action, ret, error);
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_YWAIT:
             ret = ywait_action(&error);
@@ -2263,14 +3197,90 @@ void tExe_Action(void *p_arg)
             break;
         case CMD_ACTION_ZDRMP:
             ret = zdrmp_action(&error);
-           proc_result(gCur_action, ret, error);
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_ZDRDW:
             ret = zdrdw_action(&error);
-           proc_result(gCur_action, ret, error);
+            proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_ZDRUP:
             ret = zdrup_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_ORGSH:
+            ret = orgsh_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_ABORG:
+            ret = aborg_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CLOAD:
+            ret = cload_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CLDDK:
+            ret = clddk_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CLDYD:
+            ret = cldyd_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CLDOP:
+            ret = cldop_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CLDMP:
+            ret = cldmp_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CLMPO:
+            ret = clmpo_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CULOD:
+            ret = culod_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CULDK:
+            ret = culdk_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CUDCL:
+            ret = cudcl_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CUDNC:
+            ret = cudnc_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CULYD:
+            ret = culyd_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CULFC:
+            ret = culfc_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CUDMP:
+            ret = cudmp_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CUMDK:
+            ret = cumdk_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_CUMFC:
+            ret = cumfc_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_MAPDO:
+            ret = mapdo_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_REMAP:
+            ret = remap_action(&error);
             proc_result(gCur_action, ret, error);
             break;
         default:
