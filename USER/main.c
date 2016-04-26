@@ -326,9 +326,13 @@ void task1_task(void *p_arg)
   //          printf("任务1删除了任务2!\r\n");
 					task1_num = 0;
         }
-				OUTPUT_TogOne(CS_O_0, SOL07B_0);
+				OUTPUT_SetOne(CS_O_0, SOL07B_0);
         OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
-				OUTPUT_TogOne(CS_O_0, SOL07A_0);		 
+				OUTPUT_SetOne(CS_O_0, SOL07A_0);		 
+       	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
+				OUTPUT_ResetOne(CS_O_0, SOL07B_0);
+        OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+				OUTPUT_SetOne(CS_O_0, SOL07A_0);		 
        	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }

@@ -43,7 +43,7 @@
 #define CS_O_1 1
 #define CS_O_2 2
 #define CS_O_3 3
-
+#define OUT_CLK 7
 
 /*
 #define SOL07A_0 PFout(0)

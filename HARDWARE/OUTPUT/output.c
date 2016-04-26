@@ -30,7 +30,7 @@ void OUTPUT_Init(void)
 	
 	GPIO_SetBits(GPIOF,GPIO_InitStructure.GPIO_Pin);//设置为高
 	
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3; //输出片选
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_7; //输出片选
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//普通输出模式
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //推挽输出
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100M
@@ -52,7 +52,7 @@ void OUTPUT_Write(u8 cs_num, u8 val)
 	PEout(cs_num) = 1;
 }
 
-void OUTPUT_ResetOne(u8 cs_num, u8 pin)
+void OUTPUT_SetOne(u8 cs_num, u8 pin)
 {
 	u16 tmp = 0;
 	assert_param(IS_OUTPUT_CS(cs_num));
@@ -66,7 +66,7 @@ void OUTPUT_ResetOne(u8 cs_num, u8 pin)
 	PEout(cs_num) = 1; 
 }
 
-void OUTPUT_SetOne(u8 cs_num, u8 pin)
+void OUTPUT_ResetOne(u8 cs_num, u8 pin)
 {
 	u16 tmp = 0;
 	assert_param(IS_OUTPUT_CS(cs_num));
