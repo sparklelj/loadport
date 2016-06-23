@@ -35,7 +35,7 @@ bool is_mstop(void)
 
 bool is_m_err(void)
 {
-	if(PFin(M_ERR) == 0x00)
+	if(PFin(M_ERR) == 0x01)
 	{
 		return true;
 	}

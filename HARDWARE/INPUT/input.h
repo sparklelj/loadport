@@ -21,13 +21,13 @@
 #define AS01_10   14
 #define VS01_10   15
 
-#define CLS08A_11 8
-#define CLS08B_11 9
-#define PH06_11   10
-#define FS02_11   11
-#define PH07_11   12
-#define CLS07A_11 13
-#define CLS07B_11 14
+#define CLS07A_11 8
+#define CLS07B_11 9
+#define CLS08A_11 10
+#define CLS08B_11 11
+#define FS02_11   12
+#define PH06_11   13
+#define PH07_11   14
 #define PH08_11   15
 
 #define ES04_12   8
