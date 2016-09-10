@@ -3,10 +3,10 @@
 
 #include "sys.h"
 
-#define M_UPLMT 1000000
-#define M_STRMP 900000
-#define M_STPMP 600000
-#define M_DNLMT 200000
+#define M_UPLMT 0        //初始位置
+#define M_STRMP -200000  //开始扫盘位置
+#define M_STPMP -600000  //扫盘结束
+#define M_DNLMT -900000  //下限位置
 
 #define M_VEL VEL_MAX
 

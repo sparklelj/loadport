@@ -8,10 +8,10 @@
 
 #define IS_STOP ((gMotion_cmd == gMotion_num) && (gCur_vel == 0))
 
-#define BACK_POS -800000
+#define INIT_POS 0
+#define BACK_POS 800000  //寻零距离
 #define BACK_VEL 0xF000
-
-#define FORWD_POS 100000
+#define FORWD_POS -100000 //前进距离
 #define FORWD_VEL 0xF000
 
 s32 gMotion_cmd = 0;
@@ -240,6 +240,14 @@ void MOTOR_GO(s32 target_pos, u16 target_vel)
     }
 }
 
+/*
+*电机位置初始化
+*检测位置信号下降沿
+*如果为低，先往下运动直到为高
+*为高向上运动触发下降沿中断
+*电机找到零位
+*运行至指定位置
+*/
 void tMotor_Init(void *p_arg)
 {
     OS_ERR err;
@@ -312,12 +320,12 @@ BEGIN:
 
     OS_CRITICAL_ENTER();
 //	gPos_num = gPos_num - gPark_num;
-    POS_SET(gPark_num);
+    POS_SET(gPark_num); //设置位置
     gMotion_num = gPos_num ;
     gMotion_cmd = gMotion_num;
     OS_CRITICAL_EXIT();
 
-    START_Motion(MS_GOINIT, FORWD_VEL);
+    START_Motion(INIT_POS, FORWD_VEL); //运行至指定位置 0
 
     while(!is_mstop())
     {

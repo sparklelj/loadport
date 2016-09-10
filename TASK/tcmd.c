@@ -165,7 +165,7 @@ bool check_sum(u8* msg)
 }
 
 
-bool check_fornat(u8* msg)
+bool check_format(u8* msg)
 {
     u16 len;
     len = *(msg + 1);
@@ -1791,7 +1791,7 @@ void tCMD_Proc(void *p_arg)
         {
             continue;
         }
-        if(check_fornat(msg))
+        if(check_format(msg))
         {
             len = ONLINE_Read(msg, lencmd);
             proc_cmd(msg);

@@ -30,10 +30,10 @@
 #define MS_END       0x0B
 #define MS_BAKINIT   0x0C
 
-#define VEL_MAX 	 0xF0
-#define VEL_MIN 	 0xFFF0
+#define VEL_MAX 	 0x80
+#define VEL_MIN 	 0xF080
 #define VEL_ACCB   3
-#define VEL_ACC 	 0x08
+#define VEL_ACC 	 0x0400
 
 
 extern int32_t gpos_num;
@@ -49,10 +49,18 @@ extern u8 gMotor_state;
 extern bool is_stop;
 extern u32 gPulse_num;
 
+
+
+extern s32 gtestcnt;
+extern s32 gtestpul;
+
+
+
 #define SCAN_NUM_MAX 100
 extern s32 gScan_pos[SCAN_NUM_MAX];
 extern u8 gScan_num;
 
+s32 COUNT_Get(void);
 void POS_SET(s32 target);
 void MOTOR_Init(void);
 

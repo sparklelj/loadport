@@ -10,7 +10,7 @@
 #define WTHICK_MARG 10
 
 #define WPOS_MARGIN   10
-#define WPOS_START    2000
+#define WPOS_START    -500000
 #define WPOS_INTERVAL 1000
 
 #define WAFER_NUM 25

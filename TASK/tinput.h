@@ -7,7 +7,7 @@
 
 #define STATUS_NUM 200
 #define INPUT_NUM 8
-extern u8 gStatus[INPUT_NUM];
+extern u8 gStatus_scan[INPUT_NUM];
 
 #define SF_UNREADY  0
 #define SF_READY    1

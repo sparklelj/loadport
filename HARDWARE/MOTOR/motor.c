@@ -35,6 +35,10 @@ u16 gCur_vel = 0;
 u16 gMax_vel = VEL_MAX;
 s8  gDir_vel = 1;
 
+
+s32 gtestcnt = 0;
+s32 gtestpul = 0;
+
 s32 gScan_pos[SCAN_NUM_MAX] = {26100,26000,25200,25000,24100,24000,22800,22600,21100,21000,20200,20000,19200,19000,17800,17600,16200,16000,15200,15000,14100,14000,12800,12600,11100,11000,8800,8600,6800,6600,3100,3000};
 u8  gScan_num = 32;
 
@@ -184,6 +188,24 @@ void MOTION_Scan(void)
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
 
+// test	
+	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_POS_A);
+    GPIO_Init(GPIOF, &GPIO_InitStructure);
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_A));
+
+    EXTI_InitStructure.EXTI_Line = CONN(EXTI_Line, M_POS_A);
+    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&EXTI_InitStructure);
+// test	
+
     NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = SCAN_PR;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0;
@@ -217,11 +239,11 @@ void MOTION_Init(void)
 
 void MOTOR_Init(void)
 {
-    CTRL_Init();
-    ENC_Init();
-    COUNT_Init();
-    MOTION_Init();
-    MOTION_Scan();
+    CTRL_Init(); //初始化控制
+    ENC_Init();  //初始化编码器反馈
+    COUNT_Init(); //初始化计数器
+    MOTION_Init(); //初始化多圈计数时钟
+    MOTION_Scan(); //初始化扫盘
 }
 
 s32 COUNT_Get(void)
@@ -292,6 +314,20 @@ void EXTI15_10_IRQHandler(void)
         }
         EXTI_ClearITPendingBit(CONN(EXTI_Line, M_SCAN));
     }
+		
+    if(EXTI_GetITStatus(CONN(EXTI_Line, M_POS_A)) == SET)
+    {
+        if(PFin(M_POS_B) == 1)
+				{
+					gtestpul++;
+				}
+				else
+				{
+					gtestpul--;
+				}
+        EXTI_ClearITPendingBit(CONN(EXTI_Line, M_POS_A));
+    }
+		
 }
 
 void TIM3_IRQHandler(void)

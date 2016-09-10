@@ -12,17 +12,23 @@ void tInput_Scan(void *p_arg)
 {
     u8 cnt = 0;
     OS_ERR err;
-    while(cnt < INPUT_NUM)
+    while(true)
     {
-        if(cnt < INPUT_NUM-1)
+        while(cnt < INPUT_NUM)
         {
-            gStatus_scan[cnt] = INPUT_Read(CS_I_9 + cnt);
+            if(cnt < INPUT_NUM-1)
+            {
+                gStatus_scan[cnt] = INPUT_Read(CS_I_9 + cnt);
+            }
+            else
+            {
+                gStatus_scan[cnt] = Get_MStatus();
+            }
+            cnt++;
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
-        else
-        {
-            gStatus_scan[cnt] = Get_MStatus();
-        }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        cnt = 0;
+        OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
 

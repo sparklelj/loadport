@@ -16,6 +16,7 @@
 u8 output_arr[4] = {0xFF, 0xFF, 0xFF, 0xFF};														
 void OUTPUT_Init(void)
 {
+	int i =1000;
 	GPIO_InitTypeDef  GPIO_InitStructure;
 
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOF, ENABLE);//使能GPIOE,GPIOF时钟
@@ -38,6 +39,9 @@ void OUTPUT_Init(void)
   GPIO_Init(GPIOE, &GPIO_InitStructure);//初始化输入	
 	
 	GPIO_SetBits(GPIOE,GPIO_InitStructure.GPIO_Pin);//设置为高，都不选
+	PEout(OUT_CLR) = 0;
+	while(i--);
+	PEout(OUT_CLR) = 1;
 }
 
 void OUTPUT_Write(u8 cs_num, u8 val)
