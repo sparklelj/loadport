@@ -33,7 +33,8 @@
 #define VEL_MAX 	 0x80
 #define VEL_MIN 	 0xF080
 #define VEL_ACCB   3
-#define VEL_ACC 	 0x0400
+//#define VEL_ACC 	 0x0400
+#define VEL_ACC 	 0x0010
 
 
 extern int32_t gpos_num;
