@@ -10,7 +10,8 @@
 #define WTHICK_MARG 10
 
 #define WPOS_MARGIN   10
-#define WPOS_START    -500000
+#define WPOS_FIRST    1000
+#define WPOS_START    400000
 #define WPOS_INTERVAL 1000
 
 #define WAFER_NUM 25
@@ -843,7 +844,73 @@ u8 is_inthick(s32 height)
     }
     return INSLOT_HI;
 }
+
+bool slot_dect(s32 up, s32 down, u8* result)
+{
+	u8 i = 0;
+	for(i=0; i<WAFER_NUM; i++)
+	{
+		if((up < (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i)))) //&& (down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN))
+		{
+			if(down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) + WAFER_THICK + WTHICK_MARG)
+			{
+				if(i > 0)
+				{
+					*(result + WAFER_NUM - i - 1) = 3; //cross
+          *(result + WAFER_NUM - i) = 3;
+				}
+				else
+				{
+					*(result + WAFER_NUM - i - 1) = 3;
+				}
+				return true;
+			}
+			if(down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN)
+			{
+				if((up - down) > (WAFER_THICK + WTHICK_MARG))
+				{
+					*(result + WAFER_NUM - i - 1) = 2;// two wafers
+				}
+				else
+				{
+					*(result  + WAFER_NUM - i - 1) = 1;// one wafer
+				}
+				return true;
+			}
+			*(result + WAFER_NUM - i - 1) = 3; //cross
+			*(result + WAFER_NUM - i - 2) = 3; //cross
+			return false;
+		}
+		if(up < (WPOS_START + WPOS_FIRST))
+		{
+			*(result + WAFER_NUM - i) = 3; //cross
+			return false;
+		}
+	}
+	return false;
+}
+
 bool Analyze_Scan(u8* result)
+{
+    u8 cntp = 0;
+    u8 cnts = 0;
+//	u8 p1,p2,p3,p4,p5;
+    u8 p1,p2,p4,p5;
+	bool ret = false;
+    memset(result, 0, WAFER_NUM);
+    if(gis_scan == false)
+    {
+//      return false;
+    }
+    while(cntp < gScan_num)
+    {
+			ret = slot_dect(gScan_pos[cntp], gScan_pos[cntp+1], result);
+			cntp += 2;
+		}
+    return ret;
+}
+
+bool Analyze_ScanBK(u8* result)
 {
     u8 cntp = 0;
     u8 cnts = 0;

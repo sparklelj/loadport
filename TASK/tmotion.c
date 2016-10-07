@@ -14,16 +14,22 @@
 #define FORWD_POS -100000 //Ç°½ø¾àÀë
 #define FORWD_VEL 0xF000
 
+#define MW_INIT 1
+#define MW_UPL  2
+#define MW_UPM  3
+#define MW_DNM  4
+#define MW_DNL  5
+
 s32 gMotion_cmd = 0;
 u16 gVel_cmd = 0;
 
 u8 gMotion_status;
-
+u8 gWorkPos;
 
 
 bool is_mstop(void)
 {
-    if((gMotion_cmd == gMotion_num) && (is_stop == true))
+    if((gMotion_cmd == gMotion_num) && (is_stop() == true))
     {
         return true;
     }
@@ -35,17 +41,17 @@ bool is_mstop(void)
 
 bool is_m_err(void)
 {
-	if(PFin(M_ERR) == 0x01)
-	{
-		return true;
-	}
-	return false;
+    if(PFin(M_ERR) == 0x01)
+    {
+        return true;
+    }
+    return false;
 }
 
 bool enable_m(bool ctrl)
 {
-	PEout(M_ENABLE) = ctrl;
-	return true;
+    PEout(M_ENABLE) = ctrl;
+    return true;
 }
 
 
@@ -61,7 +67,7 @@ void tMotor_Motion(void *p_arg)
         {
             continue;
         }
-        if(!is_stop)
+        if(!is_stop())
         {
             if(gMotion_cmd >= ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel + gMotion_num)
             {
@@ -89,7 +95,7 @@ void tMotor_Motion(void *p_arg)
         else
         {
             if(gMotion_cmd - gMotion_num >= 0)
-            {               
+            {
                 if(gDir_vel == DIE_NEG)
                 {
                     OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_HMSM_STRICT,&err);
@@ -97,10 +103,10 @@ void tMotor_Motion(void *p_arg)
                     gDir_vel = DIR_POS;
                     OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_HMSM_STRICT,&err);
                 }
-								gPulse_num = gMotion_cmd - gMotion_num;
+                gPulse_num = gMotion_cmd - gMotion_num;
             }
             else
-            {                
+            {
                 if(gDir_vel == DIR_POS)
                 {
                     OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_HMSM_STRICT,&err);
@@ -108,10 +114,10 @@ void tMotor_Motion(void *p_arg)
                     gDir_vel = DIE_NEG;
                     OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_HMSM_STRICT,&err);
                 }
-								gPulse_num = gMotion_num - gMotion_cmd;
+                gPulse_num = gMotion_num - gMotion_cmd;
             }
         }
-        
+
         if(is_mstop())
         {
             switch (gMotor_state)
@@ -133,94 +139,129 @@ void tMotor_Motion(void *p_arg)
                 break;
             }
         }
-				OS_CRITICAL_EXIT();
+        OS_CRITICAL_EXIT();
 //       OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
     }
 }
 
 void STOP_Minit(void)
 {
-	CPU_SR_ALLOC();
-	OS_CRITICAL_ENTER();
+    CPU_SR_ALLOC();
+    OS_CRITICAL_ENTER();
     gMotor_state = MS_UNINIT;
     STOP_Motion();
-	OS_CRITICAL_EXIT();
+    OS_CRITICAL_EXIT();
 }
 
 void STOP_Motion(void)
 {
-	CPU_SR_ALLOC();
-	OS_CRITICAL_ENTER();
+    CPU_SR_ALLOC();
+    OS_CRITICAL_ENTER();
+    START_Motion(gStopPos,VEL_MIN);
 //	if((gMotor_state < MS_INITED) && (gMotor_state > MS_UNINIT))
 //	{
 //		gMotor_state = MS_UNINIT;
 //	}
 //    if((gCur_vel != 0) || (gCur_vel < VEL_MIN))
- //   {
-        gMotion_cmd = gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel;
+//   {
+//       gMotion_cmd = gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel;
 //    }
-	OS_CRITICAL_EXIT();
+    OS_CRITICAL_EXIT();
 }
 
 void PAUSE_Motion(s32 target)
 {
-	CPU_SR_ALLOC();
-	OS_CRITICAL_ENTER();
-	switch(target)
-	{
-		case M_STRMP:
-			if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel < M_STRMP)
-			{
-				gMotion_cmd = M_STRMP;
-			}
-			else
-			{
-				STOP_Motion();
-			}
-			break;
-		case M_STPMP:
-			if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel < M_STPMP)
-			{
-				gMotion_cmd = M_STPMP;
-			}
-			else
-			{
-				STOP_Motion();
-			}
-			break;
-		case M_DNLMT:
-			if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel < M_DNLMT)
-			{
-				gMotion_cmd = M_DNLMT;
-			}
-			else
-			{
-				STOP_Motion();
-			}
-			break;
-		case M_UPLMT:
-			if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel > M_UPLMT)
-			{
-				gMotion_cmd = M_UPLMT;
-			}
-			else
-			{
-				STOP_Motion();
-			}
-			break;
-	}
-	OS_CRITICAL_EXIT();
+    CPU_SR_ALLOC();
+    OS_CRITICAL_ENTER();
+    switch(target)
+    {
+    case M_STRMP:
+        if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel < M_STRMP)
+        {
+            gMotion_cmd = M_STRMP;
+        }
+        else
+        {
+            STOP_Motion();
+        }
+        break;
+    case M_STPMP:
+        if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel < M_STPMP)
+        {
+            gMotion_cmd = M_STPMP;
+        }
+        else
+        {
+            STOP_Motion();
+        }
+        break;
+    case M_DNLMT:
+        if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel < M_DNLMT)
+        {
+            gMotion_cmd = M_DNLMT;
+        }
+        else
+        {
+            STOP_Motion();
+        }
+        break;
+    case M_UPLMT:
+        if(gMotion_num + ((VEL_MIN - gCur_vel) >> VEL_ACCB) * gDir_vel > M_UPLMT)
+        {
+            gMotion_cmd = M_UPLMT;
+        }
+        else
+        {
+            STOP_Motion();
+        }
+        break;
+    }
+    OS_CRITICAL_EXIT();
 }
 void START_Motion(s32 target_pos, u16 target_vel)
 {
-	CPU_SR_ALLOC();
-	OS_CRITICAL_ENTER();
-    gMotion_cmd = target_pos;
-    gVel_cmd = target_vel;
-	OS_CRITICAL_EXIT();
+    CPU_SR_ALLOC();
+    OS_CRITICAL_ENTER();
+    gTarPos = target_pos;
+    gTarVel = target_vel;
+    OS_CRITICAL_EXIT();
 }
 
-void MOTOR_GO(s32 target_pos, u16 target_vel)
+// work cmd
+void MOTOR_GO(u8 tarpos, u16 tarvel)
+{
+    s32 tmp = M_UPLMT;
+    switch (tarpos)
+    {
+    case MW_UPL:
+        gMotor_state = MS_BAKINIT;
+        tmp = M_UPLMT;
+        break;
+    case MW_UPM:
+        gMotor_state = MS_GOMAPSTR;
+        tmp = M_STRMP;
+        break;
+    case MW_DNM:
+        gMotor_state = MS_SCANNING;
+        tmp = M_STPMP;
+        break;
+    case MW_DNL:
+        gMotor_state = MS_GOEND;
+        tmp = M_DNLMT;
+        break;
+    }
+    if(tarvel > VEL_MIN)
+    {
+        tarvel = VEL_MIN;
+    }
+    if(tarvel < VEL_MAX)
+    {
+        tarvel = VEL_MAX;
+    }
+    START_Motion(tmp, tarvel);
+}
+
+void MOTOR_GOBK(s32 target_pos, u16 target_vel)
 {
     START_Motion(target_pos, target_vel);
     switch (target_pos)
@@ -273,8 +314,8 @@ BEGIN:
     {
         START_Motion(FORWD_POS, FORWD_VEL);
     }
-		
-		while(PFin(M_POS_P) == 0)
+
+    while(PFin(M_POS_P) == 0)
     {
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         if(gMotor_state == MS_UNINIT)
@@ -282,7 +323,7 @@ BEGIN:
             goto BEGIN;
         }
     }
-		STOP_Motion();
+    STOP_Motion();
     while(!is_mstop())
     {
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);

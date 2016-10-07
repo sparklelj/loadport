@@ -1,5 +1,6 @@
 #include "motor.h"
 
+
 #if SYSTEM_SUPPORT_OS
 #include "includes.h"					//ucos 使用	  
 #endif
@@ -24,7 +25,7 @@
 #define MOTION_DIV 83
 
 bool bpulse = true;
-bool is_stop = true;
+//bool is_stop = true;
 s32 gPos_num = 0;
 s32 gPark_num = 0;
 u8  gMotor_state = MS_UNINIT;
@@ -42,13 +43,30 @@ s32 gtestpul = 0;
 s32 gScan_pos[SCAN_NUM_MAX] = {26100,26000,25200,25000,24100,24000,22800,22600,21100,21000,20200,20000,19200,19000,17800,17600,16200,16000,15200,15000,14100,14000,12800,12600,11100,11000,8800,8600,6800,6600,3100,3000};
 u8  gScan_num = 32;
 
+u32 gDePos = 0;
+u16 gCurVel = VEL_MIN;
+s32 gTarPos = 0;
+s32 gCurPos = 0;
+s32 gStopPos = 0;
+s32 gCurDis = 0;
+u16 gTarVel = VEL_MIN;
+s8 gCurDir = 1;
+
 void CTRL_Init(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOF, ENABLE);//使能GPIOE
 
-    GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_ENABLE) | CONN(GPIO_Pin_, M_DIR) | CONN(GPIO_Pin_, M_PULSE); //输出引脚
+    GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_ENABLE); //输出引脚
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//普通输出模式
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100M
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;//上拉
+    GPIO_Init(GPIOE, &GPIO_InitStructure);//初始化输入
+    GPIO_ResetBits(GPIOE,GPIO_InitStructure.GPIO_Pin);//设置为高
+	
+	  GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_DIR) | CONN(GPIO_Pin_, M_PULSE); //输出引脚
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//普通输出模式
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //推挽输出
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100M
@@ -75,7 +93,7 @@ void ENC_Init(void)
 
 //	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource12);
 //	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, EXTI_PinSource13);
-//    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_Z));
+//  SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_Z));
     SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_P));
 
     EXTI_InitStructure.EXTI_Line = CONN(EXTI_Line, M_POS_P);
@@ -101,9 +119,10 @@ void ENC_Init(void)
     GPIO_PinAFConfig(GPIOB,CONN(GPIO_PinSource, P_POS_B),GPIO_AF_TIM4);
 
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-//  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 //	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+//    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
     GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, P_POS_A) | CONN(GPIO_Pin_, P_POS_B);
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
@@ -129,10 +148,12 @@ void ENC_Init(void)
     TIM_EncoderInterfaceConfig(TIM4, TIM_EncoderMode_TI12,
                                TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
     TIM_ICStructInit(&TIM_ICInitStructure);
-//  TIM_ICInitStructure.TIM_ICFilter = 0;
+  TIM_ICInitStructure.TIM_ICFilter = 6;
     TIM_ICInit(TIM4, &TIM_ICInitStructure);
-    TIM_ICInitStructure.TIM_Channel=TIM_Channel_2;
-    TIM_ICInit(TIM4, &TIM_ICInitStructure);
+//		TIM_ICInitStructure.TIM_Channel=TIM_Channel_1;
+//    TIM_ICInit(TIM4, &TIM_ICInitStructure);
+//    TIM_ICInitStructure.TIM_Channel=TIM_Channel_2;
+//    TIM_ICInit(TIM4, &TIM_ICInitStructure);
 
 // Clear all pending interrupts
     TIM_ClearFlag(TIM4, TIM_FLAG_Update);
@@ -187,9 +208,9 @@ void MOTION_Scan(void)
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
-
-// test	
-	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+/*
+// test
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
     GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_POS_A);
@@ -204,8 +225,8 @@ void MOTION_Scan(void)
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
-// test	
-
+// test
+*/
     NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = SCAN_PR;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0;
@@ -314,20 +335,97 @@ void EXTI15_10_IRQHandler(void)
         }
         EXTI_ClearITPendingBit(CONN(EXTI_Line, M_SCAN));
     }
-		
+
     if(EXTI_GetITStatus(CONN(EXTI_Line, M_POS_A)) == SET)
     {
         if(PFin(M_POS_B) == 1)
-				{
-					gtestpul++;
-				}
-				else
-				{
-					gtestpul--;
-				}
+        {
+            gtestpul++;
+        }
+        else
+        {
+            gtestpul--;
+        }
         EXTI_ClearITPendingBit(CONN(EXTI_Line, M_POS_A));
     }
-		
+
+}
+
+bool is_stop()
+{
+    if((gTarPos == gCurPos) && (gDePos <= STOP_DEPOS))
+    {
+        return true;
+    }
+    return false;
+}
+
+bool is_sameDir()
+{
+	s32 tmp = gCurDir;
+    if((gCurDis & 0x80000000) == (tmp & 0x80000000))
+    {
+        return true;
+    }
+    return false;
+}
+
+void vel_de()
+{
+    if(gCurVel == VEL_MIN)
+    {
+        gCurDir = -gCurDir;
+    }
+    if(gCurVel < (VEL_MIN - VEL_ACC))
+    {
+        gCurVel += VEL_ACC;
+    }
+    else
+    {
+        gCurVel = VEL_MIN;
+    }
+}
+
+void vel_acc()
+{
+    if(gCurVel > (gTarVel + VEL_ACC))
+    {
+			if(gCurDis >= 2 || gCurDis <= -2)
+			{
+        gCurVel -= VEL_ACC;
+			}
+    }
+    else
+    {
+        gCurVel = gMax_vel;
+    }
+}
+
+void set_pulse()
+{
+    if(gCurDir > 0)
+    {
+        if(PEout(M_PULA) == PEout(M_PULB))
+        {
+            PEout(M_PULA) = ~PEout(M_PULA);
+        }
+        else
+        {
+            PEout(M_PULB) = ~PEout(M_PULB);
+        }
+    }
+    else
+    {
+        if(PEout(M_PULA) == PEout(M_PULB))
+        {
+            PEout(M_PULB) = ~PEout(M_PULB);
+        }
+        else
+        {
+            PEout(M_PULA) = ~PEout(M_PULA);
+        }
+    }
+    gCurPos +=	gCurDir;
 }
 
 void TIM3_IRQHandler(void)
@@ -336,55 +434,29 @@ void TIM3_IRQHandler(void)
     if(TIM_GetITStatus(TIM3,TIM_IT_Update)==SET)
     {
         CPU_CRITICAL_ENTER();
-        if(bpulse == false)
+        gDePos = (VEL_MIN - gCurVel) >> VEL_ACCB;
+			 gStopPos = gCurPos + gDePos * gCurDir;
+        gCurDis = gTarPos - gStopPos;
+        if( !is_stop())
         {
-            PEout(M_PULSE) = ~PEout(M_PULSE);
-            bpulse = true;
-            //          TIM_SetAutoreload(TIM3, gCur_vel);
-        }
-        else if(gPulse_num > 0)
-        {
-            PEout(M_PULSE) = ~PEout(M_PULSE);
-            bpulse = false;
-            is_stop = false;
-            gPulse_num--;
-            gMotion_num += gDir_vel?1:-1;
-            if(((VEL_MIN - gCur_vel) >> VEL_ACCB) + 1 < gPulse_num)
+           
+            if(is_sameDir())
             {
-                if(gCur_vel < gMax_vel + VEL_ACC)
-                {
-                    if(gCur_vel + VEL_ACC < gMax_vel)
-                    {
-                        gCur_vel += VEL_ACC;
-                    }
-                    else
-                    {
-                        gCur_vel = gMax_vel;
-                    }
-                }
-                else
-                {
-                    gCur_vel -= VEL_ACC;
-                }
+                vel_acc();
             }
             else
             {
-                if(gCur_vel > VEL_MIN - VEL_ACC)
-                {
-                    gCur_vel = VEL_MIN;
-                }
-                else
-                {
-                    gCur_vel += VEL_ACC;
-                }
+                vel_de();
             }
+            set_pulse();
         }
         else
         {
             gCur_vel = VEL_MIN;
-            is_stop = true;
+					gStopPos = gTarPos;
         }
         TIM_SetAutoreload(TIM3, gCur_vel);
+
         CPU_CRITICAL_EXIT();
     }
     TIM_ClearITPendingBit(TIM3,TIM_IT_Update);

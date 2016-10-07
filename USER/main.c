@@ -281,7 +281,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-
+/*
 		OSTaskCreate((OS_TCB 	* )&MINIT_TaskTCB,
                  (CPU_CHAR	* )"minittor task",
                  (OS_TASK_PTR )tMotor_Init,
@@ -295,7 +295,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-								 
+/*								 
     OSTaskCreate((OS_TCB 	* )&MOTOR_TaskTCB,
                  (CPU_CHAR	* )"motor task",
                  (OS_TASK_PTR )tMotor_Motion,
@@ -309,7 +309,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-
+*/
     OS_CRITICAL_EXIT();	//退出临界区
 //		OSTaskResume(&MINIT_TaskTCB,&err);
     OSTaskDel((OS_TCB*)0,&err);	//删除start_task任务自身
@@ -406,7 +406,8 @@ void task2_task(void *p_arg)
 //	OUTPUT_SetOne(CS_O_0, SOL08A_0);
 //START_Motion(100, 0xEFF0);
 OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
-OSTaskResume(&MINIT_TaskTCB,&err);	
+	START_Motion(1000, 0x880);
+//OSTaskResume(&MINIT_TaskTCB,&err);	
     while(1)
     {
 			for(i=0;i<8;i++)
@@ -419,7 +420,7 @@ OSTaskResume(&MINIT_TaskTCB,&err);
 				printf("\r\n");
 			}
 			printf("count:%d \r\n",COUNT_Get());
-			printf("gPulse_num:%d  gMotion_cmd:%d  gMotion_num:%d  gtestcnt:%d  gtestpul:%d \r\n",gPulse_num,gMotion_cmd,gMotion_num,gtestcnt,gtestpul);
+			printf("gCurVel:%x  gTarPos:%d  gCurPos:%d  gCurDir:%d  gCurDis:%d \r\n",gCurVel,gTarPos,gCurPos,gCurDir,gCurDis);
 			printf("gScan_num:%d  gPos_num:%d  gvel:%d\r\n",gScan_num, gPos_num,gCur_vel);
 			printf("M_POS_P:%d \r\n",PFin(M_POS_P));
 			printf("M_SCAN:%d \r\n",PFin(M_SCAN));
@@ -431,6 +432,18 @@ OSTaskResume(&MINIT_TaskTCB,&err);
 			}
 			printf("\r\n");
 			printf("\r\n");
+			if(task2_num == 10)
+			{
+				START_Motion(-1000, 0x480);
+			}
+			if(task2_num == 100)
+			{
+				START_Motion(2000, 0x280);
+			}
+			if(task2_num == 100)
+			{
+				START_Motion(-3000, 0x180);
+			}
         task2_num++;	//任务2执行次数加1 注意task1_num2加到255的时候会清零！！
 //			printf("m:%d v:%d d:%d p:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num);
 //        LED1=~LED1;

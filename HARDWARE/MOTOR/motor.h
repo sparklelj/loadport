@@ -9,6 +9,8 @@
 #define M_ENABLE 4 //PE
 #define M_DIR    5
 #define M_PULSE  6
+#define M_PULA   5
+#define M_PULB   6
 
 #define M_SCAN   11 //PF
 #define M_POS_A  12 //PF
@@ -32,10 +34,10 @@
 
 #define VEL_MAX 	 0x80
 #define VEL_MIN 	 0xF080
-#define VEL_ACCB   3
+#define VEL_ACCB   5
 //#define VEL_ACC 	 0x0400
-#define VEL_ACC 	 0x0010
-
+#define VEL_ACC 	 (0x0001 << VEL_ACCB) 
+#define STOP_DEPOS  4
 
 extern int32_t gpos_num;
 extern s32 gMotion_num;
@@ -47,9 +49,15 @@ extern s8  gDir_vel;
 extern s32 gPos_num;
 extern s32 gPark_num;
 extern u8 gMotor_state;
-extern bool is_stop;
-extern u32 gPulse_num;
 
+extern u32 gPulse_num;
+extern s32 gTarPos;
+extern u16 gTarVel;
+extern s32 gStopPos;
+extern u16 gCurVel;
+extern s32 gCurPos;
+extern s8 gCurDir;
+extern s32 gCurDis;
 
 
 extern s32 gtestcnt;
@@ -62,6 +70,7 @@ extern s32 gScan_pos[SCAN_NUM_MAX];
 extern u8 gScan_num;
 
 s32 COUNT_Get(void);
+bool is_stop();
 void POS_SET(s32 target);
 void MOTOR_Init(void);
 
