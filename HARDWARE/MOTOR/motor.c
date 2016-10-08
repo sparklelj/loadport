@@ -48,9 +48,12 @@ u16 gCurVel = VEL_MIN;
 s32 gTarPos = 0;
 s32 gCurPos = 0;
 s32 gStopPos = 0;
+s32 gParkPos = 0;
 s32 gCurDis = 0;
 u16 gTarVel = VEL_MIN;
 s8 gCurDir = 1;
+	
+	bool gisMotorPark = false;
 
 void CTRL_Init(void)
 {
@@ -98,7 +101,7 @@ void ENC_Init(void)
 
     EXTI_InitStructure.EXTI_Line = CONN(EXTI_Line, M_POS_P);
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
 
@@ -278,13 +281,15 @@ s32 COUNT_Get(void)
     return gPos_num + tmp;
 }
 
-void POS_SET(s32 target)
+void POS_SET(s32 target, s32 pos)
 {
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
 //	gPos_num += COUNT_Get();
     gPos_num = COUNT_Get();
     gPos_num = gPos_num - target;
+		gCurPos -= pos;
+  	gTarPos -= pos;
     CPU_CRITICAL_EXIT();
 }
 
@@ -317,6 +322,8 @@ void EXTI15_10_IRQHandler(void)
         {
             CPU_CRITICAL_ENTER();
             gPark_num = COUNT_Get();
+					gParkPos = gCurPos;
+					gisMotorPark = true;
             gMotor_state = MS_PRKEND;
             CPU_CRITICAL_EXIT();
         }
@@ -452,10 +459,10 @@ void TIM3_IRQHandler(void)
         }
         else
         {
-            gCur_vel = VEL_MIN;
+            gCurVel = VEL_MIN;
 					gStopPos = gTarPos;
         }
-        TIM_SetAutoreload(TIM3, gCur_vel);
+        TIM_SetAutoreload(TIM3, gCurVel);
 
         CPU_CRITICAL_EXIT();
     }

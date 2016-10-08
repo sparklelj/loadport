@@ -281,7 +281,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-/*
+
 		OSTaskCreate((OS_TCB 	* )&MINIT_TaskTCB,
                  (CPU_CHAR	* )"minittor task",
                  (OS_TASK_PTR )tMotor_Init,
@@ -406,8 +406,8 @@ void task2_task(void *p_arg)
 //	OUTPUT_SetOne(CS_O_0, SOL08A_0);
 //START_Motion(100, 0xEFF0);
 OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
-	START_Motion(1000, 0x880);
-//OSTaskResume(&MINIT_TaskTCB,&err);	
+//	START_Motion(1000, VEL_MAX);
+OSTaskResume(&MINIT_TaskTCB,&err);	
     while(1)
     {
 			for(i=0;i<8;i++)
@@ -434,15 +434,15 @@ OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
 			printf("\r\n");
 			if(task2_num == 10)
 			{
-				START_Motion(-1000, 0x480);
+//				START_Motion(-1000, VEL_MAX);
 			}
-			if(task2_num == 100)
+			if(task2_num == 30)
 			{
-				START_Motion(2000, 0x280);
+//				START_Motion(2000, VEL_MAX);
 			}
-			if(task2_num == 100)
+			if(task2_num == 50)
 			{
-				START_Motion(-3000, 0x180);
+//				START_Motion(-3000, VEL_MAX);
 			}
         task2_num++;	//任务2执行次数加1 注意task1_num2加到255的时候会清零！！
 //			printf("m:%d v:%d d:%d p:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num);

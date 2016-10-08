@@ -8,11 +8,11 @@
 
 #define IS_STOP ((gMotion_cmd == gMotion_num) && (gCur_vel == 0))
 
-#define INIT_POS 0
-#define BACK_POS 800000  //寻零距离
-#define BACK_VEL 0xF000
-#define FORWD_POS -100000 //前进距离
-#define FORWD_VEL 0xF000
+#define INIT_POS 80000
+#define BACK_POS -80000  //寻零距离
+#define BACK_VEL 0x2000
+#define FORWD_POS 10000 //前进距离
+#define FORWD_VEL 0x2000
 
 #define MW_INIT 1
 #define MW_UPL  2
@@ -29,6 +29,7 @@ u8 gWorkPos;
 
 bool is_mstop(void)
 {
+	return is_stop();
     if((gMotion_cmd == gMotion_num) && (is_stop() == true))
     {
         return true;
@@ -310,12 +311,12 @@ BEGIN:
         }
     }
 
-    if(PFin(M_POS_P) == 0)
+    if(PFin(M_POS_P) == 1)
     {
         START_Motion(FORWD_POS, FORWD_VEL);
     }
 
-    while(PFin(M_POS_P) == 0)
+    while(PFin(M_POS_P) == 1)
     {
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         if(gMotor_state == MS_UNINIT)
@@ -333,7 +334,7 @@ BEGIN:
         }
     }
 
-    while(gMotor_state != MS_PRKEND)
+    while(gisMotorPark)//gMotor_state != MS_PRKEND)
     {
         START_Motion(BACK_POS, BACK_VEL);
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
@@ -361,12 +362,12 @@ BEGIN:
 
     OS_CRITICAL_ENTER();
 //	gPos_num = gPos_num - gPark_num;
-    POS_SET(gPark_num); //设置位置
+    POS_SET(gPark_num, gParkPos); //设置位置
     gMotion_num = gPos_num ;
     gMotion_cmd = gMotion_num;
     OS_CRITICAL_EXIT();
 
-    START_Motion(INIT_POS, FORWD_VEL); //运行至指定位置 0
+    START_Motion(INIT_POS, FORWD_VEL); //运行至指定位置 上限
 
     while(!is_mstop())
     {
