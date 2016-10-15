@@ -3,10 +3,10 @@
 
 #include "sys.h"
 
-#define M_UPLMT 900000        //初始位置
-#define M_STRMP 700000  //开始扫盘位置
-#define M_STPMP 300000  //扫盘结束
-#define M_DNLMT 200000  //下限位置
+#define M_UPLMT 10000        //初始位置
+#define M_STRMP 70000  //开始扫盘位置
+#define M_STPMP 30000  //扫盘结束
+#define M_DNLMT 20000  //下限位置
 
 #define M_VEL VEL_MAX
 
@@ -16,6 +16,7 @@
 u8 Get_MStatus(void);
 extern u8 gMotion_status;
 extern s32 gMotion_cmd;
+extern bool gParkErr;
 
 void STOP_Minit(void);
 void PAUSE_Motion(s32 target);

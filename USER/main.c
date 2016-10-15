@@ -13,6 +13,7 @@
 #include "tcmd.h"
 #include "tled.h"
 #include "tinput.h"
+#include "tstatus.h"
 
 //任务优先级
 #define START_TASK_PRIO		3
@@ -85,13 +86,13 @@ OS_TCB INPUT_TaskTCB;
 CPU_STK INPUT_TASK_STK[INPUT_STK_SIZE];
 
 //任务优先级
-#define MOTOR_TASK_PRIO		3
+#define STATUS_TASK_PRIO		10
 //任务堆栈大小
-#define MOTOR_STK_SIZE 		2048
+#define STATUS_STK_SIZE 		2048
 //任务控制块
-OS_TCB MOTOR_TaskTCB;
+OS_TCB STATUS_TaskTCB;
 //任务堆栈
-CPU_STK MOTOR_TASK_STK[MOTOR_STK_SIZE];
+CPU_STK STATUS_TASK_STK[STATUS_STK_SIZE];
 
 //任务优先级
 #define MINIT_TASK_PRIO		6
@@ -118,13 +119,13 @@ void init_all(void)
 	//初始化电机
     MOTOR_Init();
 	
-	// 等待电机停止
-	/*
+	// 等待错误结束
+
 	  while((time--) && (is_m_err()))
     {
 			delay_ms(500);
 		}
-	*/
+
 		if(time == 0)
 		{
 			enable_m(DIS_M); //规定时间内未停止 错误
@@ -295,21 +296,21 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-/*								 
-    OSTaskCreate((OS_TCB 	* )&MOTOR_TaskTCB,
-                 (CPU_CHAR	* )"motor task",
-                 (OS_TASK_PTR )tMotor_Motion,
+								 
+    OSTaskCreate((OS_TCB 	* )&STATUS_TaskTCB,
+                 (CPU_CHAR	* )"sattus check",
+                 (OS_TASK_PTR )tStatus_Check,
                  (void		* )0,
-                 (OS_PRIO	  )MOTOR_TASK_PRIO,
-                 (CPU_STK   * )&MOTOR_TASK_STK[0],
-                 (CPU_STK_SIZE)MOTOR_STK_SIZE/10,
-                 (CPU_STK_SIZE)MOTOR_STK_SIZE,
+                 (OS_PRIO	  )STATUS_TASK_PRIO,
+                 (CPU_STK   * )&STATUS_TASK_STK[0],
+                 (CPU_STK_SIZE)STATUS_STK_SIZE/10,
+                 (CPU_STK_SIZE)STATUS_STK_SIZE,
                  (OS_MSG_QTY  )0,
                  (OS_TICK	  )0,
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-*/
+
     OS_CRITICAL_EXIT();	//退出临界区
 //		OSTaskResume(&MINIT_TaskTCB,&err);
     OSTaskDel((OS_TCB*)0,&err);	//删除start_task任务自身
@@ -421,7 +422,7 @@ OSTaskResume(&MINIT_TaskTCB,&err);
 			}
 			printf("count:%d \r\n",COUNT_Get());
 			printf("gCurVel:%x  gTarPos:%d  gCurPos:%d  gCurDir:%d  gCurDis:%d \r\n",gCurVel,gTarPos,gCurPos,gCurDir,gCurDis);
-			printf("gScan_num:%d  gPos_num:%d  gvel:%d\r\n",gScan_num, gPos_num,gCur_vel);
+			printf("gScan_num:%d  gPos_num:%d  gvel:%d gparkerr:%d\r\n",gScan_num, gPos_num,gCur_vel, gParkErr);
 			printf("M_POS_P:%d \r\n",PFin(M_POS_P));
 			printf("M_SCAN:%d \r\n",PFin(M_SCAN));
 			printf("M_ERR:%d \r\n",PFin(M_ERR));

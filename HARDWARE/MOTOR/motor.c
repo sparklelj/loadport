@@ -276,6 +276,7 @@ s32 COUNT_Get(void)
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     tmp = TIM_GetCounter(TIM4);
+	  TIM_SetCounter(TIM4, CNT_VAL);
     tmp = tmp - CNT_VAL;
     CPU_CRITICAL_EXIT();
     return gPos_num + tmp;
@@ -288,8 +289,10 @@ void POS_SET(s32 target, s32 pos)
 //	gPos_num += COUNT_Get();
     gPos_num = COUNT_Get();
     gPos_num = gPos_num - target;
-		gCurPos -= pos;
-  	gTarPos -= pos;
+//		gCurPos -= pos;
+//  	gTarPos -= pos;
+	gCurPos = gPos_num >> 1;
+	gTarPos = gPos_num >> 1;
     CPU_CRITICAL_EXIT();
 }
 
@@ -307,7 +310,7 @@ void TIM8_BRK_TIM12_IRQHandler(void)
         CPU_CRITICAL_ENTER();
 //		gPos_num += COUNT_Get();
         gPos_num = COUNT_Get();
-        TIM_SetCounter(TIM4, CNT_VAL);
+ //       TIM_SetCounter(TIM4, CNT_VAL);
         CPU_CRITICAL_EXIT();
     }
     TIM_ClearITPendingBit(TIM12,TIM_IT_Update);  //清除中断标志位
@@ -358,7 +361,7 @@ void EXTI15_10_IRQHandler(void)
 
 }
 
-bool is_stop()
+__inline bool _is_stop()
 {
     if((gTarPos == gCurPos) && (gDePos <= STOP_DEPOS))
     {
@@ -367,7 +370,11 @@ bool is_stop()
     return false;
 }
 
-bool is_sameDir()
+bool is_stop()
+{
+  return   _is_stop();
+} 
+__inline bool is_sameDir()
 {
 	s32 tmp = gCurDir;
     if((gCurDis & 0x80000000) == (tmp & 0x80000000))
@@ -377,7 +384,7 @@ bool is_sameDir()
     return false;
 }
 
-void vel_de()
+__inline void vel_de()
 {
     if(gCurVel == VEL_MIN)
     {
@@ -393,7 +400,7 @@ void vel_de()
     }
 }
 
-void vel_acc()
+__inline void vel_acc()
 {
     if(gCurVel > (gTarVel + VEL_ACC))
     {
@@ -408,7 +415,7 @@ void vel_acc()
     }
 }
 
-void set_pulse()
+__inline void set_pulse()
 {
     if(gCurDir > 0)
     {

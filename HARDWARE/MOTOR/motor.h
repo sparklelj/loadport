@@ -33,11 +33,11 @@
 #define MS_BAKINIT   0x0C
 
 #define VEL_MAX 	 0x280
-#define VEL_MIN 	 0x8080
+#define VEL_MIN 	 0x4080
 #define VEL_ACCB   8
 //#define VEL_ACC 	 0x0400
 #define VEL_ACC 	 (0x0001 << VEL_ACCB) 
-#define STOP_DEPOS  4
+#define STOP_DEPOS  3
 
 extern int32_t gpos_num;
 extern s32 gMotion_num;
@@ -71,7 +71,7 @@ extern s32 gScan_pos[SCAN_NUM_MAX];
 extern u8 gScan_num;
 
 s32 COUNT_Get(void);
-bool is_stop();
+bool is_stop(void);
 void POS_SET(s32 target, s32 pos);
 void MOTOR_Init(void);
 

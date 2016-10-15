@@ -8,7 +8,7 @@
 
 #define IS_STOP ((gMotion_cmd == gMotion_num) && (gCur_vel == 0))
 
-#define INIT_POS 80000
+#define INIT_POS M_UPLMT
 #define BACK_POS -80000  //—∞¡„æ‡¿Î
 #define BACK_VEL 0x2000
 #define FORWD_POS 10000 //«∞Ω¯æ‡¿Î
@@ -26,10 +26,11 @@ u16 gVel_cmd = 0;
 u8 gMotion_status;
 u8 gWorkPos;
 
+bool gParkErr = false;
 
 bool is_mstop(void)
 {
-	return is_stop();
+    return is_stop();
     if((gMotion_cmd == gMotion_num) && (is_stop() == true))
     {
         return true;
@@ -55,7 +56,10 @@ bool enable_m(bool ctrl)
     return true;
 }
 
-
+void set_park_err(void)
+{
+    gParkErr = true;
+}
 void tMotor_Motion(void *p_arg)
 {
     OS_ERR err;
@@ -172,6 +176,11 @@ void STOP_Motion(void)
 
 void PAUSE_Motion(s32 target)
 {
+	STOP_Motion();
+}
+
+void PAUSE_MotionB(s32 target)
+{
     CPU_SR_ALLOC();
     OS_CRITICAL_ENTER();
     switch(target)
@@ -229,10 +238,10 @@ void START_Motion(s32 target_pos, u16 target_vel)
 }
 
 // work cmd
-void MOTOR_GO(u8 tarpos, u16 tarvel)
+void MOTOR_GO(u8 workpos, u16 tarvel)
 {
     s32 tmp = M_UPLMT;
-    switch (tarpos)
+    switch (workpos)
     {
     case MW_UPL:
         gMotor_state = MS_BAKINIT;
@@ -297,20 +306,22 @@ void tMotor_Init(void *p_arg)
 BEGIN:
     OSTaskSuspend(NULL, &err);
     gMotor_state = MS_INITING;
-    if(!is_mstop())
-    {
-        STOP_Motion();
-    }
-
-    while(!is_mstop())
-    {
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
-        if(gMotor_state == MS_UNINIT)
+    gParkErr = false;
+    /*
+        if(!is_mstop())
         {
-            goto BEGIN;
+            STOP_Motion();
         }
-    }
 
+        while(!is_mstop())
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            if(gMotor_state == MS_UNINIT)
+            {
+                goto BEGIN;
+            }
+        }
+    */
     if(PFin(M_POS_P) == 1)
     {
         START_Motion(FORWD_POS, FORWD_VEL);
@@ -319,11 +330,44 @@ BEGIN:
     while(PFin(M_POS_P) == 1)
     {
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        if(is_mstop())
+        {
+            set_park_err();
+					goto BEGIN;
+//				gParkErr = true;
+        }
         if(gMotor_state == MS_UNINIT)
         {
             goto BEGIN;
         }
     }
+    /*
+        STOP_Motion();
+        while(!is_mstop())
+        {
+            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            if(gMotor_state == MS_UNINIT)
+            {
+                goto BEGIN;
+            }
+        }
+    */
+    START_Motion(BACK_POS, BACK_VEL);
+    while(!gisMotorPark)//gMotor_state != MS_PRKEND)
+    {
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        if(is_mstop())
+        {
+            set_park_err();
+					goto BEGIN;
+//				gParkErr = true;
+        }
+        if(gMotor_state == MS_UNINIT)
+        {
+            goto BEGIN;
+        }
+    }
+
     STOP_Motion();
     while(!is_mstop())
     {
@@ -333,33 +377,13 @@ BEGIN:
             goto BEGIN;
         }
     }
-
-    while(gisMotorPark)//gMotor_state != MS_PRKEND)
-    {
-        START_Motion(BACK_POS, BACK_VEL);
+    /*
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         if(gMotor_state == MS_UNINIT)
         {
             goto BEGIN;
         }
-    }
-
-    STOP_Motion();
-    while(!is_mstop())
-    {
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
-        if(gMotor_state == MS_UNINIT)
-        {
-            goto BEGIN;
-        }
-    }
-
-    OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
-    if(gMotor_state == MS_UNINIT)
-    {
-        goto BEGIN;
-    }
-
+    */
     OS_CRITICAL_ENTER();
 //	gPos_num = gPos_num - gPark_num;
     POS_SET(gPark_num, gParkPos); //…Ë÷√Œª÷√
