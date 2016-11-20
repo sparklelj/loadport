@@ -123,7 +123,9 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     mlen++;
     if((type & 0xF0) == 0x00)
     {
-        s_len = ONLINE_Write(msg, mlen);
+        s_len = ONLINE_Write(msg+5, mlen-8);
+			return true; //test
+//			        s_len = ONLINE_Write(msg, mlen);
         while(s_len !=  mlen)
         {
             mlen = mlen - s_len;
@@ -833,7 +835,9 @@ bool proc_fin(u8* cmd_name)
 
 bool proc_before(u8* cmd_name, u8 rtype, u8 error)
 {
-    u8 ucmd;
+	
+    u8 ucmd = 0;
+//	rtype = false;
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
         ucmd = CMD_ACTION_ORGSH;
@@ -1743,6 +1747,30 @@ bool proc_cmd(u8* msg)
 }
 
 void tCMD_Proc(void *p_arg)
+{
+    u8 msg[105];
+    u8 len;
+    u16 lencmd;
+	bool res;
+    OS_ERR err;
+    CPU_SR_ALLOC();
+    while(1)
+    {
+        OSTimeDlyHMSM(0,0,0,900,OS_OPT_TIME_HMSM_STRICT,&err);
+        OS_CRITICAL_ENTER();
+        len = ONLINE_RxLen();
+	if(len >= 5)
+        {
+            ONLINE_Read(msg, 5);
+					res = proc_mov(msg);
+					printf("cmd:%s  res:%d \r\n",msg, res);
+        }		
+				
+			OS_CRITICAL_EXIT();
+		}
+	}
+
+void tCMD_ProcMain(void *p_arg)
 {
     u8 msg[105];
     u8 len;

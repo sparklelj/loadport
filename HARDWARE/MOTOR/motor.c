@@ -15,12 +15,12 @@
 #define ENCODER_PR 0x03
 
 #define COUNT_PR 0x03
-#define COUNT_ARR 99 //1ms (COUNT_ARR+1)*(COUNT_PSC+1)/84M
+#define COUNT_ARR 999 //1ms (COUNT_ARR+1)*(COUNT_PSC+1)/84M
 #define COUNT_PSC 839
 
 #define MOTION_PR 0x03
 
-#define CNT_VAL 0x0FFF
+#define CNT_VAL 0x8000
 
 #define MOTION_DIV 83
 
@@ -278,8 +278,9 @@ s32 COUNT_Get(void)
     tmp = TIM_GetCounter(TIM4);
 	  TIM_SetCounter(TIM4, CNT_VAL);
     tmp = tmp - CNT_VAL;
+	gPos_num += tmp;
     CPU_CRITICAL_EXIT();
-    return gPos_num + tmp;
+    return gPos_num;
 }
 
 void POS_SET(s32 target, s32 pos)
@@ -308,8 +309,8 @@ void TIM8_BRK_TIM12_IRQHandler(void)
     if(TIM_GetITStatus(TIM12,TIM_IT_Update)==SET) //Òç³öÖÐ¶Ï
     {
         CPU_CRITICAL_ENTER();
-//		gPos_num += COUNT_Get();
-        gPos_num = COUNT_Get();
+				COUNT_Get();
+//        gPos_num = COUNT_Get();
  //       TIM_SetCounter(TIM4, CNT_VAL);
         CPU_CRITICAL_EXIT();
     }
@@ -411,7 +412,7 @@ __inline void vel_acc()
     }
     else
     {
-        gCurVel = gMax_vel;
+        gCurVel = gTarVel;
     }
 }
 
@@ -466,7 +467,7 @@ void TIM3_IRQHandler(void)
         }
         else
         {
-            gCurVel = VEL_MIN;
+          gCurVel = VEL_MIN;
 					gStopPos = gTarPos;
         }
         TIM_SetAutoreload(TIM3, gCurVel);

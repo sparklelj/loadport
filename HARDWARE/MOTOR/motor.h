@@ -32,9 +32,9 @@
 #define MS_END       0x0B
 #define MS_BAKINIT   0x0C
 
-#define VEL_MAX 	 0x280
+#define VEL_MAX 	 0x80
 #define VEL_MIN 	 0x4080
-#define VEL_ACCB   8
+#define VEL_ACCB   0x0B
 //#define VEL_ACC 	 0x0400
 #define VEL_ACC 	 (0x0001 << VEL_ACCB) 
 #define STOP_DEPOS  3

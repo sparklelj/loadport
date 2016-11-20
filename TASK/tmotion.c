@@ -9,16 +9,12 @@
 #define IS_STOP ((gMotion_cmd == gMotion_num) && (gCur_vel == 0))
 
 #define INIT_POS M_UPLMT
-#define BACK_POS -80000  //—∞¡„æ‡¿Î
-#define BACK_VEL 0x2000
-#define FORWD_POS 10000 //«∞Ω¯æ‡¿Î
-#define FORWD_VEL 0x2000
+#define BACK_POS -40000  //—∞¡„æ‡¿Î
+#define BACK_VEL 0x280
+#define FORWD_POS 1000 //«∞Ω¯æ‡¿Î
+#define FORWD_VEL 0x280
 
-#define MW_INIT 1
-#define MW_UPL  2
-#define MW_UPM  3
-#define MW_DNM  4
-#define MW_DNL  5
+
 
 s32 gMotion_cmd = 0;
 u16 gVel_cmd = 0;

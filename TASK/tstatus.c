@@ -1,5 +1,6 @@
 #include "tstatus.h"
 #include "tmotion.h"
+#include "tinput.h"
 #include "motor.h"
 #include "includes.h"
 
@@ -25,19 +26,34 @@ void tStatus_Check(void *p_arg)
             switch (gMotor_state)
             {
             case MS_GOMAPSTR:
+							if(is_mapstart())
+								{
                 gMotor_state = MS_MAPSTR;
+							}
                 break;
             case MS_SCANNING:
+							if(is_mapstart())
+							{
                 gMotor_state = MS_SCANED;
+							}
                 break;
             case MS_GOEND:
+							if(is_mapend())
+							{
                 gMotor_state = MS_END;
+							}
                 break;
             case MS_BAKINIT:
+							if(is_drdwlmt())
+							{
                 gMotor_state = MS_INITED;
+							}
                 break;
             case MS_GOINIT:
+							if(is_druplmt())
+							{
                 gMotor_state = MS_INITED;
+							}
                 break;
             }
         }

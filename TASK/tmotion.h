@@ -3,10 +3,19 @@
 
 #include "sys.h"
 
-#define M_UPLMT 10000        //初始位置
-#define M_STRMP 70000  //开始扫盘位置
-#define M_STPMP 30000  //扫盘结束
-#define M_DNLMT 20000  //下限位置
+//1000 pules per circle 
+//2000 counts per circle
+
+#define M_UPLMT 500        //初始位置
+#define M_STRMP 6500  //开始扫盘位置
+#define M_STPMP 32500  //扫盘结束
+#define M_DNLMT 39000  //下限位置
+
+#define MW_INIT 1
+#define MW_UPL  2
+#define MW_UPM  3
+#define MW_DNM  4
+#define MW_DNL  5
 
 #define M_VEL VEL_MAX
 
@@ -21,6 +30,7 @@ extern bool gParkErr;
 void STOP_Minit(void);
 void PAUSE_Motion(s32 target);
 void START_Motion(s32 target_pos, u16 target_vel);
+void MOTOR_GO(u8 workpos, u16 tarvel);
 void STOP_Motion(void);
 void tMotor_Motion(void *p_arg);
 void tMotor_Init(void *p_arg);

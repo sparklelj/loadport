@@ -105,38 +105,38 @@ CPU_STK MINIT_TASK_STK[MINIT_STK_SIZE];
 
 void init_all(void)
 {
-	  u8 time = 10;
-	
-	//初始化串口
+    u8 time = 10;
+
+    //初始化串口
     UART_init();
-	
-  //初始化输入
+
+    //初始化输入
     INPUT_Init();
-	
-	//初始化输出
+
+    //初始化输出
     OUTPUT_Init();
-	
-	//初始化电机
+
+    //初始化电机
     MOTOR_Init();
-	
-	// 等待错误结束
 
-	  while((time--) && (is_m_err()))
+    // 等待错误结束
+
+    while((time--) && (is_m_err()))
     {
-			delay_ms(500);
-		}
+        delay_ms(500);
+    }
 
-		if(time == 0)
-		{
-			enable_m(DIS_M); //规定时间内未停止 错误
-			while(true)
-			{
-			}
-		}
-		else
-		{
-			enable_m(ENA_M);  //使能电机（已使能）
-		}		
+    if(time == 0)
+    {
+        enable_m(DIS_M); //规定时间内未停止 错误
+        while(true)
+        {
+        }
+    }
+    else
+    {
+        enable_m(ENA_M);  //使能电机（已使能）
+    }
 }
 
 //主函数
@@ -152,7 +152,7 @@ int main(void)
 
     init_all();
 
-		gMotor_state = MS_UNINIT; //MS_SCANNING; //状态为未初始化
+    gMotor_state = MS_UNINIT; //MS_SCANNING; //状态为未初始化
 
     OSInit(&err);		    //初始化UCOSIII
     OS_CRITICAL_ENTER();	//进入临界区
@@ -283,7 +283,7 @@ void start_task(void *p_arg)
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
 
-		OSTaskCreate((OS_TCB 	* )&MINIT_TaskTCB,
+    OSTaskCreate((OS_TCB 	* )&MINIT_TaskTCB,
                  (CPU_CHAR	* )"minittor task",
                  (OS_TASK_PTR )tMotor_Init,
                  (void		* )0,
@@ -296,7 +296,7 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-								 
+
     OSTaskCreate((OS_TCB 	* )&STATUS_TaskTCB,
                  (CPU_CHAR	* )"sattus check",
                  (OS_TASK_PTR )tStatus_Check,
@@ -321,73 +321,109 @@ void test_init(void);
 void task1_task(void *p_arg)
 {
     u8 task1_num=0;
-		s32 tt1;
-		u8 poa, pob = 0;
-	
-		int j = 0;
+    s32 tt1;
+    u8 poa, pob = 0;
+
+    int j = 0;
     OS_ERR err;
 //	CPU_SR_ALLOC();
     p_arg = p_arg;
-		gtestcnt = 0;
-		gtestpul = 0;
-		test_init();
+    gtestcnt = 0;
+    gtestpul = 0;
+    test_init();
     while(1)
     {
-			poa = GPIO_ReadOutputDataBit(GPIOD, GPIO_Pin_0);
-			pob = GPIO_ReadOutputDataBit(GPIOD, GPIO_Pin_1);
-			if(gtestcnt > gtestpul)
-			{
-				if(poa == pob)
-				{
-					PDout(1) = ~PDout(1);
-				}
-				else
-				{
-					PDout(0) = PDout(1);
-				}
-				gtestcnt--;
-			}
-			if(gtestcnt < gtestpul)
-			{
-				if(poa == pob)
-				{
-					PDout(0) = ~PDout(0);
-				}
-				else
-				{
-					PDout(1) = PDout(0);
-				}
-				gtestcnt++;
-			}
+			 OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
+        if (gMotor_state == MS_INITED)
+        {
+            
+            while(!is_mstop())
+            {
+                OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
+
+            }
+						OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
+            START_Motion(M_STRMP, M_VEL);
+
+            while(!is_mstop())
+            {
+                OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
+
+            }
+            OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
+            START_Motion(M_STPMP, M_VEL);
+            while(!is_mstop())
+            {
+                OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
+
+            }
+            OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
+            START_Motion(M_DNLMT, M_VEL);
+            while(!is_mstop())
+            {
+                OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
+
+            }
+            OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
+            START_Motion(M_UPLMT, M_VEL);
+        }
+        /*
+        poa = GPIO_ReadOutputDataBit(GPIOD, GPIO_Pin_0);
+        pob = GPIO_ReadOutputDataBit(GPIOD, GPIO_Pin_1);
+        if(gtestcnt > gtestpul)
+        {
+        	if(poa == pob)
+        	{
+        		PDout(1) = ~PDout(1);
+        	}
+        	else
+        	{
+        		PDout(0) = PDout(1);
+        	}
+        	gtestcnt--;
+        }
+        if(gtestcnt < gtestpul)
+        {
+        	if(poa == pob)
+        	{
+        		PDout(0) = ~PDout(0);
+        	}
+        	else
+        	{
+        		PDout(1) = PDout(0);
+        	}
+        	gtestcnt++;
+        }
         task1_num++;	//任务执1行次数加1 注意task1_num1加到255的时候会清零！！
- //       LED0= ~LED0;
- //       printf("任务1已经执行：%d次\r\n",task1_num);
+        //       LED0= ~LED0;
+        //       printf("任务1已经执行：%d次\r\n",task1_num);
         if((task1_num % 300) == 1)
         {
-					LED0= ~LED0;
-					OUTPUT_SetOne(CS_O_0, SOL07A_0);
-					OUTPUT_ResetOne(CS_O_0, SOL07B_0);
-					
-					OUTPUT_SetOne(CS_O_1, SOL01B_1);
-					OUTPUT_ResetOne(CS_O_1, SOL01A_1);
-//					PEout(7) = 0;
-				}
-					OSTimeDlyHMSM(0,0,0,2,OS_OPT_TIME_HMSM_STRICT,&err);
-//					tt1 = gPos_num;
-	//				printf("m:%d v:%d d:%d p:%d cm:%d ps:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num ,gMotion_cmd,gPos_num);
-  //          OSTaskDel((OS_TCB*)&Task2_TaskTCB,&err);	//任务1执行5此后删除掉任务2
-  //          printf("任务1删除了任务2!\r\n");
-	//				task1_num = 0;
-/*				
-				OUTPUT_SetOne(CS_O_0, SOL07B_0);
-        OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
-				OUTPUT_SetOne(CS_O_0, SOL07A_0);		 
-       	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
-				OUTPUT_ResetOne(CS_O_0, SOL07B_0);
-        OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
-				OUTPUT_SetOne(CS_O_0, SOL07A_0);		 
-       	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
-*/				
+        		LED0= ~LED0;
+        		OUTPUT_SetOne(CS_O_0, SOL07A_0);
+        		OUTPUT_ResetOne(CS_O_0, SOL07B_0);
+
+        		OUTPUT_SetOne(CS_O_1, SOL01B_1);
+        		OUTPUT_ResetOne(CS_O_1, SOL01A_1);
+        //					PEout(7) = 0;
+        	}
+        		OSTimeDlyHMSM(0,0,0,2,OS_OPT_TIME_HMSM_STRICT,&err);
+        //					tt1 = gPos_num;
+        //				printf("m:%d v:%d d:%d p:%d cm:%d ps:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num ,gMotion_cmd,gPos_num);
+        //          OSTaskDel((OS_TCB*)&Task2_TaskTCB,&err);	//任务1执行5此后删除掉任务2
+        //          printf("任务1删除了任务2!\r\n");
+        //				task1_num = 0;
+        */
+        /*
+        				OUTPUT_SetOne(CS_O_0, SOL07B_0);
+                OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+        				OUTPUT_SetOne(CS_O_0, SOL07A_0);
+               	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
+        				OUTPUT_ResetOne(CS_O_0, SOL07B_0);
+                OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+        				OUTPUT_SetOne(CS_O_0, SOL07A_0);
+               	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
+        */
     }
 }
 
@@ -397,8 +433,8 @@ void task1_task(void *p_arg)
 void task2_task(void *p_arg)
 {
     u8 task2_num=0;
-	u8 param[30];
-	u8 i,j = 0;
+    u8 param[30];
+    u8 i,j = 0;
     OS_ERR err;
 //	CPU_SR_ALLOC();
     p_arg = p_arg;
@@ -406,45 +442,50 @@ void task2_task(void *p_arg)
 //OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
 //	OUTPUT_SetOne(CS_O_0, SOL08A_0);
 //START_Motion(100, 0xEFF0);
-OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
+    OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
 //	START_Motion(1000, VEL_MAX);
-OSTaskResume(&MINIT_TaskTCB,&err);	
+    OSTaskResume(&MINIT_TaskTCB,&err);
     while(1)
     {
-			for(i=0;i<8;i++)
-			{
-				printf("input state num:%d val:",i);
-				for(j=0;j<8;j++)
-				{
-					printf("%d", (gStatus_scan[i] >> j) & 0x01);
-				}
-				printf("\r\n");
-			}
-			printf("count:%d \r\n",COUNT_Get());
-			printf("gCurVel:%x  gTarPos:%d  gCurPos:%d  gCurDir:%d  gCurDis:%d \r\n",gCurVel,gTarPos,gCurPos,gCurDir,gCurDis);
-			printf("gScan_num:%d  gPos_num:%d  gvel:%d gparkerr:%d\r\n",gScan_num, gPos_num,gCur_vel, gParkErr);
-			printf("M_POS_P:%d \r\n",PFin(M_POS_P));
-			printf("M_SCAN:%d \r\n",PFin(M_SCAN));
-			printf("M_ERR:%d \r\n",PFin(M_ERR));
-			
-			printf("scan result:");
-			for(j=0;j<gScan_num;j++){
-				printf("%d  ",gScan_pos[j]);
-			}
-			printf("\r\n");
-			printf("\r\n");
-			if(task2_num == 10)
-			{
+        for(i=0; i<8; i++)
+        {
+            printf("input state num:%d val:",i);
+            for(j=0; j<8; j++)
+            {
+                printf("%d", (gStatus_scan[i] >> j) & 0x01);
+            }
+            printf("\r\n");
+        }
+        printf("count:%d \r\n",COUNT_Get());
+        printf("gCurVel:%x  gTarPos:%d  gCurPos:%d  gCurDir:%d  gCurDis:%d \r\n",gCurVel,gTarPos,gCurPos,gCurDir,gCurDis);
+        printf("gScan_num:%d  gPos_num:%d  gvel:%d gparkerr:%d\r\n",gScan_num, gPos_num,gCurVel, gParkErr);
+        printf("M_POS_P:%d \r\n",PFin(M_POS_P));
+        printf("M_SCAN:%d \r\n",PFin(M_SCAN));
+        printf("M_ERR:%d \r\n",PFin(M_ERR));
+				printf("is_no_foup:%d is_foup_place:%d is_foup_presence:%d is_obstacle:  %d is_protrusion:%d \r\n",is_no_foup(), is_foup_place(), is_foup_presence(), is_obstacle(), is_protrusion());
+				printf("is_clampup:%d is_clampdown: %d is_clamplock:    %d is_clampfwd:  %d is_clampbwd:  %d is_busy:   %d \r\n",is_clampup(), is_clampdown(), is_clamplock(), is_clampfwd(), is_clampbwd(), is_busy());
+				printf("is_dock   :%d is_undock:    %d is_vacuumon:     %d is_latch:     %d is_unlatch:   %d is_error:  %d \r\n",is_dock(), is_undock(), is_vacuumon(), is_latch(), is_unlatch(),is_error());
+				printf("is_dropen: %d is_drclose:   %d is_druplmt:      %d is_mapstart:  %d is_mapend:    %d is_drdwlmt:%d \r\n",is_dropen(), is_drclose(), is_druplmt(), is_mapstart(), is_mapend(),is_drdwlmt());
+				printf("is_mapopen:%d is_mapclose:  %d is_stopperon:    %d is_stopperoff:%d is_noair:     %d \r\n",is_mapopen(), is_mapclose(), is_stopperon(), is_stopperoff(), is_noair());
+
+        printf("scan result:");
+        for(j=0; j<gScan_num; j++) {
+            printf("%d  ",gScan_pos[j]);
+        }
+        printf("\r\n");
+        printf("\r\n");
+        if(task2_num == 10)
+        {
 //				START_Motion(-1000, VEL_MAX);
-			}
-			if(task2_num == 30)
-			{
+        }
+        if(task2_num == 30)
+        {
 //				START_Motion(2000, VEL_MAX);
-			}
-			if(task2_num == 50)
-			{
+        }
+        if(task2_num == 50)
+        {
 //				START_Motion(-3000, VEL_MAX);
-			}
+        }
         task2_num++;	//任务2执行次数加1 注意task1_num2加到255的时候会清零！！
 //			printf("m:%d v:%d d:%d p:%d\r\n", gMotion_num,gCur_vel,gDir_vel,gPulse_num);
 //        LED1=~LED1;
@@ -452,13 +493,13 @@ OSTaskResume(&MINIT_TaskTCB,&err);
 //        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
 //				OUTPUT_TogOne(CS_O_0, SOL07B_0);
 //			OUTPUT_TogOne(CS_O_0, SOL07A_0);
-				OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
+        OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
 //			OUTPUT_TogOne(CS_O_0, SOL07B_0);
-			OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
+        OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
 //			if(task2_num == 1)
-			{
+        {
 //				format_mapdt(param);
-			}
+        }
 //			OUTPUT_ResetOne(CS_O_0, SOL08A_0);
 //			OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
 //			OUTPUT_SetOne(CS_O_0, SOL08A_0);
@@ -466,41 +507,41 @@ OSTaskResume(&MINIT_TaskTCB,&err);
 //			while(1)
 //			{
 //			}
-   //     OUTPUT_ResetOne(CS_O_0, SOL07A_0);
-    //    OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
-			/*
-			while(!(is_mstop() && (gMotion_num == 10)))
-			{}
-				OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
-				START_Motion(-50, 0xEFF0);
-			while(gMotion_num > -10)
-			{}
-				printf("-300");
-				START_Motion(-100, 0xEFF0);
-			while(gMotion_num > -40)
-			{}
-				printf("100");
-				START_Motion(100, 0xDFF0);	
-				*/
+        //     OUTPUT_ResetOne(CS_O_0, SOL07A_0);
+        //    OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+        /*
+        while(!(is_mstop() && (gMotion_num == 10)))
+        {}
+        	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
+        	START_Motion(-50, 0xEFF0);
+        while(gMotion_num > -10)
+        {}
+        	printf("-300");
+        	START_Motion(-100, 0xEFF0);
+        while(gMotion_num > -40)
+        {}
+        	printf("100");
+        	START_Motion(100, 0xDFF0);
+        	*/
     }
 }
 
 
 void test_init(void)
 {
-		GPIO_InitTypeDef  GPIO_InitStructure;
+    GPIO_InitTypeDef  GPIO_InitStructure;
 
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);//使能GPIOD,GPIOE时钟
- 
-	
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1; //输片引脚
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//普通输出模式
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //推挽输出
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100M
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;//上拉
-  GPIO_Init(GPIOD, &GPIO_InitStructure);//初始化输入	
-	
-	GPIO_SetBits(GPIOD,GPIO_InitStructure.GPIO_Pin);//设置为高，都不选
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);//使能GPIOD,GPIOE时钟
+
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1; //输片引脚
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//普通输出模式
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100M
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;//上拉
+    GPIO_Init(GPIOD, &GPIO_InitStructure);//初始化输入
+
+    GPIO_SetBits(GPIOD,GPIO_InitStructure.GPIO_Pin);//设置为高，都不选
 }
 
 

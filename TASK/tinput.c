@@ -6,7 +6,18 @@
 #include "motor.h"
 #include "texecute.h"
 
+#define DIS_SLAP 300
 u8 gStatus_scan[INPUT_NUM];
+
+bool is_indis(s32 num, s32 std, s16 dis)
+{
+//    return true;
+    if((num > (std - dis)) && (num < (std + dis)))
+    {
+        return true;
+    }
+    return false;
+}
 
 void tInput_Scan(void *p_arg)
 {
@@ -665,28 +676,30 @@ bool is_sf_clamdwnd(void)
     }
 }
 
-
+//有光动作
 bool is_no_foup(void)
 {
-    if((INPUT_ReadOne(CS_I_15,PH01_15) == 0x00) &&\
-            (INPUT_ReadOne(CS_I_15,PH02_15) == 0x00) && \
-            (INPUT_ReadOne(CS_I_15,PH03_15) == 0x00) && \
+    if((INPUT_ReadOne(CS_I_15,PH01_15) == 0x01) &&\
+            (INPUT_ReadOne(CS_I_15,PH02_15) == 0x01) && \
+            (INPUT_ReadOne(CS_I_15,PH03_15) == 0x01) && \
             (INPUT_ReadOne(CS_I_12,ES01_12) == 0x00))
     {
         return true;
     }
     return false;
 }
+//有光动作
 bool is_foup_place(void)
 {
-    if((INPUT_ReadOne(CS_I_15,PH01_15) == 0x01) &&\
-            (INPUT_ReadOne(CS_I_15,PH02_15) == 0x01) && \
-            (INPUT_ReadOne(CS_I_15,PH03_15) == 0x01))
+    if((INPUT_ReadOne(CS_I_15,PH01_15) == 0x00) &&\
+            (INPUT_ReadOne(CS_I_15,PH02_15) == 0x00) && \
+            (INPUT_ReadOne(CS_I_15,PH03_15) == 0x00))
     {
         return true;
     }
     return false;
 }
+//有光动作
 bool is_foup_presence(void)
 {
     if(INPUT_ReadOne(CS_I_12,ES01_12) == 0x01)
@@ -695,6 +708,7 @@ bool is_foup_presence(void)
     }
     return false;
 }
+//有光动作
 bool is_obstacle(void)
 {
     if((INPUT_ReadOne(CS_I_12,ES04_12) == 0x01) ||\
@@ -705,6 +719,7 @@ bool is_obstacle(void)
     }
     return false;
 }
+//有光动作
 bool is_protrusion(void)
 {
     if((INPUT_ReadOne(CS_I_12,FS01_12) == 0x01))
@@ -819,7 +834,7 @@ bool is_drclose(void)
 }
 bool is_druplmt(void)
 {
-    if(gMotor_state == MS_INITED)
+    if(is_stop() && ( gCurPos == M_UPLMT) && (is_indis(gPos_num, M_UPLMT<<1, DIS_SLAP)))
     {
         return true;
     }
@@ -827,7 +842,7 @@ bool is_druplmt(void)
 }
 bool is_mapstart(void)
 {
-    if(gMotor_state == MS_MAPSTR)
+    if(is_stop() && ( gCurPos == M_STRMP) && (INPUT_ReadOne(CS_I_11,PH08_11) == 0x00) && (is_indis(gPos_num, M_STRMP<<1, DIS_SLAP)))
     {
         return true;
     }
@@ -835,7 +850,7 @@ bool is_mapstart(void)
 }
 bool is_mapend(void)
 {
-    if(gMotor_state == MS_SCANED)
+    if(is_stop() && ( gCurPos == M_STPMP) && (INPUT_ReadOne(CS_I_11,PH07_11) == 0x00) && (is_indis(gPos_num, M_STPMP<<1, DIS_SLAP)))
     {
         return true;
     }
@@ -843,7 +858,7 @@ bool is_mapend(void)
 }
 bool is_drdwlmt(void)
 {
-    if(gMotor_state == MS_END)
+    if(is_stop() && ( gCurPos == M_DNLMT) && (INPUT_ReadOne(CS_I_10,CLS06A_10) == 0x01) && (is_indis(gPos_num, M_DNLMT<<1, DIS_SLAP)))
     {
         return true;
     }
@@ -883,6 +898,7 @@ bool is_stopperoff(void)
 }
 bool is_noair(void)
 {
+	return false;
     if((INPUT_ReadOne(CS_I_10,AS01_10) == 0x00))
     {
         return true;
@@ -1801,7 +1817,7 @@ u8 cload_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -1859,7 +1875,7 @@ u8 clddk_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -1917,7 +1933,7 @@ u8 cldyd_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -1975,7 +1991,7 @@ u8 cldop_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2028,7 +2044,7 @@ u8 cldmp_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2091,7 +2107,7 @@ u8 clmpo_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2149,7 +2165,7 @@ u8 culod_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2207,7 +2223,7 @@ u8 culdk_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2323,7 +2339,7 @@ u8 cudcl_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2386,7 +2402,7 @@ u8 cudnc_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2449,7 +2465,7 @@ u8 culfc_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2507,7 +2523,7 @@ u8 mapdo_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2555,7 +2571,7 @@ u8 remap_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2603,7 +2619,7 @@ u8 cudmp_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2671,7 +2687,7 @@ u8 cumdk_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;
@@ -2739,7 +2755,7 @@ u8 cumfc_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;

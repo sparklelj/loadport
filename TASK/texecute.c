@@ -11,7 +11,7 @@
 
 #define WPOS_MARGIN   10
 #define WPOS_FIRST    1000
-#define WPOS_START    400000
+#define WPOS_START    32000
 #define WPOS_INTERVAL 1000
 
 #define WAFER_NUM 25
@@ -34,6 +34,8 @@
 #define ACT_NAT  0x04
 #define ACT_STA  0x05
 
+#define CIRCLR_TIME 500
+
 u8 scan_mode = SCAN_UPP;
 u8 gCur_action = CMD_ACTION_PODOP;
 u8 gCur_pause = 0;
@@ -44,6 +46,7 @@ u8 gErr_no = 0;
 u8 gMap_status = 0;
 u8 pod_s = CMD_ACTION_NOACT;
 
+bool gIsError = false;
 bool gErr_mod = false;
 bool gIs_init = false;
 bool gis_scan = false;
@@ -572,7 +575,8 @@ u8 run_drdwns(bool pause)
     }
     else
     {
-        START_Motion(M_STRMP, M_VEL);
+			MOTOR_GO(MW_UPM, M_VEL);
+ //       START_Motion(M_STRMP, M_VEL);
     }
     return 0;
 }
@@ -613,7 +617,8 @@ u8 run_drdwne(bool pause)
     }
     else
     {
-        START_Motion(M_STPMP, M_VEL);
+			MOTOR_GO(MW_DNM, M_VEL);
+ //       START_Motion(M_STPMP, M_VEL);
     }
     return 0;
 }
@@ -654,7 +659,8 @@ u8 run_drdwnl(bool pause)
     }
     else
     {
-        START_Motion(M_DNLMT, M_VEL);
+			MOTOR_GO(MW_DNL, M_VEL);
+//        START_Motion(M_DNLMT, M_VEL);
     }
     return 0;
 }
@@ -667,7 +673,8 @@ u8 run_drupl(bool pause)
     }
     else
     {
-        START_Motion(M_UPLMT, M_VEL);
+			MOTOR_GO(MW_UPL, M_VEL);
+ //       START_Motion(M_UPLMT, M_VEL);
     }
     return 0;
 }
@@ -1155,7 +1162,7 @@ u8 podop_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             switch (seq)
@@ -1170,7 +1177,7 @@ u8 podop_action(u8* error)
                 run_clamdwn(gCur_pause);
                 break;
             }
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1248,7 +1255,7 @@ u8 podcl_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             switch (seq)
@@ -1263,7 +1270,7 @@ u8 podcl_action(u8* error)
                 run_clamlck(gCur_pause);
                 break;
             }
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1324,11 +1331,11 @@ u8 vacon_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_dradsp(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1367,11 +1374,11 @@ u8 vacof_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_dradsr(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1410,11 +1417,11 @@ u8 dorop_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_drunlt(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1452,11 +1459,11 @@ u8 dorcl_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_drlt(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1494,11 +1501,11 @@ u8 mapop_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_mpaop(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1536,11 +1543,11 @@ u8 mapcl_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_mpac(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1578,11 +1585,11 @@ u8 dorbk_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_drop(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1620,11 +1627,11 @@ u8 dorfw_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_drcls(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1662,11 +1669,11 @@ u8 ydoor_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_fpdck(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1704,11 +1711,11 @@ u8 ywait_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_fpundk(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1746,11 +1753,11 @@ u8 mston_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_stpon(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1788,11 +1795,11 @@ u8 mstof_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_stpoff(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1831,11 +1838,11 @@ u8 zmpst_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_drdwns(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1873,11 +1880,11 @@ u8 zmped_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_drupl(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1915,11 +1922,11 @@ u8 zdrmp_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_drdwne(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1957,11 +1964,11 @@ u8 zdrdw_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_drdwnl(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -1999,11 +2006,11 @@ u8 zdrup_action(u8* error)
             }
             break;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         while(gCur_pause == 0x01)
         {
             run_drupl(gCur_pause);
-            OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         if(gCur_stop == 0x01)
         {
@@ -3147,6 +3154,7 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         send_msg(gCom_mod & BCAK_ABS, (char*)chcmd, param, 6);
         gPre_status = gCur_status;
         gCur_status = G_CUR_STA_ERR;
+				gIsError = true;
         gEnd_act = CMD_ACTION_NOACT;
     }
     else if(rtype == ACT_ABT)
@@ -3185,12 +3193,17 @@ void tExe_Action(void *p_arg)
                 gCur_status == G_CUR_STA_UNI || \
                 gCur_status == G_CUR_STA_ABO || \
                 gCur_status == G_CUR_STA_END || \
-                gCur_status == G_CUR_STA_STP)
+                gCur_status == G_CUR_STA_STP ||\
+				        gIsError)
         {
-//           OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
-//            continue;
+					if(gIsError)
+					{
+						gCur_status = G_CUR_STA_ERR;
+					}
+           OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
+            continue;
         }
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err);
         gCur_action = gCmd_action;
         switch (gCur_action)
         {
