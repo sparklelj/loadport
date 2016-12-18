@@ -1167,11 +1167,13 @@ u8 zdrup_before(u8* error)
         *error = 0x34; //MPARM
         return true;
     }
+		/*
     if(!is_stopperoff())
     {
         *error = 0x35;
         return true;
     }
+		*/
     return false;
 }
 u8 zdrup_running(u8* error)
@@ -1215,7 +1217,7 @@ u8 zdrmp_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_dropen())
+    if(!is_dropen())
     {
         *error = 0x33;
         return true;
@@ -1268,7 +1270,7 @@ u8 zdrdw_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_dropen())
+    if(!is_dropen())
     {
         *error = 0x33;
         return true;
@@ -1278,11 +1280,13 @@ u8 zdrdw_before(u8* error)
         *error = 0x34; //MPARM
         return true;
     }
+		/*
     if(!is_stopperoff())
     {
         *error = 0x35; //MPSTP
         return true;
     }
+		*/
     return false;
 }
 u8 zdrdw_running(u8* error)
@@ -1503,12 +1507,12 @@ u8 mapop_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_dropen())
+    if(!is_dropen())
     {
         *error = 0x33;
         return true;
     }
-    if(is_mapstart())
+    if(!is_mapstart())
     {
         *error = 0x34;
         return true;
@@ -1763,6 +1767,42 @@ u8 orgsh_before(u8* error)
     }
     return false;
 }
+
+u8 sysin_before(u8* error)
+{
+    if(is_error())
+    {
+        *error = 0x30; //ERROR
+        return true;
+    }
+    if(is_busy())
+    {
+        *error = 0x31; //BUSY
+        return true;
+    }
+    return false;
+}
+
+u8 sysin_running(u8* error)
+{
+    if(is_obstacle())
+    {
+        *error = 0xFF;
+        return true;
+    }
+    if(is_noair())
+    {
+        *error = 0x27;
+        return true;
+    }
+    if(is_fanerr())
+    {
+        *error = 0xFC;
+        return true;
+    }
+    return false;
+}
+
 u8 orgsh_running(u8* error)
 {
     if(is_obstacle())
@@ -2281,7 +2321,7 @@ u8 culyd_before(u8* error)
         *error = 0x31;
         return true;
     }
-    if(is_origin == true)
+    if(is_origin == false)
     {
         *error = 0x80; //ORGYT
         return true;

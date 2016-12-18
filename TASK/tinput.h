@@ -177,6 +177,8 @@ u8 mstof_before(u8* error);
 u8 mstof_running(u8* error);
 u8 orgsh_before(u8* error);
 u8 orgsh_running(u8* error);
+u8 sysin_before(u8* error);
+u8 sysin_running(u8* error);
 u8 aborg_before(u8* error);
 u8 aborg_running(u8* error);
 u8 cload_before(u8* error);

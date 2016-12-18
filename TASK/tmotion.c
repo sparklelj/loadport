@@ -10,9 +10,9 @@
 
 #define INIT_POS M_UPLMT
 #define BACK_POS -40000  //—∞¡„æ‡¿Î
-#define BACK_VEL 0x280
+#define BACK_VEL 0x880
 #define FORWD_POS 1000 //«∞Ω¯æ‡¿Î
-#define FORWD_VEL 0x280
+#define FORWD_VEL 0x880
 
 
 

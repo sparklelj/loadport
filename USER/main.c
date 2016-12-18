@@ -330,9 +330,11 @@ void task1_task(void *p_arg)
     p_arg = p_arg;
     gtestcnt = 0;
     gtestpul = 0;
-    test_init();
+//    test_init();
     while(1)
     {
+			OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
+/*			
 			 OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
         if (gMotor_state == MS_INITED)
         {
@@ -367,6 +369,7 @@ void task1_task(void *p_arg)
             OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);
             START_Motion(M_UPLMT, M_VEL);
         }
+	*/			
         /*
         poa = GPIO_ReadOutputDataBit(GPIOD, GPIO_Pin_0);
         pob = GPIO_ReadOutputDataBit(GPIOD, GPIO_Pin_1);

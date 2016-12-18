@@ -34,7 +34,7 @@
 #define ACT_NAT  0x04
 #define ACT_STA  0x05
 
-#define CIRCLR_TIME 500
+#define CIRCLR_TIME 200
 
 u8 scan_mode = SCAN_UPP;
 u8 gCur_action = CMD_ACTION_PODOP;
@@ -50,423 +50,10 @@ bool gIsError = false;
 bool gErr_mod = false;
 bool gIs_init = false;
 bool gis_scan = false;
-bool is_origin = false;
+//bool is_origin = false;
+bool is_origin = true;
 bool is_aborg = false;
 
-
-u8 exe_clamup(bool bforce)
-{
-    if((!is_sf_setfoupd()) && (!bforce) && (!is_sf_clamupd()) && (!is_sf_clamupi()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_1,SOL01B_1);
-    OUTPUT_SetOne(CS_O_1,SOL01A_1);
-    if(is_sf_clamupd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_clamupi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_clamfwd(bool bforce)
-{
-    if((!is_sf_clamupd()) && (!bforce) && (!is_sf_clanfwdd()) && (!is_sf_clanfwdi()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_1,SOL02B_1);
-    OUTPUT_SetOne(CS_O_1,SOL02A_1);
-    if(is_sf_clanfwdd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_clanfwdi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_clamlck(bool bforce)
-{
-    if((!is_sf_clanfwdd()) && (!bforce) && (!is_sf_clamlckd()) && (!is_sf_clamlcki()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_1,SOL01A_1);
-    OUTPUT_SetOne(CS_O_1,SOL01B_1);
-    if(is_sf_clamlckd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_clamlcki())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_fpdck(bool bforce)
-{
-    if((!is_sf_clamlckd()) && (!bforce) && (!is_sf_fpdckd()) && (!is_sf_fpdcki()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_1,SOL03B_1);
-    OUTPUT_SetOne(CS_O_1,SOL03A_1);
-    if(is_sf_fpdckd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_fpdcki())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_dradsp(bool bforce)
-{
-    if((!is_sf_fpdckd()) && (!bforce) && (!is_sf_dradspd()) && (!is_sf_dradspi()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_2,SOL09B_2);
-    OUTPUT_SetOne(CS_O_2,SOL09A_2);
-    if(is_sf_dradspd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_dradspi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_drunlt(bool bforce)
-{
-    if((!is_sf_dradspd()) && (!bforce) && (!is_sf_drunltd()) && (!is_sf_drunlti()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_1,SOL04B_1);
-    OUTPUT_SetOne(CS_O_1,SOL04A_1);
-    if(is_sf_drunltd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_drunlti())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_drop(bool bforce)
-{
-    if((!is_sf_drunltd()) && (!bforce) && (!is_sf_dropd()) && (!is_sf_dropi()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_2,SOL05B_2);
-    OUTPUT_SetOne(CS_O_2,SOL05A_2);
-    if(is_sf_dropd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_dropi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_drdwns(bool bforce)
-{
-    if((!is_sf_dropd()) && (!bforce) && (!is_sf_drdwnsd()) && (!is_sf_drdwnsi()))
-    {
-        return PROC_UNS;
-    }
-    START_Motion(M_STRMP, M_VEL);
-    if(is_sf_drdwnsd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_drdwnsi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_mpaop(bool bforce)
-{
-    if((!is_sf_drdwnsd()) && (!bforce) && (!is_sf_mpaopd()) && (!is_sf_mpaopi()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_0,SOL08B_0);
-    OUTPUT_SetOne(CS_O_0,SOL08A_0);
-    if(is_sf_mpaopd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_mpaopi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_stpon(bool bforce)
-{
-    if((!is_sf_mpaopd()) && (!bforce) && (!is_sf_stpond()) && (!is_sf_stponi()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_0,SOL07B_0);
-    OUTPUT_SetOne(CS_O_0,SOL07A_0);
-    if(is_sf_stpond())
-    {
-        return PROC_END;
-    }
-    if(is_sf_stponi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_drdwne(bool bforce)
-{
-    if((!is_sf_stpond()) && (!bforce) && (!is_sf_drdwned()) && (!is_sf_drdwnei()))
-    {
-        return PROC_UNS;
-    }
-    START_Motion(M_STPMP, M_VEL);
-    if(is_sf_drdwned())
-    {
-        return PROC_END;
-    }
-    if(is_sf_drdwnei())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_mpac(bool bforce)
-{
-    if((!is_sf_drdwned()) && (!bforce) && (!is_sf_mpacd()) && (!is_sf_mpaci()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_0,SOL08A_0);
-    OUTPUT_SetOne(CS_O_0,SOL08B_0);
-    if(is_sf_mpacd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_mpaci())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_stpoff(bool bforce)
-{
-    if((!is_sf_mpacd()) && (!bforce) && (!is_sf_stpoffd()) && (!is_sf_stpoffi()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_0,SOL07A_0);
-    OUTPUT_SetOne(CS_O_0,SOL07B_0);
-    if(is_sf_stpoffd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_stpoffi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_drdwnl(bool bforce)
-{
-    if((!is_sf_stpoffd()) && (!bforce) && (!is_sf_drdwnld()) && (!is_sf_drdwnli()))
-    {
-        return PROC_UNS;
-    }
-    START_Motion(M_DNLMT, M_VEL);
-    if(is_sf_drdwnld())
-    {
-        return PROC_END;
-    }
-    if(is_sf_drdwnli())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_drupl(bool bforce)
-{
-    if((!is_sf_drdwnld()) && (!bforce) && (!is_sf_drupld()) && (!is_sf_drupli()))
-    {
-        return PROC_UNS;
-    }
-    START_Motion(M_UPLMT, M_VEL);
-    if(is_sf_drupld())
-    {
-        return PROC_END;
-    }
-    if(is_sf_drupli())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_drcls(bool bforce)
-{
-    if((!is_sf_drupld()) && (!bforce) && (!is_sf_drclsd()) && (!is_sf_drclsi()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_2,SOL05A_2);
-    OUTPUT_SetOne(CS_O_2,SOL05B_2);
-    if(is_sf_drclsd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_drclsi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_drlt(bool bforce)
-{
-    if((!is_sf_drclsd()) && (!bforce) && (!is_sf_drltd()) && (!is_sf_drlti()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_1,SOL04A_1);
-    OUTPUT_SetOne(CS_O_1,SOL04B_1);
-    if(is_sf_drltd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_drlti())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_dradsr(bool bforce)
-{
-    if((!is_sf_drltd()) && (!bforce) && (!is_sf_drclsd()) && (!is_sf_drclsi()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_2,SOL09B_2);
-    OUTPUT_SetOne(CS_O_2,SOL09A_2);
-    if(is_sf_dradsrd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_drclsi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_fpundk(bool bforce)
-{
-    if((!is_sf_dradsrd()) && (!bforce) && (!is_sf_fpundkd()) && (!is_sf_fpundki()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_1,SOL03A_1);
-    OUTPUT_SetOne(CS_O_1,SOL03B_1);
-    if(is_sf_fpundkd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_fpundki())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_clamulk(bool bforce)
-{
-    if((!is_sf_fpundkd()) && (!bforce) && (!is_sf_clamulkd()) && (!is_sf_clamulki()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_1,SOL01B_1);
-    OUTPUT_SetOne(CS_O_1,SOL01A_1);
-    if(is_sf_clamulkd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_clamulki())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_clambwd(bool bforce)
-{
-    if((!is_sf_clamulkd()) && (!bforce) && (!is_sf_clambwdd()) && (!is_sf_clambwdi()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_1,SOL02A_1);
-    OUTPUT_SetOne(CS_O_1,SOL02B_1);
-    if(is_sf_clambwdd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_clambwdi())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
-
-u8 exe_clamdwn(bool bforce)
-{
-    if((!is_sf_clambwdd()) && (!bforce) && (!is_sf_clamdwnd()) && (!is_sf_clamdwni()))
-    {
-        return PROC_UNS;
-    }
-    OUTPUT_ResetOne(CS_O_1,SOL01A_1);
-    OUTPUT_SetOne(CS_O_1,SOL01B_1);
-    if(is_sf_clamdwnd())
-    {
-        return PROC_END;
-    }
-    if(is_sf_clamdwni())
-    {
-        return PROC_ING;
-    }
-    return PROC_ERR;
-}
 
 u8 run_clamup(bool pause)
 {
@@ -497,7 +84,7 @@ u8 run_clamfwd(bool pause)
     return 0;
 }
 
-u8 run_clamlck(bool pause)
+u8 run_clamldwn(bool pause)
 {
     OUTPUT_ResetOne(CS_O_1,SOL01A_1);
     if(pause)
@@ -709,14 +296,14 @@ u8 run_drlt(bool pause)
 
 u8 run_dradsr(bool pause)
 {
-    OUTPUT_ResetOne(CS_O_2,SOL09B_2);
+    OUTPUT_ResetOne(CS_O_2,SOL09A_2);
     if(pause)
     {
-        OUTPUT_ResetOne(CS_O_2,SOL09A_2);
+        OUTPUT_ResetOne(CS_O_2,SOL09B_2);
     }
     else
     {
-        OUTPUT_SetOne(CS_O_2,SOL09A_2);
+        OUTPUT_SetOne(CS_O_2,SOL09B_2);
     }
     return 0;
 }
@@ -1122,6 +709,7 @@ u8 noact_action(u8* error)
     return ACT_NAT;
 }
 
+
 u8 podop_action(u8* error)
 {
     u8 time = 30;
@@ -1138,24 +726,8 @@ u8 podop_action(u8* error)
         switch (seq)
         {
         case 0x01:
-            run_clamulk(gCur_pause);
+            run_clamldwn(gCur_pause);
             *error = 0x61;
-            if(is_clampup())
-            {
-                seq = 0x02;
-            }
-            break;
-        case 0x02:
-            run_clambwd(gCur_pause);
-            *error = 0x21;
-            if(is_clampbwd())
-            {
-                seq = 0x03;
-            }
-            break;
-        case 0x03:
-            run_clamdwn(gCur_pause);
-            *error = 0x62;
             if(is_clampdown())
             {
                 return ACT_END;
@@ -1168,13 +740,7 @@ u8 podop_action(u8* error)
             switch (seq)
             {
             case 0x01:
-                run_clamulk(gCur_pause);
-                break;
-            case 0x02:
-                run_clambwd(gCur_pause);
-                break;
-            case 0x03:
-                run_clamdwn(gCur_pause);
+                run_clamldwn(gCur_pause);
                 break;
             }
             OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
@@ -1184,13 +750,7 @@ u8 podop_action(u8* error)
             switch (seq)
             {
             case 0x01:
-                run_clamulk(gCur_pause);
-                break;
-            case 0x02:
-                run_clambwd(gCur_pause);
-                break;
-            case 0x03:
-                run_clamdwn(gCur_pause);
+                run_clamldwn(gCur_pause);
                 break;
             }
             return ACT_STP;
@@ -1200,13 +760,7 @@ u8 podop_action(u8* error)
             switch (seq)
             {
             case 0x01:
-                run_clamulk(gCur_pause);
-                break;
-            case 0x02:
-                run_clambwd(gCur_pause);
-                break;
-            case 0x03:
-                run_clamdwn(gCur_pause);
+                run_clamldwn(gCur_pause);
                 break;
             }
             return ACT_ABT;
@@ -1214,6 +768,7 @@ u8 podop_action(u8* error)
     }
     return ACT_ERR;
 }
+
 
 u8 podcl_action(u8* error)
 {
@@ -1235,22 +790,6 @@ u8 podcl_action(u8* error)
             *error = 0x61;
             if(is_clampup())
             {
-                seq = 0x02;
-            }
-            break;
-        case 0x02:
-            run_clamfwd(gCur_pause);
-            *error = 0x22;
-            if(is_clampfwd())
-            {
-                seq = 0x03;
-            }
-            break;
-        case 0x03:
-            run_clamlck(gCur_pause);
-            *error = 0x63;
-            if(is_clamplock())
-            {
                 return ACT_END;
             }
             break;
@@ -1263,12 +802,6 @@ u8 podcl_action(u8* error)
             case 0x01:
                 run_clamup(gCur_pause);
                 break;
-            case 0x02:
-                run_clamfwd(gCur_pause);
-                break;
-            case 0x03:
-                run_clamlck(gCur_pause);
-                break;
             }
             OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
         }
@@ -1279,12 +812,6 @@ u8 podcl_action(u8* error)
             case 0x01:
                 run_clamup(gCur_pause);
                 break;
-            case 0x02:
-                run_clamfwd(gCur_pause);
-                break;
-            case 0x03:
-                run_clamlck(gCur_pause);
-                break;
             }
             return ACT_STP;
         }
@@ -1294,12 +821,6 @@ u8 podcl_action(u8* error)
             {
             case 0x01:
                 run_clamup(gCur_pause);
-                break;
-            case 0x02:
-                run_clamfwd(gCur_pause);
-                break;
-            case 0x03:
-                run_clamlck(gCur_pause);
                 break;
             }
             return ACT_ABT;
@@ -2044,7 +1565,7 @@ u8 orgsh_action(u8* error)
             break;
         case 0x02:
             ret = zmped_action(error);
-            seq = 0x03;
+            seq = 0x04;
             break;
         case 0x03:
             ret = mstof_action(error);
@@ -2100,7 +1621,7 @@ u8 aborg_action(u8* error)
             break;
         case 0x02:
             ret = zmped_action(error);
-            seq = 0x03;
+            seq = 0x04;
             break;
         case 0x03:
             ret = mstof_action(error);
@@ -2137,6 +1658,64 @@ u8 aborg_action(u8* error)
     }
     return ret;
 }
+
+u8 sysin_action(u8* error)
+{
+    u8 seq = 0;
+    u8 ret = ACT_STA;
+    seq = 0x01;
+    while((ret == ACT_STA) || (ret == ACT_END))
+    {
+        if(aborg_running(error) == true)
+        {
+            return ACT_ERR;
+        }
+        switch(seq)
+        {
+        case 0x01:
+            ret = mapcl_action(error);
+            seq = 0x02;
+            break;
+        case 0x02:
+            ret = zmped_action(error);
+            seq = 0x04;
+            break;
+        case 0x03:
+            ret = mstof_action(error);
+            seq = 0x04;
+            break;
+        case 0x04:
+            ret = dorbk_action(error);
+            seq = 0x05;
+            break;
+        case 0x05:
+            ret = zdrup_action(error);
+            seq = 0x06;
+            break;
+        case 0x06:
+            ret = dorfw_action(error);
+            seq = 0x07;
+            break;
+        case 0x07:
+            ret = dorcl_action(error);
+            seq = 0x08;
+            break;
+        case 0x08:
+            ret = vacof_action(error);
+            seq = 0x09;
+            break;
+        case 0x09:
+            ret = ywait_action(error);
+            seq = 0x10;
+            break;
+        case 0x10:
+            ret = podop_action(error);
+            return ret;
+        }
+    }
+    return ret;
+}
+
 u8 cload_action(u8* error)
 {
     u8 seq = 0;
@@ -2220,7 +1799,7 @@ u8 cldmp_action(u8* error)
             break;
         case 0x07:
             ret = mapop_action(error);
-            seq = 0x08;
+            seq = 0x09;
             break;
         case 0x08:
             ret = mston_action(error);
@@ -2232,7 +1811,7 @@ u8 cldmp_action(u8* error)
             break;
         case 0x10:
             ret = mapcl_action(error);
-            seq = 0x11;
+            seq = 0x12;
             break;
         case 0x11:
             ret = mstof_action(error);
@@ -2348,7 +1927,7 @@ u8 clmpo_action(u8* error)
             break;
         case 0x03:
             ret = mapop_action(error);
-            seq = 0x04;
+            seq = 0x05;
             break;
         case 0x04:
             ret = mston_action(error);
@@ -2360,7 +1939,7 @@ u8 clmpo_action(u8* error)
             break;
         case 0x06:
             ret = mapcl_action(error);
-            seq = 0x07;
+            seq = 0x08;
             break;
         case 0x07:
             ret = mstof_action(error);
@@ -2401,7 +1980,7 @@ u8 mapdo_action(u8* error)
             break;
         case 0x04:
             ret = mapop_action(error);
-            seq = 0x05;
+            seq = 0x06;
             break;
         case 0x05:
             ret = mston_action(error);
@@ -2413,7 +1992,7 @@ u8 mapdo_action(u8* error)
             break;
         case 0x07:
             ret = mapcl_action(error);
-            seq = 0x08;
+            seq = 0x09;
             break;
         case 0x08:
             ret = mstof_action(error);
@@ -2454,7 +2033,7 @@ u8 remap_action(u8* error)
             break;
         case 0x04:
             ret = mapop_action(error);
-            seq = 0x05;
+            seq = 0x06;
             break;
         case 0x05:
             ret = mston_action(error);
@@ -2466,7 +2045,7 @@ u8 remap_action(u8* error)
             break;
         case 0x07:
             ret = mapcl_action(error);
-            seq = 0x08;
+            seq = 0x09;
             break;
         case 0x08:
             ret = mstof_action(error);
@@ -2494,7 +2073,7 @@ u8 culod_action(u8* error)
         {
         case 0x01:
             ret = mapcl_action(error);
-            seq = 0x02;
+            seq = 0x03;
             break;
         case 0x02:
             ret = mstof_action(error);
@@ -2554,7 +2133,7 @@ u8 cudmp_action(u8* error)
             break;
         case 0x03:
             ret = mapop_action(error);
-            seq = 0x04;
+            seq = 0x05;
             break;
         case 0x04:
             ret = mston_action(error);
@@ -2566,7 +2145,7 @@ u8 cudmp_action(u8* error)
             break;
         case 0x06:
             ret = mapcl_action(error);
-            seq = 0x07;
+            seq = 0x08;
             break;
         case 0x07:
             ret = mstof_action(error);
@@ -2618,7 +2197,7 @@ u8 culfc_action(u8* error)
         {
         case 0x01:
             ret = mapcl_action(error);
-            seq = 0x02;
+            seq = 0x03;
             break;
         case 0x02:
             ret = mstof_action(error);
@@ -2674,7 +2253,7 @@ u8 cumfc_action(u8* error)
             break;
         case 0x03:
             ret = mapop_action(error);
-            seq = 0x04;
+            seq = 0x05;
             break;
         case 0x04:
             ret = mston_action(error);
@@ -2686,7 +2265,7 @@ u8 cumfc_action(u8* error)
             break;
         case 0x06:
             ret = mapcl_action(error);
-            seq = 0x07;
+            seq = 0x08;
             break;
         case 0x07:
             ret = mstof_action(error);
@@ -2734,7 +2313,7 @@ u8 culyd_action(u8* error)
         {
         case 0x01:
             ret = mapcl_action(error);
-            seq = 0x02;
+            seq = 0x03;
             break;
         case 0x02:
             ret = mstof_action(error);
@@ -2778,7 +2357,7 @@ u8 culdk_action(u8* error)
         {
         case 0x01:
             ret = mapcl_action(error);
-            seq = 0x02;
+            seq = 0x03;
             break;
         case 0x02:
             ret = mstof_action(error);
@@ -2822,7 +2401,7 @@ u8 cumdk_action(u8* error)
             break;
         case 0x03:
             ret = mapop_action(error);
-            seq = 0x04;
+            seq = 0x05;
             break;
         case 0x04:
             ret = mston_action(error);
@@ -2834,7 +2413,7 @@ u8 cumdk_action(u8* error)
             break;
         case 0x06:
             ret = mapcl_action(error);
-            seq = 0x07;
+            seq = 0x08;
             break;
         case 0x07:
             ret = mstof_action(error);
@@ -3153,8 +2732,9 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         set_errno(cmd, error);
         send_msg(gCom_mod & BCAK_ABS, (char*)chcmd, param, 6);
         gPre_status = gCur_status;
-        gCur_status = G_CUR_STA_ERR;
-				gIsError = true;
+ //       gCur_status = G_CUR_STA_ERR;
+				gCur_status = G_CUR_STA_STP;
+//				gIsError = true;
         gEnd_act = CMD_ACTION_NOACT;
     }
     else if(rtype == ACT_ABT)

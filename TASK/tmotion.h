@@ -6,10 +6,10 @@
 //1000 pules per circle 
 //2000 counts per circle
 
-#define M_UPLMT 500        //初始位置
-#define M_STRMP 6500  //开始扫盘位置
-#define M_STPMP 32500  //扫盘结束
-#define M_DNLMT 39000  //下限位置
+#define M_UPLMT -200        //初始位置
+#define M_STRMP 6000  //开始扫盘位置
+#define M_STPMP 31700  //扫盘结束
+#define M_DNLMT 38500  //下限位置
 
 #define MW_INIT 1
 #define MW_UPL  2
