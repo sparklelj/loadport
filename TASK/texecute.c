@@ -1184,7 +1184,7 @@ u8 ydoor_action(u8* error)
         case 0x01:
             run_fpdck(gCur_pause);
             *error = 0x04;
-            if(is_dock())
+            if(is_dock() && is_drondr())
             {
                 return ACT_END;
             }

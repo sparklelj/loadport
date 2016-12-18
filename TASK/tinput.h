@@ -117,6 +117,7 @@ bool is_clamplock(void);
 bool is_clampfwd(void);
 bool is_clampbwd(void);
 bool is_dock(void);
+bool is_drondr(void);
 bool is_undock(void);
 bool is_vacuumon(void);
 bool is_vacuumoff(void);

@@ -722,6 +722,7 @@ bool is_obstacle(void)
 //有光动作
 bool is_protrusion(void)
 {
+	return false;
     if((INPUT_ReadOne(CS_I_12,FS01_12) == 0x01))
     {
         return true;
@@ -816,6 +817,15 @@ bool is_unlatch(void)
     }
     return false;
 }
+bool is_drondr(void)
+{
+    if((INPUT_ReadOne(CS_I_12,PH14_12) == 0x01))
+    {
+        return true;
+    }
+    return false;
+}
+
 bool is_dropen(void)
 {
     if((INPUT_ReadOne(CS_I_10,CLS05A_10) == 0x01))
@@ -1079,6 +1089,11 @@ u8 dorop_before(u8* error)
     if(is_busy())
     {
         *error = 0x31;
+        return true;
+    }
+		if(!is_drondr())
+    {
+        *error = 0x30;
         return true;
     }
     return false;
@@ -1378,7 +1393,7 @@ u8 ydoor_before(u8* error)
         *error = 0x32;
         return true;
     }
-    if(is_foup_place() && is_drclose() && is_vacuumoff() && (!is_unlatch()))
+    if(is_foup_place() && is_drclose() && is_vacuumoff() && (!is_latch()))
     {
         *error = 0x39;
         return true;
