@@ -447,7 +447,7 @@ void task2_task(void *p_arg)
 //START_Motion(100, 0xEFF0);
     OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err);
 //	START_Motion(1000, VEL_MAX);
-    OSTaskResume(&MINIT_TaskTCB,&err);
+//    OSTaskResume(&MINIT_TaskTCB,&err);
     while(1)
     {
         for(i=0; i<8; i++)
@@ -496,7 +496,7 @@ void task2_task(void *p_arg)
 //        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
 //				OUTPUT_TogOne(CS_O_0, SOL07B_0);
 //			OUTPUT_TogOne(CS_O_0, SOL07A_0);
-        OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
+        OSTimeDlyHMSM(0,0,5,0,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
 //			OUTPUT_TogOne(CS_O_0, SOL07B_0);
         OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);//延时1s
 //			if(task2_num == 1)

@@ -6,6 +6,9 @@
 #define SCAN_UPP 0
 #define SCAN_LOW 1
 
+
+
+
 extern u8 scan_mode;
 extern u8 gCur_action;
 extern bool gIs_init;
@@ -17,6 +20,7 @@ extern u8 gCur_abort;
 extern u8 gCur_retry;
 extern u8 gErr_no;
 extern u8 gMap_status;
+extern bool gissysinit;
 
 u8 get_init(void);
 u8 get_oper(void);

@@ -34,7 +34,7 @@
 #define ACT_NAT  0x04
 #define ACT_STA  0x05
 
-#define CIRCLR_TIME 200
+#define CIRCLR_TIME 900
 
 u8 scan_mode = SCAN_UPP;
 u8 gCur_action = CMD_ACTION_PODOP;
@@ -50,8 +50,8 @@ bool gIsError = false;
 bool gErr_mod = false;
 bool gIs_init = false;
 bool gis_scan = false;
-//bool is_origin = false;
-bool is_origin = true;
+bool is_origin = false;
+//bool is_origin = true;
 bool is_aborg = false;
 
 
@@ -162,8 +162,8 @@ u8 run_drdwns(bool pause)
     }
     else
     {
-			MOTOR_GO(MW_UPM, M_VEL);
- //       START_Motion(M_STRMP, M_VEL);
+        MOTOR_GO(MW_UPM, M_VEL);
+//       START_Motion(M_STRMP, M_VEL);
     }
     return 0;
 }
@@ -204,8 +204,8 @@ u8 run_drdwne(bool pause)
     }
     else
     {
-			MOTOR_GO(MW_DNM, M_VEL);
- //       START_Motion(M_STPMP, M_VEL);
+        MOTOR_GO(MW_DNM, M_VEL);
+//       START_Motion(M_STPMP, M_VEL);
     }
     return 0;
 }
@@ -246,7 +246,7 @@ u8 run_drdwnl(bool pause)
     }
     else
     {
-			MOTOR_GO(MW_DNL, M_VEL);
+        MOTOR_GO(MW_DNL, M_VEL);
 //        START_Motion(M_DNLMT, M_VEL);
     }
     return 0;
@@ -260,8 +260,8 @@ u8 run_drupl(bool pause)
     }
     else
     {
-			MOTOR_GO(MW_UPL, M_VEL);
- //       START_Motion(M_UPLMT, M_VEL);
+        MOTOR_GO(MW_UPL, M_VEL);
+//       START_Motion(M_UPLMT, M_VEL);
     }
     return 0;
 }
@@ -363,7 +363,24 @@ u8 run_clamdwn(bool pause)
     }
     return 0;
 }
-
+u8 run_motin(bool pause)
+{
+    OS_ERR err;
+    if(pause)
+    {
+        gstopmotin = true;
+//			gMotor_state = MS_UNINIT;
+//       PAUSE_Motion(M_UPLMT);
+    }
+    else
+    {       
+        if(gismoting == false) {
+					gismotinit = false;
+            OSTaskResume(&MINIT_TaskTCB,&err);
+        }
+    }
+    return 0;
+}
 u8 get_init(void)
 {
     if(gIs_init == true)
@@ -441,47 +458,47 @@ u8 is_inthick(s32 height)
 
 bool slot_dect(s32 up, s32 down, u8* result)
 {
-	u8 i = 0;
-	for(i=0; i<WAFER_NUM; i++)
-	{
-		if((up < (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i)))) //&& (down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN))
-		{
-			if(down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) + WAFER_THICK + WTHICK_MARG)
-			{
-				if(i > 0)
-				{
-					*(result + WAFER_NUM - i - 1) = 3; //cross
-          *(result + WAFER_NUM - i) = 3;
-				}
-				else
-				{
-					*(result + WAFER_NUM - i - 1) = 3;
-				}
-				return true;
-			}
-			if(down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN)
-			{
-				if((up - down) > (WAFER_THICK + WTHICK_MARG))
-				{
-					*(result + WAFER_NUM - i - 1) = 2;// two wafers
-				}
-				else
-				{
-					*(result  + WAFER_NUM - i - 1) = 1;// one wafer
-				}
-				return true;
-			}
-			*(result + WAFER_NUM - i - 1) = 3; //cross
-			*(result + WAFER_NUM - i - 2) = 3; //cross
-			return false;
-		}
-		if(up < (WPOS_START + WPOS_FIRST))
-		{
-			*(result + WAFER_NUM - i) = 3; //cross
-			return false;
-		}
-	}
-	return false;
+    u8 i = 0;
+    for(i=0; i<WAFER_NUM; i++)
+    {
+        if((up < (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i)))) //&& (down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN))
+        {
+            if(down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) + WAFER_THICK + WTHICK_MARG)
+            {
+                if(i > 0)
+                {
+                    *(result + WAFER_NUM - i - 1) = 3; //cross
+                    *(result + WAFER_NUM - i) = 3;
+                }
+                else
+                {
+                    *(result + WAFER_NUM - i - 1) = 3;
+                }
+                return true;
+            }
+            if(down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN)
+            {
+                if((up - down) > (WAFER_THICK + WTHICK_MARG))
+                {
+                    *(result + WAFER_NUM - i - 1) = 2;// two wafers
+                }
+                else
+                {
+                    *(result  + WAFER_NUM - i - 1) = 1;// one wafer
+                }
+                return true;
+            }
+            *(result + WAFER_NUM - i - 1) = 3; //cross
+            *(result + WAFER_NUM - i - 2) = 3; //cross
+            return false;
+        }
+        if(up < (WPOS_START + WPOS_FIRST))
+        {
+            *(result + WAFER_NUM - i) = 3; //cross
+            return false;
+        }
+    }
+    return false;
 }
 
 bool Analyze_Scan(u8* result)
@@ -490,7 +507,7 @@ bool Analyze_Scan(u8* result)
     u8 cnts = 0;
 //	u8 p1,p2,p3,p4,p5;
     u8 p1,p2,p4,p5;
-	bool ret = false;
+    bool ret = false;
     memset(result, 0, WAFER_NUM);
     if(gis_scan == false)
     {
@@ -498,9 +515,9 @@ bool Analyze_Scan(u8* result)
     }
     while(cntp < gScan_num)
     {
-			ret = slot_dect(gScan_pos[cntp], gScan_pos[cntp+1], result);
-			cntp += 2;
-		}
+        ret = slot_dect(gScan_pos[cntp], gScan_pos[cntp+1], result);
+        cntp += 2;
+    }
     return ret;
 }
 
@@ -607,21 +624,22 @@ void set_errno(u8 cmd, u8 errno)
 {
     switch(errno)
     {
-    case 0x07:
-    case 0x27:
-    case 0x12:
-    case 0x23:
-    case 0x24:
-    case 0x25:
-    case 0x26:
-    case 0xA1:
-    case 0xA2:
-    case 0xA3:
-    case 0xA4:
-    case 0xFC:
-    case 0xFD:
-    case 0xFE:
-    case 0xFF:
+    case R_PROTS:
+    case R_AIRSN:
+    case R_MPEDL:
+    case R_DROPS:
+    case R_DRCLS:
+    case R_VACCS:
+    case R_VACOS:
+    case R_INTOP:
+    case R_INTCL:
+    case R_RESVE:
+    case R_PARER:
+    case R_FNAST:
+    case R_INLKE:
+    case R_COMER:
+    case R_SAFTY:
+		case R_SYSIN:
         gErr_no = errno;
         return;
     }
@@ -631,61 +649,61 @@ void set_errno(u8 cmd, u8 errno)
     {
         switch (gErr_no)
         {
-        case 0x42:
-            gErr_no = 0x02;
+        case R_ZLMITU:
+            gErr_no = R_ZLMITD;
             break;
-        case 0x48:
-            gErr_no = 0x08;
+        case R_DLMITC:
+            gErr_no = R_DLMITO;
             break;
-        case 0x49:
-            gErr_no = 0x09;
+        case R_MPBARC:
+            gErr_no = R_MPBARO;
             break;
-        case 0x50:
-            gErr_no = 0x10;
+        case R_MPZLMU:
+            gErr_no = R_MPZLMD;
             break;
-        case 0x51:
-            gErr_no = 0x11;
+        case R_MPSTPF:
+            gErr_no = R_MPSTPN;
             break;
-        case 0x61:
+        case R_CLOPSU:
             if(pod_s == CMD_ACTION_PODOP)
             {
-                gErr_no =0x21;
+                gErr_no = R_CLOPS;
             }
             if(pod_s == CMD_ACTION_PODCL)
             {
-                gErr_no =0x22;
+                gErr_no = R_CLCLS;
             }
             break;
-        case 0x62:
+        case R_CLOPSD:
             if(pod_s == CMD_ACTION_PODOP)
             {
-                gErr_no =0x21;
+                gErr_no = R_CLOPS;
             }
             if(pod_s == CMD_ACTION_PODCL)
             {
-                gErr_no =0x22;
+                gErr_no = R_CLCLS;
             }
             break;
         case CMD_ACTION_YWAIT:
-            gErr_no =0x04;
+            gErr_no = R_YLMITD;
             break;
         case CMD_ACTION_MSTON:
-            gErr_no =0x11;
+            gErr_no = R_MPSTPN;
             break;
         case CMD_ACTION_MSTOF:
-            gErr_no =0x11;
+            gErr_no = R_MPSTPN;
             break;
         case CMD_ACTION_ZDRUP:
-            gErr_no =0x02;
+            gErr_no = R_ZLMITD;
             break;
         case CMD_ACTION_ZDRDW:
-            gErr_no =0x02;
+            gErr_no = R_ZLMITD;
             break;
         case CMD_ACTION_ZDRMP:
-            gErr_no =0x10;
+            gErr_no = R_MPZLMD;
             break;
         case CMD_ACTION_ZMPST:
-            gErr_no =0x10;
+            gErr_no = R_MPZLMD;
             break;
         }
     }
@@ -714,6 +732,7 @@ u8 podop_action(u8* error)
 {
     u8 time = 30;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     pod_s = CMD_ACTION_PODOP;
@@ -721,16 +740,21 @@ u8 podop_action(u8* error)
     {
         if(podop_running(error) == true)
         {
+            run_clamldwn(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_clamldwn(gCur_pause);
-            *error = 0x61;
+            *error = R_CLOPSU;
             if(is_clampdown())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_clamldwn(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -774,6 +798,7 @@ u8 podcl_action(u8* error)
 {
     u8 time = 30;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     pod_s = CMD_ACTION_PODCL;
@@ -781,16 +806,21 @@ u8 podcl_action(u8* error)
     {
         if(podcl_running(error) == true)
         {
+            run_clamup(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_clamup(gCur_pause);
-            *error = 0x61;
+            *error = R_CLOPSU;
             if(is_clampup())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_clamup(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -833,22 +863,28 @@ u8 vacon_action(u8* error)
 {
     u8 time = 50;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(vacon_running(error) == true)
         {
+            run_dradsp(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_dradsp(gCur_pause);
-            *error = 0x25;
+            *error = R_VACCS;
             if(is_vacuumon())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_dradsp(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -876,22 +912,28 @@ u8 vacof_action(u8* error)
 {
     u8 time = 50;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(vacof_running(error) == true)
         {
+            run_dradsr(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_dradsr(gCur_pause);
-            *error = 0x26;
+            *error = R_VACOS;
             if(is_vacuumoff())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_dradsr(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -919,22 +961,28 @@ u8 dorop_action(u8* error)
 {
     u8 time = 30;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(dorop_running(error) == true)
         {
+            run_drunlt(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_drunlt(gCur_pause);
-            *error = 0x23;
+            *error = R_DROPS;
             if(is_unlatch())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_drunlt(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -961,22 +1009,28 @@ u8 dorcl_action(u8* error)
 {
     u8 time = 30;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(dorcl_running(error) == true)
         {
+            run_drlt(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_drlt(gCur_pause);
-            *error = 0x24;
+            *error = R_DRCLS;
             if(is_latch())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_drlt(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1003,22 +1057,28 @@ u8 mapop_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(mapop_running(error) == true)
         {
+            run_mpaop(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_mpaop(gCur_pause);
-            *error = 0x09;
+            *error = R_MPBARO;
             if(is_mapopen())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_mpaop(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1045,22 +1105,28 @@ u8 mapcl_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(mapcl_running(error) == true)
         {
+            run_mpac(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_mpac(gCur_pause);
-            *error = 0x49;
+            *error = R_MPBARC;
             if(is_mapclose())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_mpac(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1087,22 +1153,28 @@ u8 dorbk_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(dorbk_running(error) == true)
         {
+            run_drop(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_drop(gCur_pause);
-            *error = 0x08;
+            *error = R_DLMITO;
             if(is_dropen())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_drop(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1129,22 +1201,28 @@ u8 dorfw_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(dorfw_running(error) == true)
         {
+            run_drcls(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_drcls(gCur_pause);
-            *error = 0x48;
+            *error = R_DLMITC;
             if(is_drclose())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_drcls(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1171,22 +1249,28 @@ u8 ydoor_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(ydoor_running(error) == true)
         {
+            run_fpdck(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_fpdck(gCur_pause);
-            *error = 0x04;
+            *error = R_YLMITD;
             if(is_dock() && is_drondr())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_fpdck(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1213,22 +1297,28 @@ u8 ywait_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(ywait_running(error) == true)
         {
+            run_fpundk(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_fpundk(gCur_pause);
-            *error = 0x44;
+            *error = R_YLMITU;
             if(is_undock())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_fpundk(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1255,22 +1345,28 @@ u8 mston_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(mston_running(error) == true)
         {
+            run_stpon(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_stpon(gCur_pause);
-            *error = 0x11;
+            *error = R_MPSTPN;
             if(is_stopperon())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_stpon(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1297,22 +1393,28 @@ u8 mstof_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(mstof_running(error) == true)
         {
+            run_stpoff(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_stpoff(gCur_pause);
-            *error = 0x51;
+            *error = R_MPSTPF;
             if(is_stopperoff())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_stpoff(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1340,22 +1442,28 @@ u8 zmpst_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(zmpst_running(error) == true)
         {
+            run_drdwns(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_drdwns(gCur_pause);
-            *error = 0x50;
+            *error = R_MPZLMU;
             if(is_mapstart())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_drdwns(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1382,22 +1490,28 @@ u8 zmped_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(zmped_running(error) == true)
         {
+            run_drupl(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_drupl(gCur_pause);
-            *error = 0x12;
+            *error = R_MPEDL;
             if(is_druplmt())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_drupl(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1424,22 +1538,28 @@ u8 zdrmp_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(zdrmp_running(error) == true)
         {
+            run_drdwne(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_drdwne(gCur_pause);
-            *error = 0x10;
+            *error = R_MPZLMD;
             if(is_mapend())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_drdwne(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1466,22 +1586,28 @@ u8 zdrdw_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(zdrdw_running(error) == true)
         {
+            run_drdwnl(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_drdwnl(gCur_pause);
-            *error = 0x02;
+            *error = R_ZLMITD;
             if(is_drdwlmt())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_drdwnl(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1508,22 +1634,28 @@ u8 zdrup_action(u8* error)
 {
     u8 time = 100;
     u8 seq = 0;
+    bool errstop = true;
     OS_ERR err;
     seq = 0x01;
     while(time--)
     {
         if(zdrup_running(error) == true)
         {
+            run_drupl(errstop);
             return ACT_ERR;
         }
         switch (seq)
         {
         case 0x01:
             run_drupl(gCur_pause);
-            *error = 0x42;
+            *error = R_ZLMITU;
             if(is_druplmt())
             {
                 return ACT_END;
+            }
+            if(time == 0) {
+                run_drupl(errstop);
+                return ACT_ERR;
             }
             break;
         }
@@ -1546,6 +1678,55 @@ u8 zdrup_action(u8* error)
     }
     return ACT_ERR;
 }
+u8 motin_action(u8* error)
+{
+    u8 time = 200;
+    u8 seq = 0;
+    bool errstop = true;
+    OS_ERR err;
+    seq = 0x01;
+    while(time--)
+    {
+        if(motin_running(error) == true)
+        {
+            run_motin(errstop);
+            return ACT_ERR;
+        }
+        switch (seq)
+        {
+        case 0x01:
+            run_motin(gCur_pause);
+            *error = R_SYSIN;
+            if(gismotinit == true)
+            {
+                return ACT_END;
+            }
+            if(time == 0) {
+                run_motin(errstop);
+                return ACT_ERR;
+            }
+            break;
+        }
+        OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
+        while(gCur_pause == 0x01)
+        {
+            run_motin(gCur_pause);
+            OSTimeDlyHMSM(0,0,0,CIRCLR_TIME,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        if(gCur_stop == 0x01)
+        {
+            run_motin(gCur_stop);
+            return ACT_STP;
+        }
+        if(gCur_abort == 0x01)
+        {
+            run_motin(gCur_abort);
+            return ACT_ABT;
+        }
+    }
+    return ACT_ERR;
+}
+
 u8 orgsh_action(u8* error)
 {
     u8 seq = 0;
@@ -1663,53 +1844,88 @@ u8 sysin_action(u8* error)
 {
     u8 seq = 0;
     u8 ret = ACT_STA;
-    seq = 0x01;
+
     while((ret == ACT_STA) || (ret == ACT_END))
     {
-        if(aborg_running(error) == true)
+        if(sysin_running(error) == true)
         {
             return ACT_ERR;
         }
         switch(seq)
         {
-        case 0x01:
+        case 0x00:
             ret = mapcl_action(error);
+            printf("mapcl_action  \r\n");
+            if(is_drondr()) {
+                if(is_foup_presence())
+                {
+                    seq = 0x01;
+                }
+                else
+                {
+                    seq = 0x03;
+                }
+            }
+            else
+            {
+                seq = 0x05;
+            }
+
+            break;
+        case 0x01:
+            ret = podcl_action(error);
+            printf("podcl_action \r\n");
             seq = 0x02;
             break;
         case 0x02:
-            ret = zmped_action(error);
-            seq = 0x04;
+            ret = ydoor_action(error);
+            printf("ydoor_action \r\n");
+            seq = 0x03;
             break;
         case 0x03:
-            ret = mstof_action(error);
+            ret = vacon_action(error);
+            printf("vacon_action \r\n");
             seq = 0x04;
             break;
         case 0x04:
-            ret = dorbk_action(error);
+            ret = dorop_action(error);
+            printf("dorop_action \r\n");
             seq = 0x05;
             break;
         case 0x05:
-            ret = zdrup_action(error);
+            ret = dorbk_action(error);
+            printf("dorbk_action \r\n");
             seq = 0x06;
             break;
         case 0x06:
-            ret = dorfw_action(error);
+            ret = motin_action(error);
+            printf("motin_action \r\n");
             seq = 0x07;
             break;
         case 0x07:
-            ret = dorcl_action(error);
+            ret = dorfw_action(error);
+            printf("dorfw_action \r\n");
             seq = 0x08;
             break;
         case 0x08:
-            ret = vacof_action(error);
+            ret = dorcl_action(error);
+            printf("dorcl_action \r\n");
             seq = 0x09;
             break;
         case 0x09:
-            ret = ywait_action(error);
+            ret = vacof_action(error);
+            printf("vacof_action \r\n");
             seq = 0x10;
             break;
         case 0x10:
+            ret = ywait_action(error);
+            printf("ywait_action \r\n");
+            podop_action(error);
+            seq = 0x11;
+            break;
+        case 0x11:
             ret = podop_action(error);
+            printf("podop_action \r\n");
             return ret;
         }
     }
@@ -2568,6 +2784,9 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
     case CMD_ACTION_ZDRUP:
         memcpy(chcmd, "ZDRUP", 5);
         break;
+    case CMD_ACTION_SYSIN:
+        memcpy(chcmd, "SYSIN", 5);
+        break;
     case CMD_ACTION_ORGSH:
         memcpy(chcmd, "ORGSH", 5);
         break;
@@ -2628,11 +2847,16 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
     }
     if(rtype == ACT_END)
     {
-        send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, (u8*)NULL, 0);
+        send_msg(gCom_mod & BCAK_INF, (char*)chcmd, (u8*)NULL, 0);
         gCur_status = G_CUR_STA_END;
         gEnd_act = cmd;
         if(cmd == CMD_ACTION_ORGSH || cmd == CMD_ACTION_ABORG)
         {
+            is_origin = true;
+        }
+        if(cmd == CMD_ACTION_SYSIN)
+        {
+            gissysinit = true;
             is_origin = true;
         }
     }
@@ -2727,13 +2951,19 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         case 0xA2:
             memcpy(param, (char*)"/INTCL", 6);
             break;
+				case 0xB1:
+            memcpy(param, (char*)"/SYSIN", 6);
+            break;
+        default:
+            memcpy(param, (char*)"/UNDIF", 6);
+            break;
 
         }
         set_errno(cmd, error);
         send_msg(gCom_mod & BCAK_ABS, (char*)chcmd, param, 6);
         gPre_status = gCur_status;
- //       gCur_status = G_CUR_STA_ERR;
-				gCur_status = G_CUR_STA_STP;
+//       gCur_status = G_CUR_STA_ERR;
+        gCur_status = G_CUR_STA_STP;
 //				gIsError = true;
         gEnd_act = CMD_ACTION_NOACT;
     }
@@ -2741,7 +2971,7 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
     {
         if(is_aborg == false)
         {
-            send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, param, 6);
+            send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 6);
             gCur_status = G_CUR_STA_ABO;
             gEnd_act = CMD_ACTION_NOACT;
         }
@@ -2753,7 +2983,7 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
     }
     else if(rtype == ACT_STP)
     {
-        send_msg(gCom_mod & BCAK_FIN, (char*)chcmd, param, 6);
+        send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 6);
         gCur_status = G_CUR_STA_STP;
         gEnd_act = CMD_ACTION_NOACT;
     }
@@ -2774,13 +3004,13 @@ void tExe_Action(void *p_arg)
                 gCur_status == G_CUR_STA_ABO || \
                 gCur_status == G_CUR_STA_END || \
                 gCur_status == G_CUR_STA_STP ||\
-				        gIsError)
+                gIsError)
         {
-					if(gIsError)
-					{
-						gCur_status = G_CUR_STA_ERR;
-					}
-           OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
+            if(gIsError)
+            {
+                gCur_status = G_CUR_STA_ERR;
+            }
+            OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
             continue;
         }
         OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err);
@@ -2869,6 +3099,10 @@ void tExe_Action(void *p_arg)
             break;
         case CMD_ACTION_ORGSH:
             ret = orgsh_action(&error);
+            proc_result(gCur_action, ret, error);
+            break;
+        case CMD_ACTION_SYSIN:
+            ret = sysin_action(&error);
             proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_ABORG:

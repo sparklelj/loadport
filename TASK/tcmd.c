@@ -19,6 +19,7 @@ u8 gAction_num = 0;
 u8 gAction_sta = 0;
 u8 gEnd_act = CMD_ACTION_NOACT;
 
+bool gissysinit = false;
 
 bool is_run(void)
 {
@@ -51,7 +52,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     mlen++;
     msg[mlen] = gAddr[1];
     mlen++;
-    if((type & 0x0F) == 0x0)
+    if((type & 0x0F) == BCAK_ACK)
     {
         msg[mlen] = 'A';
         mlen++;
@@ -60,7 +61,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
         msg[mlen] = 'K';
         mlen++;
     }
-    if((type & 0x0F) == 0x1)
+    if((type & 0x0F) == BCAK_NAK)
     {
         msg[mlen] = 'N';
         mlen++;
@@ -69,7 +70,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
         msg[mlen] = 'K';
         mlen++;
     }
-    if((type & 0x0F) == 0x2)
+    if((type & 0x0F) == BCAK_INF)
     {
         msg[mlen] = 'I';
         mlen++;
@@ -78,7 +79,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
         msg[mlen] = 'F';
         mlen++;
     }
-    if((type & 0x0F) == 0x3)
+    if((type & 0x0F) == BCAK_ABS)
     {
         msg[mlen] = 'A';
         mlen++;
@@ -87,7 +88,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
         msg[mlen] = 'S';
         mlen++;
     }
-    if((type & 0x0F) == 0x4)
+    if((type & 0x0F) == BCAK_RIF)
     {
         msg[mlen] = 'R';
         mlen++;
@@ -96,7 +97,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
         msg[mlen] = 'F';
         mlen++;
     }
-    if((type & 0x0F) == 0x5)
+    if((type & 0x0F) == BCAK_RAS)
     {
         msg[mlen] = 'R';
         mlen++;
@@ -349,327 +350,6 @@ bool format_wfcnt(u8* param)
         return true;
     }
 }
-// type 0 normal 0x80 force
-void format_podop(u8 type)
-{
-    gAction_seq[gAction_num++] = 20 + type;
-    gAction_seq[gAction_num++] = 21 + type;
-    gAction_seq[gAction_num++] = 22 + type;
-}
-
-void format_podcl(u8 type)
-{
-    gAction_seq[gAction_num++] = 1 + type;
-    gAction_seq[gAction_num++] = 2 + type;
-    gAction_seq[gAction_num++] = 3 + type;
-}
-
-void format_vacon(u8 type)
-{
-    gAction_seq[gAction_num++] = 5 + type;
-}
-
-void format_vacof(u8 type)
-{
-    gAction_seq[gAction_num++] = 18 + type;
-}
-
-void format_dorop(u8 type)
-{
-    gAction_seq[gAction_num++] = 6 + type;
-}
-
-void format_dorcl(u8 type)
-{
-    gAction_seq[gAction_num++] = 17 + type;
-}
-
-void format_mapop(u8 type)
-{
-    gAction_seq[gAction_num++] = 9 + type;
-}
-
-void format_mapcl(u8 type)
-{
-    gAction_seq[gAction_num++] = 12 + type;
-}
-
-void format_zdrup(u8 type)
-{
-    gAction_seq[gAction_num++] = 15 + type;
-}
-
-void format_zdrdw(u8 type)
-{
-    gAction_seq[gAction_num++] = 14 + type;
-}
-
-void format_zdrmp(u8 type)
-{
-    gAction_seq[gAction_num++] = 11 + type;
-}
-
-void format_zmpst(u8 type)
-{
-    gAction_seq[gAction_num++] = 8 + type;
-}
-
-void format_zmped(u8 type)
-{
-    gAction_seq[gAction_num++] = 15 + type;
-}
-
-void format_mston(u8 type)
-{
-    gAction_seq[gAction_num++] = 10 + type;
-}
-
-void format_mstof(u8 type)
-{
-    gAction_seq[gAction_num++] = 13 + type;
-}
-
-void format_ywait(u8 type)
-{
-    gAction_seq[gAction_num++] = 19 + type;
-}
-
-void format_ydoor(u8 type)
-{
-    gAction_seq[gAction_num++] = 4 + type;
-}
-
-void format_dorbk(u8 type)
-{
-    gAction_seq[gAction_num++] = 7 + type;
-}
-
-void format_dorfw(u8 type)
-{
-    gAction_seq[gAction_num++] = 16 + type;
-}
-
-void format_orgsh(u8 type)
-{
-    format_mapcl(type);
-    format_zmped(type);
-    format_mstof(type);
-    format_dorbk(type);
-    format_zdrup(type);
-    format_dorfw(type);
-    format_dorcl(type);
-    format_vacof(type);
-    format_ywait(type);
-    format_podop(type);
-}
-
-void format_aborg(u8 type)
-{
-    format_mapcl(type);
-    format_zmped(type);
-    format_mstof(type);
-    format_dorbk(type);
-    format_zdrup(type);
-    format_dorfw(type);
-    format_dorcl(type);
-    format_vacof(type);
-    format_ywait(type);
-    format_podop(type);
-}
-
-void format_cload(u8 type)
-{
-    format_podcl(type);
-    format_ydoor(type);
-    format_vacon(type);
-    format_dorop(type);
-    format_dorbk(type);
-    format_zdrmp(type);
-    format_zdrdw(type);
-}
-
-void format_clddk(u8 type)
-{
-    format_podcl(type);
-    format_ydoor(type);
-    format_vacon(type);
-    format_dorop(type);
-}
-
-void format_cldyd(u8 type)
-{
-    format_podcl(type);
-    format_ydoor(type);
-}
-
-void format_cldop(u8 type)
-{
-    format_dorbk(type);
-    format_zdrdw(type);
-}
-
-void format_cldmp(u8 type)
-{
-    format_podcl(type);
-    format_ydoor(type);
-    format_vacon(type);
-    format_dorop(type);
-    format_dorbk(type);
-    format_zmpst(type);
-    format_mapop(type);
-    format_mston(type);
-    format_zdrmp(type);
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrdw(type);
-}
-
-void format_clmpo(u8 type)
-{
-    format_dorbk(type);
-    format_zmpst(type);
-    format_mapop(type);
-    format_mston(type);
-    format_zdrmp(type);
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrdw(type);
-}
-
-void format_culod(u8 type)
-{
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrup(type);
-    format_zmped(type);
-    format_dorfw(type);
-    format_dorcl(type);
-    format_vacof(type);
-    format_ywait(type);
-    format_podop(type);
-}
-
-void format_culdk(u8 type)
-{
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrup(type);
-    format_zmped(type);
-    format_dorfw(type);
-}
-
-void format_cudcl(u8 type)
-{
-    format_dorcl(type);
-    format_vacof(type);
-    format_ywait(type);
-}
-
-void format_cudnc(u8 type)
-{
-    format_dorcl(type);
-    format_vacof(type);
-    format_ywait(type);
-    format_podop(type);
-}
-
-void format_culyd(u8 type)
-{
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrup(type);
-    format_zmped(type);
-    format_dorfw(type);
-    format_dorcl(type);
-    format_vacof(type);
-}
-
-void format_cuflc(u8 type)
-{
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrup(type);
-    format_zmped(type);
-    format_dorfw(type);
-    format_dorcl(type);
-    format_vacof(type);
-    format_ywait(type);
-}
-
-void format_cudmp(u8 type)
-{
-    format_zdrup(type);
-    format_zmpst(type);
-    format_mapop(type);
-    format_mston(type);
-    format_zdrmp(type);
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrup(type);
-    format_zmped(type);
-    format_dorfw(type);
-    format_dorcl(type);
-    format_vacof(type);
-    format_ywait(type);
-    format_podop(type);
-}
-
-void format_cumdk(u8 type)
-{
-    format_zdrup(type);
-    format_zmpst(type);
-    format_mapop(type);
-    format_mston(type);
-    format_zdrmp(type);
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrup(type);
-    format_zmped(type);
-    format_dorfw(type);
-}
-
-void format_cumfc(u8 type)
-{
-    format_zdrup(type);
-    format_zmpst(type);
-    format_mapop(type);
-    format_mston(type);
-    format_zdrmp(type);
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrup(type);
-    format_zmped(type);
-    format_dorfw(type);
-    format_dorcl(type);
-    format_vacof(type);
-    format_ywait(type);
-}
-
-void format_mapdo(u8 type)
-{
-    format_zdrup(type);
-    format_dorbk(type);
-    format_zmpst(type);
-    format_mapop(type);
-    format_mston(type);
-    format_zdrmp(type);
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrdw(type);
-}
-
-void format_remap(u8 type)
-{
-    format_zdrup(type);
-    format_dorbk(type);
-    format_zmpst(type);
-    format_mapop(type);
-    format_mston(type);
-    format_zdrmp(type);
-    format_mapcl(type);
-    format_mstof(type);
-    format_zdrdw(type);
-}
 
 bool proc_set(u8* cmd_name)
 {
@@ -772,7 +452,7 @@ bool proc_set(u8* cmd_name)
     {
         gLED_status[7] = 0x13;
     }
-    send_msg(gCom_mod & BCAK_FIN, (char*)cmd_name, (u8*)NULL, 0);
+    send_msg(gCom_mod & BCAK_INF, (char*)cmd_name, (u8*)NULL, 0);
     return true;
 }
 
@@ -838,6 +518,10 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
 	
     u8 ucmd = 0;
 //	rtype = false;
+	  if(memcmp(cmd_name, "SYSIN", 5) == 0)
+    {
+        ucmd = CMD_ACTION_SYSIN;
+    }
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
         ucmd = CMD_ACTION_ORGSH;
@@ -994,65 +678,56 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
     {
         switch(error)
         {
-        case 0x30:
+        case B_ERROR:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/ERROR", 12);
             break;
-        case 0x31:
+        case B_CBUSY:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/CBUSY", 12);
             break;
-        case 0x32:
+        case B_FPILG:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/FPILG", 12);
             break;
-        case 0x33:
+        case B_DPOSI:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/DPOSI", 12);
             break;
-        case 0x34:
+        case B_MPARM:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/MPARM", 12);
             break;
-        case 0x35:
+        case B_MPSTP:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/MPSTP", 12);
             break;
-        case 0x37:
+        case B_ZPOSI:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/ZPOSI", 12);
             break;
-        case 0x38:
+        case B_DVACM:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/DVACM", 12);
             break;
-        case 0x39:
-            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/LATCH", 12);
-            break;
-        case 0x3A:
-            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/LATCH", 12);
-            break;
-        case 0x4A:
-            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/LATCH", 12);
-            break;
-        case 0x4B:
-            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/DPOSI", 12);
-            break;
-        case 0x80:
+        case B_ORGYT:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/ORGYT", 12);
             break;
-        case 0x81:
+        case B_CLDDK:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/CLDDK", 12);
             break;
-        case 0x82:
-            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/ZPOSI", 12);
+        case B_YPOSI:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/YPOSI", 12);
             break;
-        case 0x83:
+        case B_LATCH:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/LATCH", 12);
             break;
-        case 0x84:
+        case B_CULDK:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/CULDK", 12);
             break;
-        case 0x85:
+        case B_CLOAD:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/CLOAD", 12);
             break;
-        case 0x86:
+        case B_RMPOS:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/RMPOS", 12);
             break;
-        case 0x87:
-            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/MPARM", 12);
+				case B_SYSIN:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/SYSIN", 12);
+            break;
+				default:
+            send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/UNDEF", 12);
             break;
         }
     }
@@ -1067,6 +742,15 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
 bool proc_motiom(u8* cmd_name)
 {
     memcpy(gPre_cmd, cmd_name, 5);
+	  if(memcmp(cmd_name, "SYSIN", 5) == 0)
+    {
+        u8 ret = 0;
+        u8 error;
+        is_origin = false;
+        ret = sysin_before(&error);
+        proc_before(cmd_name, ret, error);
+        return true;
+    }
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
         u8 ret = 0;
@@ -1086,7 +770,7 @@ bool proc_motiom(u8* cmd_name)
         gCur_stop = 0;
         gCur_abort = 1;
         gCur_retry = 0;
-        ret = orgsh_before(&error);
+        ret = aborg_before(&error);
         proc_before(cmd_name, ret, error);
         return true;
     }
@@ -1384,6 +1068,10 @@ bool proc_mov(u8* cmd_name)
 {
     CPU_SR_ALLOC();
     OS_CRITICAL_ENTER();
+	 if(memcmp(cmd_name, "SYSIN", 5) == 0)
+    {
+        proc_motiom(cmd_name);
+    }
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
         proc_motiom(cmd_name);
@@ -1576,7 +1264,7 @@ bool proc_mov(u8* cmd_name)
             gCur_stop = 0;
             gCur_abort = 0;
             gCur_retry = 0;
-            send_msg(gCom_mod & BCAK_FIN, (char*)"PAUSE", (u8*)NULL, 0);
+            send_msg(gCom_mod & BCAK_INF, (char*)"PAUSE", (u8*)NULL, 0);
         }
     }
     if(memcmp(cmd_name, "ABORT", 5) == 0)

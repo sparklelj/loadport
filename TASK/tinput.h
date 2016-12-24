@@ -58,54 +58,6 @@ extern u8 gStatus_scan[INPUT_NUM];
 #define SF_CLAMDWNI 55
 #define SF_CLAMDWND 56
 
-bool is_sf_ready(void);
-bool is_sf_setfoupi(void);
-bool is_sf_setfoupd(void);
-bool is_sf_clamupi(void);
-bool is_sf_clamupd(void);
-bool is_sf_clanfwdi(void);
-bool is_sf_clanfwdd(void);
-bool is_sf_clamlcki(void);
-bool is_sf_clamlckd(void);
-bool is_sf_fpdcki(void);
-bool is_sf_fpdckd(void);
-bool is_sf_dradspi(void);
-bool is_sf_dradspd(void);
-bool is_sf_drunlti(void);
-bool is_sf_drunltd(void);
-bool is_sf_dropi(void);
-bool is_sf_dropd(void);
-bool is_sf_drdwnsi(void);
-bool is_sf_drdwnsd(void);
-bool is_sf_mpaopi(void);
-bool is_sf_mpaopd(void);
-bool is_sf_stponi(void);
-bool is_sf_stpond(void);
-bool is_sf_drdwnei(void);
-bool is_sf_drdwned(void);
-bool is_sf_mpaci(void);
-bool is_sf_mpacd(void);
-bool is_sf_stpoffi(void);
-bool is_sf_stpoffd(void);
-bool is_sf_drdwnli(void);
-bool is_sf_drdwnld(void);
-bool is_sf_drupli(void);
-bool is_sf_drupld(void);
-bool is_sf_drclsi(void);
-bool is_sf_drclsd(void);
-bool is_sf_drlti(void);
-bool is_sf_drltd(void);
-bool is_sf_dradsri(void);
-bool is_sf_dradsrd(void);
-bool is_sf_fpundki(void);
-bool is_sf_fpundkd(void);
-bool is_sf_clamulki(void);
-bool is_sf_clamulkd(void);
-bool is_sf_clambwdi(void);
-bool is_sf_clambwdd(void);
-bool is_sf_clamdwni(void);
-bool is_sf_clamdwnd(void);
-
 bool is_no_foup(void);
 bool is_foup_place(void);
 bool is_foup_presence(void);
@@ -216,6 +168,7 @@ u8 cumdk_before(u8* error);
 u8 cumdk_running(u8* error);
 u8 cumfc_before(u8* error);
 u8 cumfc_running(u8* error);
+u8 motin_running(u8* error);
 
 
 u8 clam_sta(void);

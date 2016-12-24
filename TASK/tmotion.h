@@ -2,6 +2,7 @@
 #define __TMOTION_H
 
 #include "sys.h"
+#include "includes.h"
 
 //1000 pules per circle 
 //2000 counts per circle
@@ -26,6 +27,11 @@ u8 Get_MStatus(void);
 extern u8 gMotion_status;
 extern s32 gMotion_cmd;
 extern bool gParkErr;
+extern bool gismotinit;
+extern bool gstopmotin;
+extern bool gismoting;
+
+extern OS_TCB MINIT_TaskTCB;
 
 void STOP_Minit(void);
 void PAUSE_Motion(s32 target);

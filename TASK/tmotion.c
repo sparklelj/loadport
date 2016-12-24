@@ -23,6 +23,9 @@ u8 gMotion_status;
 u8 gWorkPos;
 
 bool gParkErr = false;
+bool gismotinit = false;
+bool gstopmotin = false;
+bool gismoting = false;
 
 bool is_mstop(void)
 {
@@ -300,7 +303,11 @@ void tMotor_Init(void *p_arg)
     OS_ERR err;
     CPU_SR_ALLOC();
 BEGIN:
+	gismoting = false;
     OSTaskSuspend(NULL, &err);
+	gismoting = true;
+		gismotinit = false;
+		gstopmotin = false;
     gMotor_state = MS_INITING;
     gParkErr = false;
     /*
@@ -332,7 +339,8 @@ BEGIN:
 					goto BEGIN;
 //				gParkErr = true;
         }
-        if(gMotor_state == MS_UNINIT)
+//        if(gMotor_state == MS_UNINIT)
+					if(gstopmotin == true)
         {
             goto BEGIN;
         }
@@ -358,7 +366,7 @@ BEGIN:
 					goto BEGIN;
 //				gParkErr = true;
         }
-        if(gMotor_state == MS_UNINIT)
+        if(gstopmotin == true)
         {
             goto BEGIN;
         }
@@ -368,7 +376,7 @@ BEGIN:
     while(!is_mstop())
     {
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
-        if(gMotor_state == MS_UNINIT)
+        if(gstopmotin == true)
         {
             goto BEGIN;
         }
@@ -392,12 +400,13 @@ BEGIN:
     while(!is_mstop())
     {
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
-        if(gMotor_state == MS_UNINIT)
+        if(gstopmotin == true)
         {
             goto BEGIN;
         }
     }
-
+		gismotinit = true;
+		printf("motor init \r\n");
     gMotor_state = MS_INITED;
     OSTaskDel(NULL,&err);
     goto BEGIN;
