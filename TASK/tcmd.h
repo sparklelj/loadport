@@ -124,6 +124,11 @@
 #define R_INLKE  0xFD
 #define R_COMER  0xFE
 
+#define W_NO    0x00
+#define W_ONE   0x01
+#define W_OVER  0x02
+#define W_CROSS 0x03
+#define W_OTHER 0x10
 
 extern u8 gAddr[2];
 extern u8 gLED_status[9];

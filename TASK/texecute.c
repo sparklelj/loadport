@@ -6,13 +6,13 @@
 #include "output.h"
 #include "tcmd.h"
 
-#define WAFER_THICK 100
-#define WTHICK_MARG 10
+#define WAFER_THICK 300
+#define WTHICK_MARG 100
 
-#define WPOS_MARGIN   10
-#define WPOS_FIRST    1000
-#define WPOS_START    32000
-#define WPOS_INTERVAL 1000
+#define WPOS_MARGIN   100
+#define WPOS_FIRST    -152
+#define WPOS_START    64000
+#define WPOS_INTERVAL 2000
 
 #define WAFER_NUM 25
 
@@ -45,6 +45,8 @@ u8 gCur_retry = 0;
 u8 gErr_no = 0;
 u8 gMap_status = 0;
 u8 pod_s = CMD_ACTION_NOACT;
+
+u8 gMapState = MAP_UNMAP;
 
 bool gIsError = false;
 bool gErr_mod = false;
@@ -373,9 +375,9 @@ u8 run_motin(bool pause)
 //       PAUSE_Motion(M_UPLMT);
     }
     else
-    {       
-        if(gismoting == false) {
-					gismotinit = false;
+    {
+        if(gismoting == false && (gismotinit == false)) {
+//					gismotinit = false;
             OSTaskResume(&MINIT_TaskTCB,&err);
         }
     }
@@ -459,43 +461,105 @@ u8 is_inthick(s32 height)
 bool slot_dect(s32 up, s32 down, u8* result)
 {
     u8 i = 0;
-    for(i=0; i<WAFER_NUM; i++)
+    for(i=0; i<=WAFER_NUM; i++)
     {
-        if((up < (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i)))) //&& (down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN))
+        if((up < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)))) //&& (down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN))
         {
-            if(down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) + WAFER_THICK + WTHICK_MARG)
+            if(down < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)) - WPOS_MARGIN)
             {
-                if(i > 0)
+                if(down - up > WAFER_THICK + WTHICK_MARG)
                 {
-                    *(result + WAFER_NUM - i - 1) = 3; //cross
-                    *(result + WAFER_NUM - i) = 3;
+                    if(i  == 0)
+                    {
+                        if(*(result  + WAFER_NUM - i - 1) == W_NO)
+                        {
+                            *(result + WAFER_NUM - i - 1) = W_CROSS; //cross
+                        }
+                        else
+                        {
+                            *(result + WAFER_NUM - i - 1) = W_OTHER;
+                        }
+                        return true;
+
+                    }
+                    else if( i == WAFER_NUM)
+                    {
+                        if(*(result  + WAFER_NUM - i) == W_NO)
+                        {
+                            *(result + WAFER_NUM - i) = W_CROSS; //cross
+                        }
+                        else
+                        {
+                            *(result + WAFER_NUM - i) = W_OTHER;
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        if(*(result  + WAFER_NUM - i - 1) == W_NO)
+                        {
+                            *(result + WAFER_NUM - i - 1) = W_CROSS; //cross
+                        }
+                        else
+                        {
+                            *(result + WAFER_NUM - i - 1) = W_OTHER;
+                        }
+                        if(*(result  + WAFER_NUM - i) == W_NO)
+                        {
+                            *(result + WAFER_NUM - i) = W_CROSS; //cross
+                        }
+                        else
+                        {
+                            *(result + WAFER_NUM - i) = W_OTHER;
+                        }
+                        return true;
+                    }
                 }
                 else
                 {
-                    *(result + WAFER_NUM - i - 1) = 3;
+                    if(*(result  + WAFER_NUM - i - 1) == W_NO)
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_ONE;
+                        return true;
+                    }
+                    if(*(result  + WAFER_NUM - i - 1) == W_ONE)
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_OVER;
+                        return true;
+                    }
+                    *(result  + WAFER_NUM - i - 1) = W_OTHER;
+                    return true;
                 }
                 return true;
             }
-            if(down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN)
-            {
-                if((up - down) > (WAFER_THICK + WTHICK_MARG))
+            else {
+                if(down - up > WAFER_THICK + WTHICK_MARG)
                 {
-                    *(result + WAFER_NUM - i - 1) = 2;// two wafers
+                    if(*(result  + WAFER_NUM - i - 1) == W_NO || (*(result  + WAFER_NUM - i - 1) == W_OVER) )
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_OVER;
+                        return true;
+                    }
+                    *(result + WAFER_NUM - i - 1) = W_OTHER;
+                    return true;
                 }
                 else
                 {
-                    *(result  + WAFER_NUM - i - 1) = 1;// one wafer
+                    if(*(result  + WAFER_NUM - i - 1) == W_NO)
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_ONE;
+                        return true;
+                    }
+                    if(*(result  + WAFER_NUM - i - 1) == W_ONE)
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_OVER;
+                        return true;
+                    }
+                    *(result  + WAFER_NUM - i - 1) = W_OTHER;
+                    return true;
                 }
-                return true;
+
             }
-            *(result + WAFER_NUM - i - 1) = 3; //cross
-            *(result + WAFER_NUM - i - 2) = 3; //cross
-            return false;
-        }
-        if(up < (WPOS_START + WPOS_FIRST))
-        {
-            *(result + WAFER_NUM - i) = 3; //cross
-            return false;
         }
     }
     return false;
@@ -513,112 +577,14 @@ bool Analyze_Scan(u8* result)
     {
 //      return false;
     }
-    while(cntp < gScan_num)
+    while(cntp < (gScan_num))
     {
+        printf("cur %d \r\n", cntp);
         ret = slot_dect(gScan_pos[cntp], gScan_pos[cntp+1], result);
         cntp += 2;
     }
-    return ret;
-}
-
-bool Analyze_ScanBK(u8* result)
-{
-    u8 cntp = 0;
-    u8 cnts = 0;
-//	u8 p1,p2,p3,p4,p5;
-    u8 p1,p2,p4,p5;
-    memset(result, 0, WAFER_NUM);
-    if(gis_scan == false)
-    {
-//      return false;
-    }
-    while(cntp < gScan_num)
-    {
-        p1 = is_inslot(gScan_pos[cntp], WAFER_NUM - cnts);
-        p2 = is_inslot(gScan_pos[cntp+1], WAFER_NUM - cnts);
-        p5 = is_inthick(gScan_pos[cntp] - gScan_pos[cntp+1]);
-        if(cnts < WAFER_NUM)
-        {
-//			p3 = is_inslot(gScan_pos[cntp+2], WAFER_NUM - cnts - 1);
-            p4 = is_inslot(gScan_pos[cntp+3], WAFER_NUM - cnts - 1);
-        }
-        if((p1 >= INSLOT_HI) && (p2 == INSLOT_LI))
-        {
-            if(p5 == INSLOT_HI)
-            {
-                if(*(result+cnts) == 0)
-                {
-                    *(result+cnts) = 1;// one wafer
-                }
-                else
-                {
-                    *(result+cnts) = 5;
-                }
-                cntp += 2;
-                cnts += 1;
-                continue;
-            }
-            if(p5 == INSLOT_HH)
-            {
-                if(*(result+cnts) == 0)
-                {
-                    *(result+cnts) = 2;// two wafers
-                }
-                else
-                {
-                    *(result+cnts) = 5;
-                }
-                cntp += 2;
-                cnts += 1;
-                continue;
-            }
-            if(p5 == INSLOT_LL)
-            {
-                *(result+cnts) = 5;
-                cntp += 2;
-                cnts += 1;
-                continue;
-            }
-        }
-        if((p1 == INSLOT_LL) && (p2 == INSLOT_LL))
-        {
-            if(cnts < WAFER_NUM - 1)
-            {
-//				p3 = is_inslot(gScan_pos[cntp+2], WAFER_NUM - cnts - 1);
-                p4 = is_inslot(gScan_pos[cntp+1], WAFER_NUM - cnts - 1);
-                if(p4 > INSLOT_LI)
-                {
-                    *(result+cnts) = 3; //cross
-                    *(result+cnts+1) = 3;
-                    cntp += 2;
-                    cnts += 2;
-                    continue;
-                }
-                else
-                {
-                    *(result+cnts) = 0; //no wafer
-//                   cntp += 2;
-                    cnts += 1;
-                    continue;
-                }
-            }
-            else
-            {
-                *(result+cnts) = 3; //cross
-                cntp += 2;
-                cnts += 1;
-                continue;
-            }
-        }
-        cntp += 2;
-    }
-    if(cnts < WAFER_NUM - 1)
-    {
-        memset(result+cnts, 0, WAFER_NUM - cnts - 1);
-    }
     return true;
 }
-
 
 void set_errno(u8 cmd, u8 errno)
 {
@@ -639,7 +605,7 @@ void set_errno(u8 cmd, u8 errno)
     case R_INLKE:
     case R_COMER:
     case R_SAFTY:
-		case R_SYSIN:
+    case R_SYSIN:
         gErr_no = errno;
         return;
     }
@@ -1541,10 +1507,13 @@ u8 zdrmp_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+    gMapState = MAP_MAPING;
+    gScan_num = 0;
     while(time--)
     {
         if(zdrmp_running(error) == true)
         {
+            gMapState = MAP_ERR;
             run_drdwne(errstop);
             return ACT_ERR;
         }
@@ -1552,12 +1521,15 @@ u8 zdrmp_action(u8* error)
         {
         case 0x01:
             run_drdwne(gCur_pause);
+            gMapState = MAP_MAPING;
             *error = R_MPZLMD;
             if(is_mapend())
             {
+                gMapState = MAP_END;
                 return ACT_END;
             }
             if(time == 0) {
+                gMapState = MAP_ERR;
                 run_drdwne(errstop);
                 return ACT_ERR;
             }
@@ -1571,11 +1543,13 @@ u8 zdrmp_action(u8* error)
         }
         if(gCur_stop == 0x01)
         {
+            gMapState = MAP_STOP;
             run_drdwne(gCur_stop);
             return ACT_STP;
         }
         if(gCur_abort == 0x01)
         {
+            gMapState = MAP_ABORT;
             run_drdwne(gCur_abort);
             return ACT_ABT;
         }
@@ -1685,6 +1659,7 @@ u8 motin_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+    gismotinit = false;
     while(time--)
     {
         if(motin_running(error) == true)
@@ -1855,7 +1830,6 @@ u8 sysin_action(u8* error)
         {
         case 0x00:
             ret = mapcl_action(error);
-            printf("mapcl_action  \r\n");
             if(is_drondr()) {
                 if(is_foup_presence())
                 {
@@ -1874,58 +1848,47 @@ u8 sysin_action(u8* error)
             break;
         case 0x01:
             ret = podcl_action(error);
-            printf("podcl_action \r\n");
             seq = 0x02;
             break;
         case 0x02:
             ret = ydoor_action(error);
-            printf("ydoor_action \r\n");
             seq = 0x03;
             break;
         case 0x03:
             ret = vacon_action(error);
-            printf("vacon_action \r\n");
             seq = 0x04;
             break;
         case 0x04:
             ret = dorop_action(error);
-            printf("dorop_action \r\n");
             seq = 0x05;
             break;
         case 0x05:
             ret = dorbk_action(error);
-            printf("dorbk_action \r\n");
             seq = 0x06;
             break;
         case 0x06:
             ret = motin_action(error);
-            printf("motin_action \r\n");
             seq = 0x07;
             break;
         case 0x07:
             ret = dorfw_action(error);
-            printf("dorfw_action \r\n");
             seq = 0x08;
             break;
         case 0x08:
             ret = dorcl_action(error);
-            printf("dorcl_action \r\n");
             seq = 0x09;
             break;
         case 0x09:
             ret = vacof_action(error);
-            printf("vacof_action \r\n");
             seq = 0x10;
             break;
         case 0x10:
             ret = ywait_action(error);
-            printf("ywait_action \r\n");
             podop_action(error);
             seq = 0x11;
             break;
         case 0x11:
             ret = podop_action(error);
-            printf("podop_action \r\n");
             return ret;
         }
     }
@@ -2951,7 +2914,7 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         case 0xA2:
             memcpy(param, (char*)"/INTCL", 6);
             break;
-				case 0xB1:
+        case 0xB1:
             memcpy(param, (char*)"/SYSIN", 6);
             break;
         default:

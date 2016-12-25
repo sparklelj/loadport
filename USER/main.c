@@ -439,6 +439,7 @@ void task2_task(void *p_arg)
     u8 param[30];
     u8 i,j = 0;
     OS_ERR err;
+	u8 result[25];
 //	CPU_SR_ALLOC();
     p_arg = p_arg;
 
@@ -450,6 +451,7 @@ void task2_task(void *p_arg)
 //    OSTaskResume(&MINIT_TaskTCB,&err);
     while(1)
     {
+/*			
         for(i=0; i<8; i++)
         {
             printf("input state num:%d val:",i);
@@ -459,6 +461,7 @@ void task2_task(void *p_arg)
             }
             printf("\r\n");
         }
+			*/
         printf("count:%d \r\n",COUNT_Get());
         printf("gCurVel:%x  gTarPos:%d  gCurPos:%d  gCurDir:%d  gCurDis:%d \r\n",gCurVel,gTarPos,gCurPos,gCurDir,gCurDis);
         printf("gScan_num:%d  gPos_num:%d  gvel:%d gparkerr:%d\r\n",gScan_num, gPos_num,gCurVel, gParkErr);
@@ -469,14 +472,24 @@ void task2_task(void *p_arg)
 				printf("is_clampup:%d is_clampdown: %d is_clamplock:    %d is_clampfwd:  %d is_clampbwd:  %d is_busy:   %d \r\n",is_clampup(), is_clampdown(), is_clamplock(), is_clampfwd(), is_clampbwd(), is_busy());
 				printf("is_dock   :%d is_undock:    %d is_vacuumon:     %d is_latch:     %d is_unlatch:   %d is_error:  %d \r\n",is_dock(), is_undock(), is_vacuumon(), is_latch(), is_unlatch(),is_error());
 				printf("is_dropen: %d is_drclose:   %d is_druplmt:      %d is_mapstart:  %d is_mapend:    %d is_drdwlmt:%d \r\n",is_dropen(), is_drclose(), is_druplmt(), is_mapstart(), is_mapend(),is_drdwlmt());
-				printf("is_mapopen:%d is_mapclose:  %d is_drondr:    %d is_stopperoff:%d is_noair:     %d \r\n",is_mapopen(), is_mapclose(), is_drondr(), is_stopperoff(), is_noair());
-
+				printf("is_mapopen:%d is_mapclose:  %d is_drondr:    %d gismoting:%d is_noair:     %d \r\n",is_mapopen(), is_mapclose(), is_drondr(), gismoting, is_noair());
+				printf("gCur_pause   :%d gstopmotin:    %d is_vacuumon:     %d is_latch:     %d is_unlatch:   %d is_error:  %d \r\n",gCur_pause, gstopmotin, is_vacuumon(), is_latch(), is_unlatch(),is_error());
         printf("scan result:");
+    
+    
         for(j=0; j<gScan_num; j++) {
             printf("%d  ",gScan_pos[j]);
         }
         printf("\r\n");
         printf("\r\n");
+				if(Analyze_Scan(result) == true)
+    {
+			printf("san start  \r\n");
+			for(j=0; j<25; j++) {
+            printf(" %d--%d  ",j,result[j]);
+        }
+			printf("san ok  \r\n");
+		}
         if(task2_num == 10)
         {
 //				START_Motion(-1000, VEL_MAX);

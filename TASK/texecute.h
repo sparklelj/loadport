@@ -7,7 +7,12 @@
 #define SCAN_LOW 1
 
 
-
+#define MAP_UNMAP  0x00
+#define MAP_MAPING 0x01
+#define MAP_ERR    0x02
+#define MAP_ABORT  0x03
+#define MAP_STOP   0x04
+#define MAP_END    0x05
 
 extern u8 scan_mode;
 extern u8 gCur_action;
@@ -21,6 +26,8 @@ extern u8 gCur_retry;
 extern u8 gErr_no;
 extern u8 gMap_status;
 extern bool gissysinit;
+
+extern u8 gMapState;
 
 u8 get_init(void);
 u8 get_oper(void);

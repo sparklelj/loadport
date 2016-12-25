@@ -304,8 +304,9 @@ void tMotor_Init(void *p_arg)
     CPU_SR_ALLOC();
 BEGIN:
 	gismoting = false;
-    OSTaskSuspend(NULL, &err);
+  OSTaskSuspend(&MINIT_TaskTCB, &err);
 	gismoting = true;
+	gisMotorPark = false;
 		gismotinit = false;
 		gstopmotin = false;
     gMotor_state = MS_INITING;
@@ -342,6 +343,7 @@ BEGIN:
 //        if(gMotor_state == MS_UNINIT)
 					if(gstopmotin == true)
         {
+					STOP_Motion();
             goto BEGIN;
         }
     }
@@ -368,6 +370,7 @@ BEGIN:
         }
         if(gstopmotin == true)
         {
+					STOP_Motion();
             goto BEGIN;
         }
     }
@@ -402,13 +405,13 @@ BEGIN:
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         if(gstopmotin == true)
         {
+					STOP_Motion();
             goto BEGIN;
         }
     }
 		gismotinit = true;
-		printf("motor init \r\n");
     gMotor_state = MS_INITED;
-    OSTaskDel(NULL,&err);
+ //   OSTaskDel(NULL,&err);
     goto BEGIN;
 }
 

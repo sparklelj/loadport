@@ -125,7 +125,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     if((type & 0xF0) == 0x00)
     {
         s_len = ONLINE_Write(msg+5, mlen-8);
-			return true; //test
+        return true; //test
 //			        s_len = ONLINE_Write(msg, mlen);
         while(s_len !=  mlen)
         {
@@ -257,17 +257,20 @@ bool format_mapdt(u8* param)
         {
             switch (result[i])
             {
-            case 0:
+            case W_NO:
                 param[i+1] = '0';
                 break;
-            case 1:
+            case W_ONE:
                 param[i+1] = '1';
                 break;
-            case 2:
+            case W_OVER:
                 param[i+1] = 'W';
                 break;
-            case 3:
+            case W_CROSS:
                 param[i+1] = '2';
+                break;
+            case W_OTHER:
+                param[i+1] = '?';
                 break;
             }
         }
@@ -291,17 +294,20 @@ bool format_maprd(u8* param)
         {
             switch (result[i])
             {
-            case 0:
+            case W_NO:
                 param[25-i] = '0';
                 break;
-            case 1:
+            case W_ONE:
                 param[25-i] = '1';
                 break;
-            case 2:
+            case W_OVER:
                 param[25-i] = 'W';
                 break;
-            case 3:
+            case W_CROSS:
                 param[25-i] = '2';
+                break;
+            case W_OTHER:
+                param[i+1] = '?';
                 break;
             }
         }
@@ -515,10 +521,10 @@ bool proc_fin(u8* cmd_name)
 
 bool proc_before(u8* cmd_name, u8 rtype, u8 error)
 {
-	
+
     u8 ucmd = 0;
 //	rtype = false;
-	  if(memcmp(cmd_name, "SYSIN", 5) == 0)
+    if(memcmp(cmd_name, "SYSIN", 5) == 0)
     {
         ucmd = CMD_ACTION_SYSIN;
     }
@@ -711,7 +717,7 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
         case B_YPOSI:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/YPOSI", 12);
             break;
-        case B_LATCH:
+        case B_LTCHU:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/LATCH", 12);
             break;
         case B_CULDK:
@@ -723,10 +729,11 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
         case B_RMPOS:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/RMPOS", 12);
             break;
-				case B_SYSIN:
+        case B_SYSIN:
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/SYSIN", 12);
             break;
-				default:
+        default:
+            printf("err %d", error);
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/UNDEF", 12);
             break;
         }
@@ -742,7 +749,7 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
 bool proc_motiom(u8* cmd_name)
 {
     memcpy(gPre_cmd, cmd_name, 5);
-	  if(memcmp(cmd_name, "SYSIN", 5) == 0)
+    if(memcmp(cmd_name, "SYSIN", 5) == 0)
     {
         u8 ret = 0;
         u8 error;
@@ -1068,7 +1075,7 @@ bool proc_mov(u8* cmd_name)
 {
     CPU_SR_ALLOC();
     OS_CRITICAL_ENTER();
-	 if(memcmp(cmd_name, "SYSIN", 5) == 0)
+    if(memcmp(cmd_name, "SYSIN", 5) == 0)
     {
         proc_motiom(cmd_name);
     }
@@ -1439,7 +1446,7 @@ void tCMD_Proc(void *p_arg)
     u8 msg[105];
     u8 len;
     u16 lencmd;
-	bool res;
+    bool res;
     OS_ERR err;
     CPU_SR_ALLOC();
     while(1)
@@ -1447,16 +1454,16 @@ void tCMD_Proc(void *p_arg)
         OSTimeDlyHMSM(0,0,0,900,OS_OPT_TIME_HMSM_STRICT,&err);
         OS_CRITICAL_ENTER();
         len = ONLINE_RxLen();
-	if(len >= 5)
+        if(len >= 5)
         {
             ONLINE_Read(msg, 5);
-					res = proc_mov(msg);
-					printf("cmd:%s  res:%d \r\n",msg, res);
-        }		
-				
-			OS_CRITICAL_EXIT();
-		}
-	}
+            res = proc_mov(msg);
+            printf("cmd:%s  res:%d \r\n",msg, res);
+        }
+
+        OS_CRITICAL_EXIT();
+    }
+}
 
 void tCMD_ProcMain(void *p_arg)
 {

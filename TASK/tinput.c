@@ -2206,7 +2206,8 @@ u8 cudmp_before(u8* error)
         *error = B_DPOSI; //DPOSI
         return true;
     }
-    if(!is_mapopen())
+//    if(!is_mapopen())
+		if(!is_mapclose())
     {
         *error = B_MPARM; //MPARM
         return true;
@@ -2274,7 +2275,8 @@ u8 cumdk_before(u8* error)
         *error = B_DPOSI; //DPOSI
         return true;
     }
-    if(!is_mapopen())
+//    if(!is_mapopen())
+			if(!is_mapclose())
     {
         *error = B_MPARM; //MPARM
         return true;
@@ -2342,7 +2344,8 @@ u8 cumfc_before(u8* error)
         *error = B_DPOSI; //DPOSI
         return true;
     }
-    if(!is_mapopen())
+ //   if(!is_mapopen())
+			if(!is_mapclose())
     {
         *error = B_MPARM; //MPARM
         return true;

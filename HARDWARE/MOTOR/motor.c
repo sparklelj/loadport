@@ -1,4 +1,6 @@
 #include "motor.h"
+#include "texecute.h"
+#include "tmotion.h"
 
 
 #if SYSTEM_SUPPORT_OS
@@ -41,7 +43,7 @@ s32 gtestcnt = 0;
 s32 gtestpul = 0;
 
 s32 gScan_pos[SCAN_NUM_MAX] = {26100,26000,25200,25000,24100,24000,22800,22600,21100,21000,20200,20000,19200,19000,17800,17600,16200,16000,15200,15000,14100,14000,12800,12600,11100,11000,8800,8600,6800,6600,3100,3000};
-u8  gScan_num = 32;
+u8  gScan_num = 0;
 
 u32 gDePos = 0;
 u16 gCurVel = VEL_MIN;
@@ -52,8 +54,8 @@ s32 gParkPos = 0;
 s32 gCurDis = 0;
 u16 gTarVel = VEL_MIN;
 s8 gCurDir = 1;
-	
-	bool gisMotorPark = false;
+
+bool gisMotorPark = false;
 
 void CTRL_Init(void)
 {
@@ -68,8 +70,8 @@ void CTRL_Init(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;//上拉
     GPIO_Init(GPIOE, &GPIO_InitStructure);//初始化输入
     GPIO_ResetBits(GPIOE,GPIO_InitStructure.GPIO_Pin);//设置为高
-	
-	  GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_DIR) | CONN(GPIO_Pin_, M_PULSE); //输出引脚
+
+    GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_DIR) | CONN(GPIO_Pin_, M_PULSE); //输出引脚
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//普通输出模式
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //推挽输出
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100M
@@ -123,7 +125,7 @@ void ENC_Init(void)
 
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 // GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 //	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
 //    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
     GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, P_POS_A) | CONN(GPIO_Pin_, P_POS_B);
@@ -151,7 +153,7 @@ void ENC_Init(void)
     TIM_EncoderInterfaceConfig(TIM4, TIM_EncoderMode_TI12,
                                TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
     TIM_ICStructInit(&TIM_ICInitStructure);
-  TIM_ICInitStructure.TIM_ICFilter = 6;
+    TIM_ICInitStructure.TIM_ICFilter = 6;
     TIM_ICInit(TIM4, &TIM_ICInitStructure);
 //		TIM_ICInitStructure.TIM_Channel=TIM_Channel_1;
 //    TIM_ICInit(TIM4, &TIM_ICInitStructure);
@@ -211,25 +213,25 @@ void MOTION_Scan(void)
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
-/*
-// test
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-    GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_POS_A);
-    GPIO_Init(GPIOF, &GPIO_InitStructure);
+    /*
+    // test
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+        GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+        GPIO_InitStructure.GPIO_Pin = CONN(GPIO_Pin_, M_POS_A);
+        GPIO_Init(GPIOF, &GPIO_InitStructure);
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_A));
+        SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOF, CONN(EXTI_PinSource, M_POS_A));
 
-    EXTI_InitStructure.EXTI_Line = CONN(EXTI_Line, M_POS_A);
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&EXTI_InitStructure);
-// test
-*/
+        EXTI_InitStructure.EXTI_Line = CONN(EXTI_Line, M_POS_A);
+        EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+        EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+        EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+        EXTI_Init(&EXTI_InitStructure);
+    // test
+    */
     NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = SCAN_PR;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0;
@@ -276,9 +278,9 @@ s32 COUNT_Get(void)
     CPU_SR_ALLOC();
     CPU_CRITICAL_ENTER();
     tmp = TIM_GetCounter(TIM4);
-	  TIM_SetCounter(TIM4, CNT_VAL);
+    TIM_SetCounter(TIM4, CNT_VAL);
     tmp = tmp - CNT_VAL;
-	gPos_num += tmp;
+    gPos_num += tmp;
     CPU_CRITICAL_EXIT();
     return gPos_num;
 }
@@ -292,8 +294,8 @@ void POS_SET(s32 target, s32 pos)
     gPos_num = gPos_num - target;
 //		gCurPos -= pos;
 //  	gTarPos -= pos;
-	gCurPos = gPos_num >> 1;
-	gTarPos = gPos_num >> 1;
+    gCurPos = gPos_num >> 1;
+    gTarPos = gPos_num >> 1;
     CPU_CRITICAL_EXIT();
 }
 
@@ -309,9 +311,9 @@ void TIM8_BRK_TIM12_IRQHandler(void)
     if(TIM_GetITStatus(TIM12,TIM_IT_Update)==SET) //溢出中断
     {
         CPU_CRITICAL_ENTER();
-				COUNT_Get();
+        COUNT_Get();
 //        gPos_num = COUNT_Get();
- //       TIM_SetCounter(TIM4, CNT_VAL);
+//       TIM_SetCounter(TIM4, CNT_VAL);
         CPU_CRITICAL_EXIT();
     }
     TIM_ClearITPendingBit(TIM12,TIM_IT_Update);  //清除中断标志位
@@ -322,12 +324,13 @@ void EXTI15_10_IRQHandler(void)
     CPU_SR_ALLOC();
     if(EXTI_GetITStatus(CONN(EXTI_Line, M_POS_P)) == SET)
     {
-        if(gMotor_state == MS_INITING)
+//        if(gMotor_state == MS_INITING)
+        if(gismoting == true)
         {
             CPU_CRITICAL_ENTER();
             gPark_num = COUNT_Get();
-					gParkPos = gCurPos;
-					gisMotorPark = true;
+            gParkPos = gCurPos;
+            gisMotorPark = true;
             gMotor_state = MS_PRKEND;
             CPU_CRITICAL_EXIT();
         }
@@ -337,7 +340,8 @@ void EXTI15_10_IRQHandler(void)
 
     if(EXTI_GetITStatus(CONN(EXTI_Line, M_SCAN)) == SET)
     {
-        if(gMotor_state == MS_SCANNING)
+//        if(gMotor_state == MS_SCANNING)
+        if(gMapState == MAP_MAPING)
         {
             CPU_CRITICAL_ENTER();
             gScan_pos[gScan_num] = COUNT_Get();
@@ -373,11 +377,11 @@ __inline bool _is_stop()
 
 bool is_stop()
 {
-  return   _is_stop();
-} 
+    return   _is_stop();
+}
 __inline bool is_sameDir()
 {
-	s32 tmp = gCurDir;
+    s32 tmp = gCurDir;
     if((gCurDis & 0x80000000) == (tmp & 0x80000000))
     {
         return true;
@@ -405,10 +409,10 @@ __inline void vel_acc()
 {
     if(gCurVel > (gTarVel + VEL_ACC))
     {
-			if(gCurDis >= 2 || gCurDis <= -2)
-			{
-        gCurVel -= VEL_ACC;
-			}
+        if(gCurDis >= 2 || gCurDis <= -2)
+        {
+            gCurVel -= VEL_ACC;
+        }
     }
     else
     {
@@ -450,11 +454,11 @@ void TIM3_IRQHandler(void)
     {
         CPU_CRITICAL_ENTER();
         gDePos = (VEL_MIN - gCurVel) >> VEL_ACCB;
-			 gStopPos = gCurPos + gDePos * gCurDir;
+        gStopPos = gCurPos + gDePos * gCurDir;
         gCurDis = gTarPos - gStopPos;
         if( !is_stop())
         {
-           
+
             if(is_sameDir())
             {
                 vel_acc();
@@ -467,8 +471,8 @@ void TIM3_IRQHandler(void)
         }
         else
         {
-          gCurVel = VEL_MIN;
-					gStopPos = gTarPos;
+            gCurVel = VEL_MIN;
+            gStopPos = gTarPos;
         }
         TIM_SetAutoreload(TIM3, gCurVel);
 
