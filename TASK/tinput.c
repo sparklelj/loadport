@@ -275,7 +275,7 @@ bool is_stopperoff(void)
 }
 bool is_noair(void)
 {
-    if((INPUT_ReadOne(CS_I_10,AS01_10) == 0x01))
+    if((INPUT_ReadOne(CS_I_10,AS01_10) == 0x00))
     {
         return true;
     }
@@ -939,7 +939,7 @@ u8 dorfw_before(u8* error)
         *error = B_FPILG;
         return true;
     }
-    if(is_vacuumon() && is_latch())
+    if(is_vacuumoff() && is_latch())
     {
         *error = B_LTCHU;
         return true;

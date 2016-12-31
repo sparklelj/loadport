@@ -461,6 +461,7 @@ u8 is_inthick(s32 height)
 bool slot_dect(s32 up, s32 down, u8* result)
 {
     u8 i = 0;
+		u8 j = 0;
     for(i=0; i<=WAFER_NUM; i++)
     {
         if((up < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)))) //&& (down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN))
@@ -473,7 +474,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                     {
                         if(*(result  + WAFER_NUM - i - 1) == W_NO)
                         {
-                            *(result + WAFER_NUM - i - 1) = W_CROSS; //cross
+                            *(result + WAFER_NUM - i - 1) = W_CROSS; 
                         }
                         else
                         {
@@ -486,7 +487,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                     {
                         if(*(result  + WAFER_NUM - i) == W_NO)
                         {
-                            *(result + WAFER_NUM - i) = W_CROSS; //cross
+                            *(result + WAFER_NUM - i) = W_CROSS; 
                         }
                         else
                         {
@@ -498,7 +499,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                     {
                         if(*(result  + WAFER_NUM - i - 1) == W_NO)
                         {
-                            *(result + WAFER_NUM - i - 1) = W_CROSS; //cross
+                            *(result + WAFER_NUM - i - 1) = W_CROSS; 
                         }
                         else
                         {
@@ -506,7 +507,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                         }
                         if(*(result  + WAFER_NUM - i) == W_NO)
                         {
-                            *(result + WAFER_NUM - i) = W_CROSS; //cross
+                            *(result + WAFER_NUM - i) = W_CROSS; 
                         }
                         else
                         {
@@ -515,7 +516,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                         return true;
                     }
                 }
-                else
+                else if(down < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)) + WPOS_MARGIN)
                 {
                     if(*(result  + WAFER_NUM - i - 1) == W_NO)
                     {
@@ -530,6 +531,22 @@ bool slot_dect(s32 up, s32 down, u8* result)
                     *(result  + WAFER_NUM - i - 1) = W_OTHER;
                     return true;
                 }
+								else
+								{
+									for(j = 1; j < WAFER_NUM; j++){
+										if(down > (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i - j)) - WPOS_MARGIN)
+										{
+											if(*(result  + WAFER_NUM - i) == W_NO)
+                        {
+                            *(result + WAFER_NUM - i) = W_CROSS; 
+                        }
+                        else
+                        {
+                            *(result + WAFER_NUM - i -1 - j) = W_OTHER;
+                        }
+										}
+									}
+								}
                 return true;
             }
             else {
