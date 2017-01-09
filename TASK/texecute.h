@@ -26,9 +26,11 @@ extern u8 gCur_retry;
 extern u8 gErr_no;
 extern u8 gMap_status;
 extern bool gissysinit;
+extern bool gIsError;
 
 extern u8 gMapState;
 
+u8 run_dradsr(bool pause);
 u8 get_init(void);
 u8 get_oper(void);
 u8 get_mapsts(void);

@@ -4,10 +4,12 @@
 #include "stdio.h"
 #include "tinput.h"
 #include "tcmd.h"
+#include "tled.h"
 
 u8 gAddr[2] = {'0','0'};
 u8 gCom_mod = 0x0F;
 u8 gLED_status[9] = {0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C};
+//u8 gLED_status[9] = {0x04,0x08,0x0C,0x11,0x12,0x13,0x00,0x0C,0x0C};
 u8 gVersion[13] = {'/','V','E','R',' ','1','.','0','1',' ',' ',' ',' '};
 u8 gCur_status = G_CUR_STA_UNI; //uninit
 u8 gPre_status = G_CUR_STA_UNI;
@@ -18,6 +20,9 @@ u8 gCmd_action = CMD_ACTION_NOACT;
 u8 gAction_num = 0;
 u8 gAction_sta = 0;
 u8 gEnd_act = CMD_ACTION_NOACT;
+
+
+Param gParam;
 
 bool gissysinit = false;
 
@@ -35,18 +40,20 @@ bool is_run(void)
 
 bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
 {
+	
     u8 msg[100];
     u8 mlen = 0;
     u8 sum = 0;
     u8 i;
     u8 s_len;
     OS_ERR err;
-
+		CPU_SR_ALLOC();
+		OS_CRITICAL_ENTER();
     msg[mlen] = 0x01;
     mlen++;
-    msg[mlen] = pLen + 14;
-    mlen++;
     msg[mlen] = 0x00;
+    mlen++;
+    msg[mlen] = pLen + 14;
     mlen++;
     msg[mlen] = gAddr[0];
     mlen++;
@@ -124,9 +131,9 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     mlen++;
     if((type & 0xF0) == 0x00)
     {
-        s_len = ONLINE_Write(msg+5, mlen-8);
-        return true; //test
-//			        s_len = ONLINE_Write(msg, mlen);
+ //       s_len = ONLINE_Write(msg+5, mlen-8);
+   //     return true; //test
+			        s_len = ONLINE_Write(msg, mlen);
         while(s_len !=  mlen)
         {
             mlen = mlen - s_len;
@@ -144,11 +151,13 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
     }
+		OS_CRITICAL_EXIT();
     return true;
 }
 
 bool check_sum(u8* msg)
 {
+	
     u8 i;
     u16 len;
     u8 sum = 0;
@@ -362,6 +371,8 @@ bool proc_set(u8* cmd_name)
     send_msg(gCom_mod & BCAK_ACK, (char*)cmd_name, (u8*)NULL, 0);
     if(memcmp(cmd_name, "RESET", 5) == 0)
     {
+				gIsError = false;
+				set_led(LED_ALARM,LED_OFF);
         if(gPre_status == G_CUR_STA_UNI)
         {
             gCur_status = G_CUR_STA_UNI;
@@ -376,87 +387,87 @@ bool proc_set(u8* cmd_name)
     }
     if((memcmp(cmd_name, "LPLOD", 5) == 0) || (memcmp(cmd_name, "LON01", 5) == 0))
     {
-        gLED_status[0] = 0x11;
+       set_led(LED_LOAD, LED_ON_M);
     }
     if((memcmp(cmd_name, "BLLOD", 5) == 0) || (memcmp(cmd_name, "LBL01", 5) == 0))
     {
-        gLED_status[0] = 0x12;
+        set_led(LED_LOAD, LED_FLASH_M);
     }
     if((memcmp(cmd_name, "LOLOD", 5) == 0) || (memcmp(cmd_name, "LOF01", 5) == 0))
     {
-        gLED_status[0] = 0x13;
+        set_led(LED_LOAD, LED_OFF_M);
     }
     if((memcmp(cmd_name, "LPULD", 5) == 0) || (memcmp(cmd_name, "LON02", 5) == 0))
     {
-        gLED_status[1] = 0x11;
+        set_led(LED_UNLOAD, LED_ON_M);
     }
     if((memcmp(cmd_name, "BLULD", 5) == 0) || (memcmp(cmd_name, "LBL02", 5) == 0))
     {
-        gLED_status[1] = 0x12;
+        set_led(LED_UNLOAD, LED_FLASH_M);
     }
     if((memcmp(cmd_name, "LOULD", 5) == 0) || (memcmp(cmd_name, "LOF02", 5) == 0))
     {
-        gLED_status[1] = 0x13;
+        set_led(LED_UNLOAD, LED_OFF_M);
     }
     if((memcmp(cmd_name, "LPMSW", 5) == 0) || (memcmp(cmd_name, "LON03", 5) == 0))
     {
-        gLED_status[2] = 0x11;
+        set_led(LED_OPACCE, LED_ON_M);
     }
     if((memcmp(cmd_name, "BLMSW", 5) == 0) || (memcmp(cmd_name, "LBL03", 5) == 0))
     {
-        gLED_status[2] = 0x12;
+        set_led(LED_OPACCE, LED_FLASH_M);
     }
     if((memcmp(cmd_name, "LOMSW", 5) == 0) || (memcmp(cmd_name, "LOF03", 5) == 0))
     {
-        gLED_status[2] = 0x13;
+        set_led(LED_OPACCE, LED_OFF_M);
     }
     if((memcmp(cmd_name, "LPCON", 5) == 0) || (memcmp(cmd_name, "LON04", 5) == 0))
     {
-        gLED_status[3] = 0x11;
+        set_led(LED_PRESENT, LED_ON_M);
     }
     if((memcmp(cmd_name, "BLCON", 5) == 0) || (memcmp(cmd_name, "LBL04", 5) == 0))
     {
-        gLED_status[3] = 0x12;
+        set_led(LED_PRESENT, LED_FLASH_M);
     }
     if((memcmp(cmd_name, "LOCON", 5) == 0) || (memcmp(cmd_name, "LOF04", 5) == 0))
     {
-        gLED_status[3] = 0x13;
+        set_led(LED_PRESENT, LED_OFF_M);
     }
     if((memcmp(cmd_name, "LPCST", 5) == 0) || (memcmp(cmd_name, "LON05", 5) == 0))
     {
-        gLED_status[4] = 0x11;
+        set_led(LED_PLACEMENT, LED_ON_M);
     }
     if((memcmp(cmd_name, "BLCST", 5) == 0) || (memcmp(cmd_name, "LBL05", 5) == 0))
     {
-        gLED_status[4] = 0x12;
+        set_led(LED_PLACEMENT, LED_FLASH_M);
     }
     if((memcmp(cmd_name, "LOCST", 5) == 0) || (memcmp(cmd_name, "LOF05", 5) == 0))
     {
-        gLED_status[4] = 0x13;
+        set_led(LED_PLACEMENT, LED_OFF_M);
     }
     if(memcmp(cmd_name, "LON07", 5) == 0)
     {
-        gLED_status[6] = 0x11;
+        set_led(LED_MANUAL, LED_ON_M);
     }
     if(memcmp(cmd_name, "LBL07", 5) == 0)
     {
-        gLED_status[6] = 0x12;
+        set_led(LED_MANUAL, LED_FLASH_M);
     }
     if(memcmp(cmd_name, "LOF07", 5) == 0)
     {
-        gLED_status[6] = 0x13;
+        set_led(LED_MANUAL, LED_OFF_M);
     }
     if(memcmp(cmd_name, "LON08", 5) == 0)
     {
-        gLED_status[7] = 0x11;
+        set_led(LED_MANUAL, LED_ON_M);
     }
     if(memcmp(cmd_name, "LBL08", 5) == 0)
     {
-        gLED_status[7] = 0x12;
+        set_led(LED_MANUAL, LED_FLASH_M);
     }
     if(memcmp(cmd_name, "LOF08", 5) == 0)
     {
-        gLED_status[7] = 0x13;
+        set_led(LED_MANUAL, LED_OFF_M);
     }
     send_msg(gCom_mod & BCAK_INF, (char*)cmd_name, (u8*)NULL, 0);
     return true;
@@ -737,6 +748,7 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/UNDEF", 12);
             break;
         }
+				set_led(LED_ALARM,LED_ON);
     }
     else
     {
@@ -1322,6 +1334,7 @@ bool proc_evt(u8* cmd_name)
 
 bool proc_rst(u8* cmd_name)
 {
+	
     return true;
 }
 
@@ -1341,6 +1354,8 @@ bool proc_cmd(u8* msg)
     u8 cmd_t[3];
     u8 cmd_n[5];
     bool res;
+		CPU_SR_ALLOC();
+		OS_CRITICAL_ENTER();
     memcpy(addr, msg+3, 2);
     if(memcmp(addr, gAddr, 2) != 0)
     {
@@ -1349,11 +1364,11 @@ bool proc_cmd(u8* msg)
 
     memcpy(cmd_t, msg+5, 3);
     memcpy(cmd_n, msg+9, 5);
-
-    if(!check_sum(msg))
+		
+    if(!check_sum(msg)) 
     {
-//       send_msg(gCom_mod & BCAK_NAK, (char*)cmd_n, (u8*)"/CKSUM", 6);
-//       return false;
+       send_msg(gCom_mod & BCAK_NAK, (char*)cmd_n, (u8*)"/CKSUM", 6);
+       return false;
     }
 
     if(memcmp(cmd_t, "SET", 3) == 0)
@@ -1438,10 +1453,11 @@ bool proc_cmd(u8* msg)
     }
 
     send_msg(gCom_mod & BCAK_NAK, (char*)cmd_t, (u8*)"/CMDER", 6);
+		OS_CRITICAL_EXIT();
     return false;
 }
 
-void tCMD_Proc(void *p_arg)
+void tCMD_ProcBK(void *p_arg)
 {
     u8 msg[105];
     u8 len;
@@ -1465,7 +1481,7 @@ void tCMD_Proc(void *p_arg)
     }
 }
 
-void tCMD_ProcMain(void *p_arg)
+void tCMD_Proc(void *p_arg)
 {
     u8 msg[105];
     u8 len;

@@ -14,6 +14,7 @@
 #include "tled.h"
 #include "tinput.h"
 #include "tstatus.h"
+#include "flash.h"
 
 //任务优先级
 #define START_TASK_PRIO		3
@@ -137,7 +138,10 @@ void init_all(void)
     {
         enable_m(ENA_M);  //使能电机（已使能）
     }
+		
+		run_dradsr(false);
 }
+
 
 //主函数
 int main(void)
@@ -440,7 +444,7 @@ void task2_task(void *p_arg)
     u8 i,j = 0;
     OS_ERR err;
 	u8 result[25];
-//	CPU_SR_ALLOC();
+	CPU_SR_ALLOC();
     p_arg = p_arg;
 
 //OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);
@@ -462,6 +466,22 @@ void task2_task(void *p_arg)
             printf("\r\n");
         }
 			*/
+			gParam.baseScanNum = 1000;
+			gParam.cmdtype = 0x01;
+			gParam.version[0] = 'H';
+			printf("base0:%d \r\n",gParam.baseScanNum);
+//			STMFLASH_Read((u8*)(&gParam), sizeof(gParam));
+			printf("base:%d  size:%d \r\n",gParam.baseScanNum, sizeof(gParam));	
+			gParam.baseScanNum = 1000;
+			gParam.cmdtype = 0x01;
+			gParam.version[0] = 'H';
+			OS_CRITICAL_ENTER();
+//			STMFLASH_Write((u8*)(&gParam), sizeof(gParam));
+			OS_CRITICAL_EXIT();
+			gParam.baseScanNum = 0;
+			printf("base1:%d \r\n",gParam.baseScanNum);
+			STMFLASH_Read((u8*)(&gParam), sizeof(gParam));
+			printf("base:%d \r\n",gParam.baseScanNum);
         printf("count:%d \r\n",COUNT_Get());
         printf("gCurVel:%x  gTarPos:%d  gCurPos:%d  gCurDir:%d  gCurDis:%d \r\n",gCurVel,gTarPos,gCurPos,gCurDir,gCurDis);
         printf("gScan_num:%d  gPos_num:%d  gvel:%d gparkerr:%d\r\n",gScan_num, gPos_num,gCurVel, gParkErr);

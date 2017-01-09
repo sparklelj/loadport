@@ -5,6 +5,7 @@
 #include "tcmd.h"
 #include "motor.h"
 #include "texecute.h"
+#include "tled.h"
 
 #define DIS_SLAP 300
 u8 gStatus_scan[INPUT_NUM];
@@ -283,7 +284,7 @@ bool is_noair(void)
 }
 bool is_error(void)
 {
-    if(gCur_status == G_CUR_STA_ERR)
+    if(gIsError == true || gCur_status == G_CUR_STA_ERR)
     {
         return true;
     }
@@ -939,14 +940,14 @@ u8 dorfw_before(u8* error)
         *error = B_FPILG;
         return true;
     }
-    if(is_vacuumoff() && is_latch())
+    if(is_vacuumon() && is_latch())
     {
         *error = B_LTCHU;
         return true;
     }
     if(is_foup_place() && is_dock() && is_vacuumoff() && is_latch())
     {
-        *error = B_FPILG;  
+        *error = B_LTCHU;  
         return true;
     }
     if(!is_druplmt())
@@ -1282,6 +1283,8 @@ u8 orgsh_before(u8* error)
 
 u8 sysin_before(u8* error)
 {
+	gIsError = false;
+	set_led(LED_ALARM,LED_OFF);
     if(is_error())
     {
         *error = B_ERROR; //ERROR
@@ -1336,6 +1339,8 @@ u8 orgsh_running(u8* error)
 }
 u8 aborg_before(u8* error)
 {
+	gIsError = false;
+	set_led(LED_ALARM,LED_OFF);
 	   if(is_error())
     {
         *error = B_ERROR; //ERROR
@@ -1344,7 +1349,7 @@ u8 aborg_before(u8* error)
 		if(gissysinit == false)
 		{
 				*error = B_SYSIN; 
-        return true;
+ //       return true;
 		}
     return false;
 }

@@ -2,7 +2,9 @@
 #include "tmotion.h"
 #include "tinput.h"
 #include "motor.h"
+#include "input.h"
 #include "includes.h"
+#include "tled.h"
 
 void motor_error()
 {
@@ -10,6 +12,25 @@ void motor_error()
 	gTarPos = gCurPos;
 	gTarVel = VEL_MIN;
 }
+
+bool is_onload(void)
+{
+	if(INPUT_ReadOne(CS_I_15, LOAD_15) == 1)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool is_unload(void)
+{
+	if(INPUT_ReadOne(CS_I_15, ULAD_15) == 1)
+	{
+		return true;
+	}
+	 return false;
+}
+
 void tStatus_Check(void *p_arg)
 {
     OS_ERR err;
@@ -20,6 +41,22 @@ void tStatus_Check(void *p_arg)
 			if(is_m_err())
 			{
 //				motor_error(); //µç»ú´íÎó
+			}
+			if(is_foup_presence() == true)
+			{
+				set_led(LED_PRESENT,LED_ON);
+			}
+			else
+			{
+				set_led(LED_PRESENT,LED_OFF);
+			}
+			if(is_foup_place() == true)
+			{
+				set_led(LED_PLACEMENT,LED_ON);
+			}
+			else
+			{
+				set_led(LED_PLACEMENT,LED_OFF);
 			}
 			 if(is_mstop())
         {

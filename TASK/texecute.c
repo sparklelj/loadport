@@ -5,8 +5,9 @@
 #include "tinput.h"
 #include "output.h"
 #include "tcmd.h"
+#include "tled.h"
 
-#define WAFER_THICK 300
+#define WAFER_THICK 150
 #define WTHICK_MARG 100
 
 #define WPOS_MARGIN   100
@@ -34,7 +35,7 @@
 #define ACT_NAT  0x04
 #define ACT_STA  0x05
 
-#define CIRCLR_TIME 900
+#define CIRCLR_TIME 300
 
 u8 scan_mode = SCAN_UPP;
 u8 gCur_action = CMD_ACTION_PODOP;
@@ -2939,12 +2940,13 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
             break;
 
         }
+				set_led(LED_ALARM,LED_ON);
         set_errno(cmd, error);
         send_msg(gCom_mod & BCAK_ABS, (char*)chcmd, param, 6);
         gPre_status = gCur_status;
 //       gCur_status = G_CUR_STA_ERR;
         gCur_status = G_CUR_STA_STP;
-//				gIsError = true;
+				gIsError = true;
         gEnd_act = CMD_ACTION_NOACT;
     }
     else if(rtype == ACT_ABT)
@@ -3086,7 +3088,8 @@ void tExe_Action(void *p_arg)
             proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_ABORG:
-            ret = aborg_action(&error);
+//            ret = aborg_action(&error);
+						ret = sysin_action(&error);
             proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_CLOAD:

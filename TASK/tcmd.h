@@ -130,6 +130,8 @@
 #define W_CROSS 0x03
 #define W_OTHER 0x10
 
+#define VER_NUM 0x0D
+
 extern u8 gAddr[2];
 extern u8 gLED_status[9];
 extern u8 gCmd_action;
@@ -137,6 +139,15 @@ extern u8 gCom_mod;
 extern u8 gCur_status;
 extern u8 gPre_status;
 extern u8 gEnd_act;
+
+typedef struct
+{
+	s32 baseScanNum;
+	u8 version[VER_NUM];
+	u8 cmdtype;
+} Param;
+
+extern Param gParam;
 
 bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen);
 void tCMD_Proc(void *p_arg);
