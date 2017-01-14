@@ -462,7 +462,7 @@ u8 is_inthick(s32 height)
 bool slot_dect(s32 up, s32 down, u8* result)
 {
     u8 i = 0;
-		u8 j = 0;
+    u8 j = 0;
     for(i=0; i<=WAFER_NUM; i++)
     {
         if((up < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)))) //&& (down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN))
@@ -475,7 +475,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                     {
                         if(*(result  + WAFER_NUM - i - 1) == W_NO)
                         {
-                            *(result + WAFER_NUM - i - 1) = W_CROSS; 
+                            *(result + WAFER_NUM - i - 1) = W_CROSS;
                         }
                         else
                         {
@@ -488,7 +488,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                     {
                         if(*(result  + WAFER_NUM - i) == W_NO)
                         {
-                            *(result + WAFER_NUM - i) = W_CROSS; 
+                            *(result + WAFER_NUM - i) = W_CROSS;
                         }
                         else
                         {
@@ -500,7 +500,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                     {
                         if(*(result  + WAFER_NUM - i - 1) == W_NO)
                         {
-                            *(result + WAFER_NUM - i - 1) = W_CROSS; 
+                            *(result + WAFER_NUM - i - 1) = W_CROSS;
                         }
                         else
                         {
@@ -508,7 +508,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                         }
                         if(*(result  + WAFER_NUM - i) == W_NO)
                         {
-                            *(result + WAFER_NUM - i) = W_CROSS; 
+                            *(result + WAFER_NUM - i) = W_CROSS;
                         }
                         else
                         {
@@ -532,22 +532,22 @@ bool slot_dect(s32 up, s32 down, u8* result)
                     *(result  + WAFER_NUM - i - 1) = W_OTHER;
                     return true;
                 }
-								else
-								{
-									for(j = 1; j < WAFER_NUM; j++){
-										if(down > (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i - j)) - WPOS_MARGIN)
-										{
-											if(*(result  + WAFER_NUM - i) == W_NO)
+                else
+                {
+                    for(j = 1; j < WAFER_NUM; j++) {
+                        if(down > (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i - j)) - WPOS_MARGIN)
                         {
-                            *(result + WAFER_NUM - i) = W_CROSS; 
+                            if(*(result  + WAFER_NUM - i) == W_NO)
+                            {
+                                *(result + WAFER_NUM - i) = W_CROSS;
+                            }
+                            else
+                            {
+                                *(result + WAFER_NUM - i -1 - j) = W_OTHER;
+                            }
                         }
-                        else
-                        {
-                            *(result + WAFER_NUM - i -1 - j) = W_OTHER;
-                        }
-										}
-									}
-								}
+                    }
+                }
                 return true;
             }
             else {
@@ -720,8 +720,13 @@ u8 podop_action(u8* error)
     OS_ERR err;
     seq = 0x01;
     pod_s = CMD_ACTION_PODOP;
+	if(is_clampdown())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
+
         if(podop_running(error) == true)
         {
             run_clamldwn(errstop);
@@ -786,6 +791,10 @@ u8 podcl_action(u8* error)
     OS_ERR err;
     seq = 0x01;
     pod_s = CMD_ACTION_PODCL;
+	 if(is_clampup())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(podcl_running(error) == true)
@@ -850,6 +859,10 @@ u8 vacon_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_vacuumon())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(vacon_running(error) == true)
@@ -899,6 +912,10 @@ u8 vacof_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_vacuumoff())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(vacof_running(error) == true)
@@ -948,6 +965,10 @@ u8 dorop_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_unlatch())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(dorop_running(error) == true)
@@ -996,6 +1017,10 @@ u8 dorcl_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_latch())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(dorcl_running(error) == true)
@@ -1044,6 +1069,10 @@ u8 mapop_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_mapopen())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(mapop_running(error) == true)
@@ -1092,6 +1121,10 @@ u8 mapcl_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_mapclose())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(mapcl_running(error) == true)
@@ -1140,6 +1173,10 @@ u8 dorbk_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_dropen())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(dorbk_running(error) == true)
@@ -1188,6 +1225,10 @@ u8 dorfw_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_drclose())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(dorfw_running(error) == true)
@@ -1236,6 +1277,10 @@ u8 ydoor_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_dock() && is_drondr())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(ydoor_running(error) == true)
@@ -1284,6 +1329,10 @@ u8 ywait_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_undock())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(ywait_running(error) == true)
@@ -1332,6 +1381,10 @@ u8 mston_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_stopperon())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(mston_running(error) == true)
@@ -1380,6 +1433,10 @@ u8 mstof_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_stopperoff())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(mstof_running(error) == true)
@@ -1429,6 +1486,10 @@ u8 zmpst_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_mapstart())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(zmpst_running(error) == true)
@@ -1477,6 +1538,10 @@ u8 zmped_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_druplmt())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(zmped_running(error) == true)
@@ -1527,6 +1592,11 @@ u8 zdrmp_action(u8* error)
     seq = 0x01;
     gMapState = MAP_MAPING;
     gScan_num = 0;
+	if(is_mapend())
+            {
+                gMapState = MAP_END;
+                return ACT_END;
+            }
     while(time--)
     {
         if(zdrmp_running(error) == true)
@@ -1581,6 +1651,10 @@ u8 zdrdw_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_drdwlmt())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(zdrdw_running(error) == true)
@@ -1629,6 +1703,10 @@ u8 zdrup_action(u8* error)
     bool errstop = true;
     OS_ERR err;
     seq = 0x01;
+	if(is_druplmt())
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(zdrup_running(error) == true)
@@ -1678,6 +1756,10 @@ u8 motin_action(u8* error)
     OS_ERR err;
     seq = 0x01;
     gismotinit = false;
+	if(gismotinit == true)
+            {
+                return ACT_END;
+            }
     while(time--)
     {
         if(motin_running(error) == true)
@@ -2940,20 +3022,20 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
             break;
 
         }
-				set_led(LED_ALARM,LED_ON);
+        set_led(LED_ALARM,LED_ON);
         set_errno(cmd, error);
         send_msg(gCom_mod & BCAK_ABS, (char*)chcmd, param, 6);
         gPre_status = gCur_status;
 //       gCur_status = G_CUR_STA_ERR;
         gCur_status = G_CUR_STA_STP;
-				gIsError = true;
+        gIsError = true;
         gEnd_act = CMD_ACTION_NOACT;
     }
     else if(rtype == ACT_ABT)
     {
         if(is_aborg == false)
         {
-            send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 6);
+            send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 0);
             gCur_status = G_CUR_STA_ABO;
             gEnd_act = CMD_ACTION_NOACT;
         }
@@ -2961,11 +3043,12 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         {
             is_aborg = false;
         }
-
+					gCur_status = G_CUR_STA_ABO;
+            gEnd_act = CMD_ACTION_NOACT;
     }
     else if(rtype == ACT_STP)
     {
-        send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 6);
+        send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 0);
         gCur_status = G_CUR_STA_STP;
         gEnd_act = CMD_ACTION_NOACT;
     }
@@ -2979,7 +3062,8 @@ void tExe_Action(void *p_arg)
     u8 ret = 0;
     while(1)
     {
-        if(gCur_status == G_CUR_STA_ERR || \
+/*       
+			if(gCur_status == G_CUR_STA_ERR || \
                 gCur_status == G_CUR_STA_INT || \
                 gCur_status == G_CUR_STA_NAC || \
                 gCur_status == G_CUR_STA_UNI || \
@@ -2995,6 +3079,11 @@ void tExe_Action(void *p_arg)
             OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
             continue;
         }
+			*/
+				if(gCur_status != G_CUR_STA_RUN || (gIsError == true)){
+				OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);
+            continue;
+				}
         OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err);
         gCur_action = gCmd_action;
         switch (gCur_action)
@@ -3089,7 +3178,7 @@ void tExe_Action(void *p_arg)
             break;
         case CMD_ACTION_ABORG:
 //            ret = aborg_action(&error);
-						ret = sysin_action(&error);
+            ret = sysin_action(&error);
             proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_CLOAD:

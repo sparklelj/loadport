@@ -9,6 +9,12 @@
 
 #define DIS_SLAP 300
 u8 gStatus_scan[INPUT_NUM];
+u8 gErrorLevel = ERR_REC;
+
+void init_error(void) {
+    gIsError = false;
+    set_led(LED_ALARM,LED_OFF);
+}
 
 bool is_indis(s32 num, s32 std, s16 dis)
 {
@@ -90,7 +96,7 @@ bool is_obstacle(void)
 //有光动作
 bool is_protrusion(void)
 {
-	return false;
+    return false;
     if((INPUT_ReadOne(CS_I_12,FS01_12) == 0x01))
     {
         return true;
@@ -311,11 +317,11 @@ u8 podop_before(u8* error)
         *error = B_ERROR; //ERROR
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY; //BUSY
@@ -354,11 +360,11 @@ u8 podcl_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -397,11 +403,11 @@ u8 vacon_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -435,11 +441,11 @@ u8 vacof_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -473,17 +479,17 @@ u8 dorop_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
         return true;
     }
-		if(!is_drondr())
+    if(!is_drondr())
     {
         *error = B_ERROR;
         return true;
@@ -516,11 +522,11 @@ u8 dorcl_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -559,11 +565,11 @@ u8 zdrup_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -584,13 +590,13 @@ u8 zdrup_before(u8* error)
         *error = B_MPARM; //MPARM
         return true;
     }
-		/*
+    /*
     if(!is_stopperoff())
     {
-        *error = B_MPSTP;
-        return true;
+    *error = B_MPSTP;
+    return true;
     }
-		*/
+    */
     return false;
 }
 u8 zdrup_running(u8* error)
@@ -629,11 +635,11 @@ u8 zdrmp_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -687,11 +693,11 @@ u8 zdrdw_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -707,13 +713,13 @@ u8 zdrdw_before(u8* error)
         *error = B_MPARM; //MPARM
         return true;
     }
-		/*
+    /*
     if(!is_stopperoff())
     {
-        *error = B_MPSTP; //MPSTP
-        return true;
+    *error = B_MPSTP; //MPSTP
+    return true;
     }
-		*/
+    */
     return false;
 }
 u8 zdrdw_running(u8* error)
@@ -752,11 +758,11 @@ u8 ywait_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -820,11 +826,11 @@ u8 motin_running(u8* error)
         *error = R_PROTS;
         return true;
     }
-		if(gParkErr)
-		{
-			  *error = 0xB2;
+    if(gParkErr)
+    {
+        *error = 0xB2;
         return true;
-		}
+    }
     return false;
 }
 u8 ydoor_before(u8* error)
@@ -834,11 +840,11 @@ u8 ydoor_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -882,11 +888,11 @@ u8 dorbk_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -925,11 +931,11 @@ u8 dorfw_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -947,7 +953,7 @@ u8 dorfw_before(u8* error)
     }
     if(is_foup_place() && is_dock() && is_vacuumoff() && is_latch())
     {
-        *error = B_LTCHU;  
+        *error = B_LTCHU;
         return true;
     }
     if(!is_druplmt())
@@ -983,11 +989,11 @@ u8 mapop_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -1031,11 +1037,11 @@ u8 mapcl_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -1074,11 +1080,11 @@ u8 zmpst_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -1127,11 +1133,11 @@ u8 zmped_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -1180,11 +1186,11 @@ u8 mston_before(u8* error)
         *error = B_ERROR;
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY;
@@ -1256,23 +1262,23 @@ u8 orgsh_before(u8* error)
         *error = B_ERROR; //ERROR
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; //SYSIN
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN; //SYSIN
         return true;
-		}
+    }
     if(is_busy())
     {
         *error = B_CBUSY; //BUSY
         return true;
     }
-	/*	
+    /*
     if(is_vacuumon())
     {
         *error = B_DVACM; // DVACM
         return true;
     }
-		*/
+    	*/
     if(!is_foup_place() && (!(is_no_foup() && is_drclose())))
     {
         *error = B_LTCHU; //UN LATCH
@@ -1283,8 +1289,8 @@ u8 orgsh_before(u8* error)
 
 u8 sysin_before(u8* error)
 {
-	gIsError = false;
-	set_led(LED_ALARM,LED_OFF);
+    init_error();
+    init_error();
     if(is_error())
     {
         *error = B_ERROR; //ERROR
@@ -1339,18 +1345,17 @@ u8 orgsh_running(u8* error)
 }
 u8 aborg_before(u8* error)
 {
-	gIsError = false;
-	set_led(LED_ALARM,LED_OFF);
-	   if(is_error())
+    init_error();
+    if(is_error())
     {
         *error = B_ERROR; //ERROR
         return true;
     }
-		if(gissysinit == false)
-		{
-				*error = B_SYSIN; 
- //       return true;
-		}
+    if(gissysinit == false)
+    {
+        *error = B_SYSIN;
+//       return true;
+    }
     return false;
 }
 u8 aborg_running(u8* error)
@@ -1742,12 +1747,12 @@ u8 culod_before(u8* error)
         *error = B_FPILG; //FPILG
         return true;
     }
-    if(!is_dock())
+    if(!(is_dock() || is_undock()))
     {
         *error = B_YPOSI; //YPOSI undock
         return true;
     }
-    if(!is_unlatch())
+    if(!(is_unlatch() || is_latch()))
     {
         *error = B_LTCHU; //LATCH
         return true;
@@ -2212,7 +2217,7 @@ u8 cudmp_before(u8* error)
         return true;
     }
 //    if(!is_mapopen())
-		if(!is_mapclose())
+    if(!is_mapclose())
     {
         *error = B_MPARM; //MPARM
         return true;
@@ -2281,7 +2286,7 @@ u8 cumdk_before(u8* error)
         return true;
     }
 //    if(!is_mapopen())
-			if(!is_mapclose())
+    if(!is_mapclose())
     {
         *error = B_MPARM; //MPARM
         return true;
@@ -2349,8 +2354,8 @@ u8 cumfc_before(u8* error)
         *error = B_DPOSI; //DPOSI
         return true;
     }
- //   if(!is_mapopen())
-			if(!is_mapclose())
+//   if(!is_mapopen())
+    if(!is_mapclose())
     {
         *error = B_MPARM; //MPARM
         return true;
@@ -2473,17 +2478,20 @@ u8 Y_pos(void)
 
 u8 get_equ(void)
 {
-    if(gCur_status != G_CUR_STA_ERR)
+    if(gIsError == false)//gCur_status != G_CUR_STA_ERR)
     {
         return '0';
     }
-    if(1)
+    else
     {
-        return 'E';
-    }
-    if(0)
-    {
-        return 'A';
+        if(gErrorLevel == ERR_REC)
+        {
+            return 'E';
+        }
+        if(gErrorLevel == ERR_FAT)
+        {
+            return 'A';
+        }
     }
 }
 

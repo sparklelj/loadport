@@ -149,6 +149,10 @@ typedef struct
 
 extern Param gParam;
 
+bool send_foupon(void);
+bool send_foupof(void);
+bool send_fouponb(void);
+bool send_foupofb(void);
 bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen);
 void tCMD_Proc(void *p_arg);
 bool format_mapdt(u8* param);

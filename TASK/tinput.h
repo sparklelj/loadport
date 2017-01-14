@@ -58,6 +58,10 @@ extern u8 gStatus_scan[INPUT_NUM];
 #define SF_CLAMDWNI 55
 #define SF_CLAMDWND 56
 
+#define ERR_REC 0x01
+#define ERR_FAT 0x02
+extern u8 gErrorLevel;
+
 bool is_no_foup(void);
 bool is_foup_place(void);
 bool is_foup_presence(void);

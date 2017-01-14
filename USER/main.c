@@ -493,7 +493,7 @@ void task2_task(void *p_arg)
 				printf("is_dock   :%d is_undock:    %d is_vacuumon:     %d is_latch:     %d is_unlatch:   %d is_error:  %d \r\n",is_dock(), is_undock(), is_vacuumon(), is_latch(), is_unlatch(),is_error());
 				printf("is_dropen: %d is_drclose:   %d is_druplmt:      %d is_mapstart:  %d is_mapend:    %d is_drdwlmt:%d \r\n",is_dropen(), is_drclose(), is_druplmt(), is_mapstart(), is_mapend(),is_drdwlmt());
 				printf("is_mapopen:%d is_mapclose:  %d is_drondr:    %d gismoting:%d is_noair:     %d \r\n",is_mapopen(), is_mapclose(), is_drondr(), gismoting, is_noair());
-				printf("gCur_pause   :%d gstopmotin:    %d is_vacuumon:     %d is_latch:     %d is_unlatch:   %d is_error:  %d \r\n",gCur_pause, gstopmotin, is_vacuumon(), is_latch(), is_unlatch(),is_error());
+				printf("gCur_status   :%d gstopmotin:    %d is_nothing:     %d is_onload:     %d is_unload:   %d is_normal:  %d \r\n",gCur_status, gstopmotin, is_nothing(), is_onload(), is_unload(),is_normal());
         printf("scan result:");
     
     

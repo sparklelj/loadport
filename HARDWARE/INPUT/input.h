@@ -64,7 +64,7 @@
 #define PH09_15    12
 #define PH10_15    13
 #define LOAD_15    12
-#define ULAD_15    13
+#define ULAD_15    14
 #define PH13_15    14
 #define FZ01_15    15
 

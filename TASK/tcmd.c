@@ -125,7 +125,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     {
         sum += msg[i];
     }
-    sprintf((char*)(msg + mlen), "%2X", sum);
+    sprintf((char*)(msg + mlen), "%02X", sum);
     mlen += 2;
     msg[mlen] = 0x03;
     mlen++;
@@ -168,7 +168,7 @@ bool check_sum(u8* msg)
     {
         sum += *(msg + i);
     }
-    sprintf((char*)strsum, "%2X", sum);
+    sprintf((char*)strsum, "%02X", sum);
     if(strsum[0] == *(msg+len+1) && strsum[1] == *(msg+len+2))
     {
         return true;
@@ -187,6 +187,30 @@ bool check_format(u8* msg)
         return true;
     }
     return false;
+}
+
+bool send_foupon(void)
+{
+	send_msg(gCom_mod & BCAK_INF, (char*)"PODON", (u8*)NULL, 0);
+	return true;
+}
+
+bool send_foupof(void)
+{
+	send_msg(gCom_mod & BCAK_INF, (char*)"PODOF", (u8*)NULL, 0);
+	return true;
+}
+
+bool send_fouponb(void)
+{
+	send_msg(gCom_mod & BCAK_INF, (char*)"BTN01", (u8*)NULL, 0);
+	return true;
+}
+
+bool send_foupofb(void)
+{
+	send_msg(gCom_mod & BCAK_INF, (char*)"BTN02", (u8*)NULL, 0);
+	return true;
 }
 
 bool format_state(u8* param)
@@ -373,6 +397,7 @@ bool proc_set(u8* cmd_name)
     {
 				gIsError = false;
 				set_led(LED_ALARM,LED_OFF);
+			/*
         if(gPre_status == G_CUR_STA_UNI)
         {
             gCur_status = G_CUR_STA_UNI;
@@ -381,6 +406,7 @@ bool proc_set(u8* cmd_name)
         {
             gCur_status = gPre_status;
         }
+			*/
     }
     if(memcmp(cmd_name, "INITL", 5) == 0)
     {
@@ -492,7 +518,7 @@ bool proc_get(u8* cmd_name)
     {
         u8 param[21];
         format_state(param);
-        send_msg(gCom_mod & BCAK_ACK, "VERSN", param, 21);
+        send_msg(gCom_mod & BCAK_ACK, "STATE", param, 21);
     }
     if(memcmp(cmd_name, "VERSN", 5) == 0)
     {
