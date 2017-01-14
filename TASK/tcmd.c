@@ -774,7 +774,7 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
             send_msg(gCom_mod & BCAK_NAK, (char*)cmd_name, (u8*)"/INTER/UNDEF", 12);
             break;
         }
-				set_led(LED_ALARM,LED_ON);
+//				set_led(LED_ALARM,LED_ON);
     }
     else
     {
