@@ -138,7 +138,7 @@ void init_all(void)
     {
         enable_m(ENA_M);  //使能电机（已使能）
     }
-		
+	
 		run_dradsr(false);
 }
 
@@ -491,7 +491,7 @@ void task2_task(void *p_arg)
 				printf("is_no_foup:%d is_foup_place:%d is_foup_presence:%d is_obstacle:  %d is_protrusion:%d \r\n",is_no_foup(), is_foup_place(), is_foup_presence(), is_obstacle(), is_protrusion());
 				printf("is_clampup:%d is_clampdown: %d is_clamplock:    %d is_clampfwd:  %d is_clampbwd:  %d is_busy:   %d \r\n",is_clampup(), is_clampdown(), is_clamplock(), is_clampfwd(), is_clampbwd(), is_busy());
 				printf("is_dock   :%d is_undock:    %d is_vacuumon:     %d is_latch:     %d is_unlatch:   %d is_error:  %d \r\n",is_dock(), is_undock(), is_vacuumon(), is_latch(), is_unlatch(),is_error());
-				printf("is_dropen: %d is_drclose:   %d is_druplmt:      %d is_mapstart:  %d is_mapend:    %d is_drdwlmt:%d \r\n",is_dropen(), is_drclose(), is_druplmt(), is_mapstart(), is_mapend(),is_drdwlmt());
+				printf("is_dropen: %d is_drclose:   %d is_druplmt:      %d is_mapstart:  %d is_mapend:    %d is_drdwlmt:%d satrt:%d end:%d, elmt:%d \r\n",is_dropen(), is_drclose(), is_druplmt(), is_mapstart(), is_mapend(),is_drdwlmt(),INPUT_ReadOne(CS_I_11,PH08_11), INPUT_ReadOne(CS_I_11,PH07_11),INPUT_ReadOne(CS_I_11,CLS06A_11));
 				printf("is_mapopen:%d is_mapclose:  %d is_drondr:    %d gismoting:%d is_noair:     %d \r\n",is_mapopen(), is_mapclose(), is_drondr(), gismoting, is_noair());
 				printf("gCur_status   :%d gstopmotin:    %d is_nothing:     %d is_onload:     %d is_unload:   %d is_normal:  %d \r\n",gCur_status, gstopmotin, is_nothing(), is_onload(), is_unload(),is_normal());
         printf("scan result:");

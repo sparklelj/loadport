@@ -7,11 +7,11 @@
 #include "tcmd.h"
 #include "tled.h"
 
-#define WAFER_THICK 150
+#define WAFER_THICK 200
 #define WTHICK_MARG 100
 
 #define WPOS_MARGIN   100
-#define WPOS_FIRST    -152
+#define WPOS_FIRST    -112
 #define WPOS_START    64000
 #define WPOS_INTERVAL 2000
 
@@ -42,6 +42,7 @@ u8 gCur_action = CMD_ACTION_PODOP;
 u8 gCur_pause = 0;
 u8 gCur_stop = 0;
 u8 gCur_abort = 0;
+bool gIsAborg = false;
 u8 gCur_retry = 0;
 u8 gErr_no = 0;
 u8 gMap_status = 0;
@@ -386,7 +387,7 @@ u8 run_motin(bool pause)
 }
 u8 get_init(void)
 {
-    if(gIs_init == true)
+    if(is_origin == true)
     {
         return '1';
     }
@@ -597,7 +598,7 @@ bool Analyze_Scan(u8* result)
     }
     while(cntp < (gScan_num))
     {
-        printf("cur %d \r\n", cntp);
+        //printf("cur %d \r\n", cntp);
         ret = slot_dect(gScan_pos[cntp], gScan_pos[cntp+1], result);
         cntp += 2;
     }
@@ -2922,6 +2923,12 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
             gissysinit = true;
             is_origin = true;
         }
+				if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
+					cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
+					cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
+				{
+					gMap_status = 0x01;
+				}
     }
     else if(rtype == ACT_ERR)
     {
@@ -3030,9 +3037,34 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         gCur_status = G_CUR_STA_STP;
         gIsError = true;
         gEnd_act = CMD_ACTION_NOACT;
+				
+				if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
+					cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
+					cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
+				{
+					gMap_status = 0x02;
+				}
     }
     else if(rtype == ACT_ABT)
     {
+			if(gIsAborg == true)
+			{
+				gCur_status = G_CUR_STA_RUN;
+			}
+			else
+			{
+				send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 0);
+            gCur_status = G_CUR_STA_ABO;
+            gEnd_act = CMD_ACTION_NOACT;
+			}
+			if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
+					cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
+					cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
+				{
+					gMap_status = 0x02;
+				}
+			
+			/*
         if(is_aborg == false)
         {
             send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 0);
@@ -3045,13 +3077,21 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         }
         gCur_status = G_CUR_STA_ABO;
         gEnd_act = CMD_ACTION_NOACT;
+			*/
     }
     else if(rtype == ACT_STP)
     {
         send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 0);
         gCur_status = G_CUR_STA_STP;
         gEnd_act = CMD_ACTION_NOACT;
+			if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
+					cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
+					cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
+				{
+					gMap_status = 0x02;
+				}
     }
+		gIsAborg = false;
     return true;
 }
 
@@ -3177,8 +3217,8 @@ void tExe_Action(void *p_arg)
             proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_ABORG:
-//            ret = aborg_action(&error);
-            ret = sysin_action(&error);
+            ret = aborg_action(&error);
+//            ret = sysin_action(&error);
             proc_result(gCur_action, ret, error);
             break;
         case CMD_ACTION_CLOAD:

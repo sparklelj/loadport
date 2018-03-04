@@ -56,7 +56,7 @@ bool is_no_foup(void)
     if((INPUT_ReadOne(CS_I_15,PH01_15) == 0x01) &&\
             (INPUT_ReadOne(CS_I_15,PH02_15) == 0x01) && \
             (INPUT_ReadOne(CS_I_15,PH03_15) == 0x01) && \
-            (INPUT_ReadOne(CS_I_12,ES01_12) == 0x00))
+            (INPUT_ReadOne(CS_I_12,ES01_12) == 0x01))
     {
         return true;
     }
@@ -76,7 +76,7 @@ bool is_foup_place(void)
 //有光动作
 bool is_foup_presence(void)
 {
-    if(INPUT_ReadOne(CS_I_12,ES01_12) == 0x01)
+    if(INPUT_ReadOne(CS_I_12,ES01_12) == 0x00)
     {
         return true;
     }
@@ -85,9 +85,9 @@ bool is_foup_presence(void)
 //有光动作
 bool is_obstacle(void)
 {
-    if((INPUT_ReadOne(CS_I_12,ES04_12) == 0x01) ||\
-            (INPUT_ReadOne(CS_I_12,ES05_12) == 0x01) || \
-            (INPUT_ReadOne(CS_I_12,ES06_12) == 0x01))
+    if((INPUT_ReadOne(CS_I_12,ES04_12) == 0x00) ||\
+            (INPUT_ReadOne(CS_I_12,ES05_12) == 0x00) || \
+            (INPUT_ReadOne(CS_I_12,ES06_12) == 0x00))
     {
         return true;
     }
@@ -97,7 +97,7 @@ bool is_obstacle(void)
 bool is_protrusion(void)
 {
     return false;
-    if((INPUT_ReadOne(CS_I_12,FS01_12) == 0x01))
+    if((INPUT_ReadOne(CS_I_12,FS01_12) == 0x00))
     {
         return true;
     }
@@ -161,7 +161,7 @@ bool is_undock(void)
 }
 bool is_vacuumon(void)
 {
-    if((INPUT_ReadOne(CS_I_10,VS01_10) == 0x01))
+    if((INPUT_ReadOne(CS_I_12,VS01_12) == 0x01))
     {
         return true;
     }
@@ -193,7 +193,7 @@ bool is_unlatch(void)
 }
 bool is_drondr(void)
 {
-    if((INPUT_ReadOne(CS_I_12,PH14_12) == 0x01))
+    if((INPUT_ReadOne(CS_I_10,PH14_10) == 0x00))
     {
         return true;
     }
@@ -226,7 +226,11 @@ bool is_druplmt(void)
 }
 bool is_mapstart(void)
 {
-    if(is_stop() && ( gCurPos == M_STRMP) && (INPUT_ReadOne(CS_I_11,PH08_11) == 0x00) && (is_indis(gPos_num, M_STRMP<<1, DIS_SLAP)))
+	if(INPUT_ReadOne(CS_I_11,PH08_11) == 0x01)
+	{
+		return true;
+	}
+    if(is_stop() && ( gCurPos == M_STRMP) && (INPUT_ReadOne(CS_I_11,PH08_11) == 0x01) && (is_indis(gPos_num, M_STRMP<<1, DIS_SLAP)))
     {
         return true;
     }
@@ -234,7 +238,7 @@ bool is_mapstart(void)
 }
 bool is_mapend(void)
 {
-    if(is_stop() && ( gCurPos == M_STPMP) && (INPUT_ReadOne(CS_I_11,PH07_11) == 0x00) && (is_indis(gPos_num, M_STPMP<<1, DIS_SLAP)))
+    if(is_stop() && ( gCurPos == M_STPMP) && (INPUT_ReadOne(CS_I_11,PH07_11) == 0x01) && (is_indis(gPos_num, M_STPMP<<1, DIS_SLAP)))
     {
         return true;
     }
@@ -242,7 +246,7 @@ bool is_mapend(void)
 }
 bool is_drdwlmt(void)
 {
-    if(is_stop() && ( gCurPos == M_DNLMT) && (INPUT_ReadOne(CS_I_10,CLS06A_10) == 0x01) && (is_indis(gPos_num, M_DNLMT<<1, DIS_SLAP)))
+    if(is_stop() && ( gCurPos == M_DNLMT) && (INPUT_ReadOne(CS_I_11,CLS06A_11) == 0x01) && (is_indis(gPos_num, M_DNLMT<<1, DIS_SLAP)))
     {
         return true;
     }
@@ -250,7 +254,7 @@ bool is_drdwlmt(void)
 }
 bool is_mapopen(void)
 {
-    if((INPUT_ReadOne(CS_I_11,CLS08A_11) == 0x01))
+    if((INPUT_ReadOne(CS_I_10,CLS08A_10) == 0x01))
     {
         return true;
     }
@@ -258,7 +262,7 @@ bool is_mapopen(void)
 }
 bool is_mapclose(void)
 {
-    if((INPUT_ReadOne(CS_I_11,CLS08B_11) == 0x01))
+    if((INPUT_ReadOne(CS_I_10,CLS08B_10) == 0x01))
     {
         return true;
     }
@@ -282,7 +286,7 @@ bool is_stopperoff(void)
 }
 bool is_noair(void)
 {
-    if((INPUT_ReadOne(CS_I_10,AS01_10) == 0x00))
+    if((INPUT_ReadOne(CS_I_12,AS01_12) == 0x00))
     {
         return true;
     }
@@ -290,7 +294,7 @@ bool is_noair(void)
 }
 bool is_error(void)
 {
-    if(gIsError == true || gCur_status == G_CUR_STA_ERR)
+    if(gIsError == true || gCur_status == G_CUR_STA_ERR || PFin(M_ERR) == 0x01)
     {
         return true;
     }
@@ -2389,11 +2393,11 @@ u8 cumfc_running(u8* error)
 
 u8 clam_sta(void)
 {
-    if((INPUT_ReadOne(CS_I_9, CLS01C_9) == 1) && (INPUT_ReadOne(CS_I_9, CLS02A_9) == 1))
+    if(is_clampup())
     {
         return '1';
     }
-    if((INPUT_ReadOne(CS_I_9, CLS01B_9) == 1) && (INPUT_ReadOne(CS_I_9, CLS02B_9) == 1))
+    if(is_clampdown())
     {
         return '0';
     }
@@ -2415,7 +2419,7 @@ u8 latch_sta(void)
 
 u8 vac_sta(void)
 {
-    if(INPUT_ReadOne(CS_I_10, VS01_10) == 1)
+    if(INPUT_ReadOne(CS_I_12, VS01_12) == 1)
     {
         return '1';
     }
@@ -2452,13 +2456,13 @@ u8 is_block(void)
 
 u8 Z_pos(void)
 {
-    if(Get_MStatus() == 0x01)
-    {
-        return '0';
-    }
-    if(Get_MStatus() == 0x07)
+    if(is_druplmt() == true)
     {
         return '1';
+    }
+    if(is_drdwlmt() == true)
+    {
+        return '0';
     }
     return '?';
 }
@@ -2497,24 +2501,24 @@ u8 get_equ(void)
 
 u8 get_mapzpos(void)
 {
-    if(Get_MStatus() == 0)
+    if(is_mapstart() == true)
     {
-        return '?';
+        return '1';
     }
-    if(Get_MStatus() == 0x01)
+    if(is_mapend() == true)
     {
         return '0';
     }
-    return '1';
+    return '?';
 }
 
 u8 map_apos(void)
 {
-    if(INPUT_ReadOne(CS_I_11, CLS08B_11) == 1)
+    if(INPUT_ReadOne(CS_I_10, CLS08B_10) == 1)
     {
         return '1';
     }
-    if(INPUT_ReadOne(CS_I_11, CLS08A_11) == 1)
+    if(INPUT_ReadOne(CS_I_10, CLS08A_10) == 1)
     {
         return '0';
     }
@@ -2544,6 +2548,20 @@ bool is_low(void)
     {
         return true;
     }
+		
+	}
+u8 present_st(void)
+{
+	if(is_foup_presence() && is_foup_place())
+	{
+		return '1';
+	}
+	if(is_no_foup())
+	{
+		return '0';
+	}
+	return '2';
+	
 }
 
 

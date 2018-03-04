@@ -49,6 +49,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     OS_ERR err;
 		CPU_SR_ALLOC();
 		OS_CRITICAL_ENTER();
+	/*
     msg[mlen] = 0x01;
     mlen++;
     msg[mlen] = 0x00;
@@ -59,6 +60,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     mlen++;
     msg[mlen] = gAddr[1];
     mlen++;
+	*/
     if((type & 0x0F) == BCAK_ACK)
     {
         msg[mlen] = 'A';
@@ -125,10 +127,12 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     {
         sum += msg[i];
     }
+		/*
     sprintf((char*)(msg + mlen), "%02X", sum);
     mlen += 2;
     msg[mlen] = 0x03;
     mlen++;
+		*/
     if((type & 0xF0) == 0x00)
     {
  //       s_len = ONLINE_Write(msg+5, mlen-8);
@@ -141,9 +145,10 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
             OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
         }
     }
-    if((type & 0xF0) == 0x10)
+    if((type & 0xF0) == 0x00)
     {
-        s_len = CMD_Write(msg, mlen);
+			mlen -= 8;
+        s_len = CMD_Write(msg+5, mlen);
         while(s_len !=  mlen)
         {
             mlen = mlen - s_len;
@@ -157,11 +162,15 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
 
 bool check_sum(u8* msg)
 {
-	
+
+
     u8 i;
     u16 len;
     u8 sum = 0;
     u8 strsum[5];
+//spark debug	
+	return true;
+	
     len = *(msg + 1);
     len = (len << 8) + *(msg + 2);
     for(i=1; i<=len; i++)
@@ -219,10 +228,10 @@ bool format_state(u8* param)
     param[1] = get_equ();
     param[2] = '0';
     param[3] = get_init();
-    param[4] = get_oper() + 0x30;
+    param[4] = get_oper();
     param[5] = (gErr_no >> 4) + 0x30;
     param[6] = (gErr_no & 0x0F) + 0x30;
-    param[7] = '0';
+    param[7] = present_st();
     param[8] = clam_sta();
     param[9] = latch_sta();
     param[10] = vac_sta();
@@ -279,7 +288,7 @@ bool format_ledst(u8* param)
     return true;
 }
 
-bool format_mapdt(u8* param)
+bool format_maprd(u8* param)
 {
     u8 result[25];
     u8 i;
@@ -316,7 +325,7 @@ bool format_mapdt(u8* param)
     }
 }
 
-bool format_maprd(u8* param)
+bool format_mapdt(u8* param)
 {
     u8 result[25];
     u8 i;
@@ -563,14 +572,17 @@ bool proc_before(u8* cmd_name, u8 rtype, u8 error)
 //	rtype = false;
     if(memcmp(cmd_name, "SYSIN", 5) == 0)
     {
+			gMap_status = 0x00;
         ucmd = CMD_ACTION_SYSIN;
     }
     if(memcmp(cmd_name, "ORGSH", 5) == 0)
     {
+			gMap_status = 0x00;
         ucmd = CMD_ACTION_ORGSH;
     }
     if(memcmp(cmd_name, "ABORG", 5) == 0)
     {
+			gMap_status = 0x00;
         ucmd = CMD_ACTION_ABORG;
     }
     if(memcmp(cmd_name, "CLOAD", 5) == 0)
@@ -815,6 +827,7 @@ bool proc_motiom(u8* cmd_name)
         gCur_stop = 0;
         gCur_abort = 1;
         gCur_retry = 0;
+				gIsAborg = true;
         ret = aborg_before(&error);
         proc_before(cmd_name, ret, error);
         return true;

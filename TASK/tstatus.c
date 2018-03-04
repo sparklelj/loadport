@@ -6,6 +6,7 @@
 #include "includes.h"
 #include "tled.h"
 #include "tcmd.h"
+#include "texecute.h"
 
 bool foupStateCur = false;
 bool foupStatePre = false;
@@ -79,6 +80,7 @@ void tStatus_Check(void *p_arg)
             foupStateCur = true;
             if(foupStateCur != foupStatePre)
             {
+							gMap_status = 0x00;
                 send_foupon();
             }
         }
@@ -87,6 +89,7 @@ void tStatus_Check(void *p_arg)
             foupStateCur = false;
             if(foupStateCur != foupStatePre)
             {
+							gMap_status = 0x00;
                 send_foupof();
             }
         }
@@ -97,6 +100,7 @@ void tStatus_Check(void *p_arg)
         {
             if(isKeyOn == false)
             {
+							gMap_status = 0x00;
                 send_fouponb();
                 isKeyOn = true;
             }
@@ -110,6 +114,7 @@ void tStatus_Check(void *p_arg)
         {
             if(isKeyOf == false)
             {
+							gMap_status = 0x00;
                 send_foupofb();
                 isKeyOf = true;
             }

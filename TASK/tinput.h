@@ -94,6 +94,7 @@ bool is_error(void);
 bool is_busy(void);
 bool is_fanerr(void);
 
+
 u8 podop_before(u8* error);
 u8 podop_running(u8* error);
 u8 podcl_before(u8* error);
@@ -187,6 +188,7 @@ u8 map_apos(void);
 u8 map_stp(void);
 u8 get_mapzpos(void);
 bool is_low(void);
+u8 present_st(void);
 
 void tInput_Scan(void *p_arg);
 

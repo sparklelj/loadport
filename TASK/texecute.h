@@ -23,6 +23,7 @@ extern u8 gCur_pause;
 extern u8 gCur_stop;
 extern u8 gCur_abort;
 extern u8 gCur_retry;
+extern bool gIsAborg;
 extern u8 gErr_no;
 extern u8 gMap_status;
 extern bool gissysinit;

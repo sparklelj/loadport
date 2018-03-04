@@ -16,15 +16,15 @@
 #define CLS04B_10 9
 #define CLS05A_10 10
 #define CLS05B_10 11
-#define CLS06A_10 12
-#define CLS06B_10 13
-#define AS01_10   14
-#define VS01_10   15
+#define CLS08A_10 12
+#define CLS08B_10 13
+#define PH14_10   14
+#define PH15_10   15
 
 #define CLS07A_11 8
 #define CLS07B_11 9
-#define CLS08A_11 10
-#define CLS08B_11 11
+#define CLS06A_11 10
+#define CLS06B_11 11
 #define FS02_11   12
 #define PH06_11   13
 #define PH07_11   14
@@ -35,8 +35,8 @@
 #define ES06_12   10
 #define ES01_12   11
 #define FS01_12   12
-#define PH14_12   13
-#define PH15_12   14
+#define AS01_12   13
+#define VS01_12   14
 #define F24LO_12  15
 
 #define IOADR01_13   8
