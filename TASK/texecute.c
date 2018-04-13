@@ -11,7 +11,7 @@
 #define WTHICK_MARG 100
 
 #define WPOS_MARGIN   100
-#define WPOS_FIRST    -112
+#define WPOS_FIRST    -80
 #define WPOS_START    64000
 #define WPOS_INTERVAL 2000
 
@@ -459,21 +459,27 @@ u8 is_inthick(s32 height)
     }
     return INSLOT_HI;
 }
-
+/*
 bool slot_dect(s32 up, s32 down, u8* result)
 {
     u8 i = 0;
     u8 j = 0;
     for(i=0; i<=WAFER_NUM; i++)
     {
+			//WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i) 每个槽的开始位置，从上往下
+			//上沿在槽上
         if((up < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)))) //&& (down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN))
         {
+					//下沿也在槽上，超过槽下沿的上限，此时应该是交叉片，下沿不能高于槽的下面太多
             if(down < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)) - WPOS_MARGIN)
             {
+							//厚度超过一个片
                 if(down - up > WAFER_THICK + WTHICK_MARG)
                 {
+									//第24片，最上面一片
                     if(i  == 0)
                     {
+											//
                         if(*(result  + WAFER_NUM - i - 1) == W_NO)
                         {
                             *(result + WAFER_NUM - i - 1) = W_CROSS;
@@ -518,6 +524,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                         return true;
                     }
                 }
+								//下沿在槽的下限范围内，此时应该为叠片
                 else if(down < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)) + WPOS_MARGIN)
                 {
                     if(*(result  + WAFER_NUM - i - 1) == W_NO)
@@ -551,6 +558,7 @@ bool slot_dect(s32 up, s32 down, u8* result)
                 }
                 return true;
             }
+						//下沿在槽下限范围内，下沿正常
             else {
                 if(down - up > WAFER_THICK + WTHICK_MARG)
                 {
@@ -583,6 +591,200 @@ bool slot_dect(s32 up, s32 down, u8* result)
     }
     return false;
 }
+*/
+/*
+bool slot_dect(s32 up, s32 down, u8* result)
+{
+    u8 i = 0;
+    u8 j = 0;
+    for(i=0; i<=WAFER_NUM; i++)
+    {
+        //WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i) 每个槽的开始位置，从上往下
+        //上沿在槽上
+        if((up < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)))) //&& (down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN))
+        {
+            //下沿也在槽上，超过槽下沿的上限，此时应该是交叉片，下沿不能高于槽的下面太多
+            if(down < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)) - WPOS_MARGIN)
+            {
+                //厚度超过一个片
+                if(down - up > WAFER_THICK + WTHICK_MARG)
+                {
+                    //第24片，最上面一片
+                    if(i  == 0)
+                    {
+                        //
+                        if(*(result  + WAFER_NUM - i - 1) == W_NO)
+                        {
+                            *(result + WAFER_NUM - i - 1) = W_CROSS;
+                        }
+                        else
+                        {
+                            *(result + WAFER_NUM - i - 1) = W_OTHER;
+                        }
+                        return true;
+
+                    }
+                    else if( i == WAFER_NUM)
+                    {
+                        if(*(result  + WAFER_NUM - i) == W_NO)
+                        {
+                            *(result + WAFER_NUM - i) = W_CROSS;
+                        }
+                        else
+                        {
+                            *(result + WAFER_NUM - i) = W_OTHER;
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        if(*(result  + WAFER_NUM - i - 1) == W_NO)
+                        {
+                            *(result + WAFER_NUM - i - 1) = W_CROSS;
+                        }
+                        else
+                        {
+                            *(result + WAFER_NUM - i - 1) = W_OTHER;
+                        }
+                        if(*(result  + WAFER_NUM - i) == W_NO)
+                        {
+                            *(result + WAFER_NUM - i) = W_CROSS;
+                        }
+                        else
+                        {
+                            *(result + WAFER_NUM - i) = W_OTHER;
+                        }
+                        return true;
+                    }
+                }
+                else
+                {
+                    *(result + WAFER_NUM - i) = W_OTHER;
+                }
+            }
+            //下沿在槽的下限范围内
+            else if(down < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)) + WPOS_MARGIN)
+            {
+                //厚度过厚为叠片
+                if(down - up > WAFER_THICK + WTHICK_MARG)
+                {
+                    if(*(result  + WAFER_NUM - i - 1) == W_NO || (*(result  + WAFER_NUM - i - 1) == W_OVER) )
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_OVER;
+                        return true;
+                    }
+                    *(result + WAFER_NUM - i - 1) = W_OTHER;
+                    return true;
+                }
+                else
+                {
+                    if(*(result  + WAFER_NUM - i - 1) == W_NO)
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_ONE;
+                        return true;
+                    }
+                    if(*(result  + WAFER_NUM - i - 1) == W_ONE)
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_OVER;
+                        return true;
+                    }
+                    *(result  + WAFER_NUM - i - 1) = W_OTHER;
+                    return true;
+                }
+            }
+            //下沿还在下面，叠片
+            else
+            {
+                for(j = 0; j < WAFER_NUM; j++) {
+                    if(down > (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i - j)) + WPOS_MARGIN)
+                    {
+                        if(*(result  + WAFER_NUM - i) == W_NO)
+                        {
+                            *(result + WAFER_NUM - i) = W_CROSS;
+                        }
+                        else
+                        {
+                            *(result + WAFER_NUM - i -1 - j) = W_OTHER;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+    }
+    return false;
+}
+*/
+
+bool slot_dect(s32 up, s32 down, u8* result)
+{
+    u8 i = 0;
+    u8 j = 0;
+    for(i=0; i<=WAFER_NUM; i++)
+    {
+        //WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i) 每个槽的开始位置，从上往下
+        //上沿在槽上
+        if((up < (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)))) //&& (down > (WPOS_START + WPOS_FIRST + WPOS_INTERVAL * (WAFER_NUM - i -1)) - WPOS_MARGIN))
+        {
+            //下沿也在槽上，超过槽下沿的上限，此时应该是交叉片，下沿不能高于槽的下面太多
+            if(down <= (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)) - WPOS_MARGIN)
+            {
+                //当前位置是交叉片
+                *(result + WAFER_NUM - i - 1) = W_CROSS;
+                //如果不是最上面的24片，则上面的也是交叉片
+                if (i > 0)
+                {
+                    *(result + WAFER_NUM - i - 1 + 1) = W_CROSS;
+                }
+                return true;
+            }
+            //下沿在槽的下限范围内
+            else if(down <= (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - i)) + WPOS_MARGIN)
+            {
+                //厚度过厚为叠片
+                if(down - up > WAFER_THICK + WTHICK_MARG)
+                {
+                    if(*(result  + WAFER_NUM - i - 1) == W_NO || (*(result  + WAFER_NUM - i - 1) == W_OVER) )
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_OVER;
+                        return true;
+                    }
+                    *(result + WAFER_NUM - i - 1) = W_OTHER;
+                    return true;
+                }
+                else
+                {
+                    if(*(result  + WAFER_NUM - i - 1) == W_NO)
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_ONE;
+                        return true;
+                    }
+                    if(*(result  + WAFER_NUM - i - 1) == W_ONE)
+                    {
+                        *(result  + WAFER_NUM - i - 1) = W_OVER;
+                        return true;
+                    }
+                    *(result  + WAFER_NUM - i - 1) = W_OTHER;
+                    return true;
+                }
+            }
+            //下沿还在下面，交叉片
+            else
+            {
+                *(result + WAFER_NUM - i - 1) = W_CROSS;
+                for(j = i+1; j < WAFER_NUM; j++) {
+                    if(down >= (WPOS_START - WPOS_FIRST - WPOS_INTERVAL * (WAFER_NUM - j)) + WPOS_MARGIN)
+                    {
+                        *(result + WAFER_NUM - j - 1) = W_CROSS;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
 
 bool Analyze_Scan(u8* result)
 {
@@ -2923,12 +3125,12 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
             gissysinit = true;
             is_origin = true;
         }
-				if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
-					cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
-					cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
-				{
-					gMap_status = 0x01;
-				}
+        if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
+                cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
+                cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
+        {
+            gMap_status = 0x01;
+        }
     }
     else if(rtype == ACT_ERR)
     {
@@ -3037,61 +3239,61 @@ bool proc_result(u8 cmd, u8 rtype, u8 error)
         gCur_status = G_CUR_STA_STP;
         gIsError = true;
         gEnd_act = CMD_ACTION_NOACT;
-				
-				if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
-					cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
-					cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
-				{
-					gMap_status = 0x02;
-				}
+
+        if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
+                cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
+                cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
+        {
+            gMap_status = 0x02;
+        }
     }
     else if(rtype == ACT_ABT)
     {
-			if(gIsAborg == true)
-			{
-				gCur_status = G_CUR_STA_RUN;
-			}
-			else
-			{
-				send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 0);
-            gCur_status = G_CUR_STA_ABO;
-            gEnd_act = CMD_ACTION_NOACT;
-			}
-			if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
-					cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
-					cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
-				{
-					gMap_status = 0x02;
-				}
-			
-			/*
-        if(is_aborg == false)
+        if(gIsAborg == true)
+        {
+            gCur_status = G_CUR_STA_RUN;
+        }
+        else
         {
             send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 0);
             gCur_status = G_CUR_STA_ABO;
             gEnd_act = CMD_ACTION_NOACT;
         }
+        if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
+                cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
+                cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
+        {
+            gMap_status = 0x02;
+        }
+
+        /*
+        if(is_aborg == false)
+        {
+        send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 0);
+        gCur_status = G_CUR_STA_ABO;
+        gEnd_act = CMD_ACTION_NOACT;
+        }
         else
         {
-            is_aborg = false;
+        is_aborg = false;
         }
         gCur_status = G_CUR_STA_ABO;
         gEnd_act = CMD_ACTION_NOACT;
-			*/
+        */
     }
     else if(rtype == ACT_STP)
     {
         send_msg(gCom_mod & BCAK_INF, (char*)chcmd, param, 0);
         gCur_status = G_CUR_STA_STP;
         gEnd_act = CMD_ACTION_NOACT;
-			if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
-					cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
-					cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
-				{
-					gMap_status = 0x02;
-				}
+        if(cmd == CMD_ACTION_MAPDO || cmd == CMD_ACTION_REMAP ||\
+                cmd == CMD_ACTION_CLDMP || cmd == CMD_ACTION_CLMPO ||\
+                cmd == CMD_ACTION_CUDMP || cmd == CMD_ACTION_CUMFC ||cmd == CMD_ACTION_CUMDK)
+        {
+            gMap_status = 0x02;
+        }
     }
-		gIsAborg = false;
+    gIsAborg = false;
     return true;
 }
 

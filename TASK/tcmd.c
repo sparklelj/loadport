@@ -49,7 +49,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     OS_ERR err;
 		CPU_SR_ALLOC();
 		OS_CRITICAL_ENTER();
-	/*
+	
     msg[mlen] = 0x01;
     mlen++;
     msg[mlen] = 0x00;
@@ -60,7 +60,7 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     mlen++;
     msg[mlen] = gAddr[1];
     mlen++;
-	*/
+	
     if((type & 0x0F) == BCAK_ACK)
     {
         msg[mlen] = 'A';
@@ -127,17 +127,17 @@ bool send_msg(u8 type, char* cmd_n, u8* param, u8 pLen)
     {
         sum += msg[i];
     }
-		/*
+		
     sprintf((char*)(msg + mlen), "%02X", sum);
     mlen += 2;
     msg[mlen] = 0x03;
     mlen++;
-		*/
+		
     if((type & 0xF0) == 0x00)
     {
  //       s_len = ONLINE_Write(msg+5, mlen-8);
    //     return true; //test
-			        s_len = ONLINE_Write(msg, mlen);
+			 s_len = ONLINE_Write(msg, mlen);
         while(s_len !=  mlen)
         {
             mlen = mlen - s_len;
@@ -168,8 +168,6 @@ bool check_sum(u8* msg)
     u16 len;
     u8 sum = 0;
     u8 strsum[5];
-//spark debug	
-	return true;
 	
     len = *(msg + 1);
     len = (len << 8) + *(msg + 2);

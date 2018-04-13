@@ -33,7 +33,7 @@
 #define MS_BAKINIT   0x0C
 
 //spark debug
-#define VEL_MAX 	 0x280
+#define VEL_MAX 	 0x80
 #define VEL_MIN 	 0x4080
 #define VEL_ACCB   0x08
 //debug
